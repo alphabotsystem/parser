@@ -98,7 +98,7 @@ class TickerParserServer(object):
 
 		print("[Startup]: Ticker Parser is online")
 
-	def exit_gracefully(self):
+	def exit_gracefully(self, signum, frame):
 		print("[Startup]: Ticker Parser is exiting")
 		self.socket.close()
 		self.isServiceAvailable = False

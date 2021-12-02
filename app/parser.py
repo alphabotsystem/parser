@@ -17,7 +17,7 @@ from ccxt.base import decimal_to_precision as dtp
 from pycoingecko import CoinGeckoAPI
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
-from TickerParserPy import Exchange
+from TickerParser import Exchange
 
 from assets import static_storage
 from helpers.utils import Utils

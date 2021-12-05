@@ -338,13 +338,13 @@ class TickerParserServer(object):
 			suffixMap = {}
 
 			for exchange in exchanges:
-				if exchange["refId"] == "": continue
-				exchangeId = exchange["refId"]
+				if exchange["mic"] == "": continue
+				exchangeId = exchange["mic"]
 				iexcExchanges.add(exchangeId.lower())
 				self.exchanges[exchangeId.lower()] = Exchange(exchangeId, "traditional", exchange["longName"], region="us")
 			exchanges = get_url("https://cloud.iexapis.com/stable/ref-data/exchanges?token={}".format(environ["IEXC_KEY"]))
 			for exchange in exchanges:
-				exchangeId = exchange["exchange"].replace("Euronext Euronext", "Euronext")
+				exchangeId = exchange["mic"]
 				if exchangeId.lower() in iexcExchanges: continue
 				iexcExchanges.add(exchangeId.lower())
 				self.exchanges[exchangeId.lower()] = Exchange(exchangeId, "traditional", exchange["description"], region=exchange["region"])

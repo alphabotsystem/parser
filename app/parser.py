@@ -130,6 +130,9 @@ class TickerParserServer(object):
 				elif service == b"get_formatted_amount_ccxt":
 					[exchangeId, symbol, amount] = request
 					response = self.format_amount(exchangeId.decode(), symbol.decode(), amount.decode())
+				elif service == b"get_venues":
+					[platforms, tickerId] = request
+					response = self.get_venues(platforms, tickerId)
 
 			except (KeyboardInterrupt, SystemExit): return
 			except Exception:
@@ -873,6 +876,24 @@ class TickerParserServer(object):
 		match = self.find_ccxt_crypto_market(tickerId, "", "Ichibot")
 		return match is not None
 
+	def get_venues(self, platforms, tickerId):
+		venues = []
+
+		# self.find_coingecko_crypto_market(tickerId)
+		# self.find_iexc_market(tickerId, "", "IEXC")
+
+		isEmpty = platforms == b""
+		if isEmpty:
+			venues += ["CoinGecko"]
+			for ids in supported.traditionalExchanges.values():
+				venues += [self.exchanges[e].name for e in ids]
+		else:
+			for platform in platforms.split(b","):
+				if platform == b"CoinGecko":
+					venues += ["CoinGecko"]
+				else:
+					venues += [self.exchanges[e].name for e in supported.traditionalExchanges.get(platform.decode(), [])]
+		return [dumps(venues)]
 
 	def _check_overrides(self, tickerId, platform):
 		for tickerOverride, triggers in TICKER_OVERRIDES.get(platform, []):

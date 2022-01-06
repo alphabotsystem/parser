@@ -72,12 +72,7 @@ class TickerParserServer(object):
 	coingeckoFiatCurrencies = []
 
 	def __init__(self):
-		self.isServiceAvailable = True
-		signal(SIGINT, self.exit_gracefully)
-		signal(SIGTERM, self.exit_gracefully)
-
 		self.logging = ErrorReportingClient(service="parser")
-
 		self.context = Context.instance()
 
 		self.refresh_coingecko_index()
@@ -95,6 +90,10 @@ class TickerParserServer(object):
 
 		self.socket = self.context.socket(ROUTER)
 		self.socket.bind("tcp://*:6900")
+
+		self.isServiceAvailable = True
+		signal(SIGINT, self.exit_gracefully)
+		signal(SIGTERM, self.exit_gracefully)
 
 		print("[Startup]: Ticker Parser is online")
 

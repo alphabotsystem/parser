@@ -131,7 +131,7 @@ class TickerParserServer(object):
 					response = self.format_amount(exchangeId.decode(), symbol.decode(), amount.decode())
 				elif service == b"get_venues":
 					[platforms, tickerId] = request
-					response = self.get_venues(platforms, tickerId)
+					response = self.get_venues(platforms.decode(), tickerId.decode())
 
 			except (KeyboardInterrupt, SystemExit): return
 			except Exception:
@@ -442,9 +442,12 @@ class TickerParserServer(object):
 					else:
 						name, nameNoSpaces = exchangeId, exchangeId
 
-					if name.startswith(raw) or name.endswith(raw): return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
-					elif nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw): return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
-					elif exchangeId.startswith(raw) or exchangeId.endswith(raw): return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
+					if name.startswith(raw) or name.endswith(raw):
+						return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
+					elif nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw):
+						return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
+					elif exchangeId.startswith(raw) or exchangeId.endswith(raw):
+						return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
 
 		else:
 			for exchangeId in supported.traditionalExchanges[platform]:
@@ -475,9 +478,12 @@ class TickerParserServer(object):
 					else:
 						name, nameNoSpaces = exchangeId, exchangeId
 
-					if name.startswith(raw) or name.endswith(raw): return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
-					elif nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw): return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
-					elif exchangeId.startswith(raw) or exchangeId.endswith(raw): return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
+					if name.startswith(raw) or name.endswith(raw):
+						return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
+					elif nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw):
+						return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
+					elif exchangeId.startswith(raw) or exchangeId.endswith(raw):
+						return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
 
 		return [b"0", b""]
 
@@ -881,17 +887,17 @@ class TickerParserServer(object):
 		# self.find_coingecko_crypto_market(tickerId)
 		# self.find_iexc_market(tickerId, "", "IEXC")
 
-		isEmpty = platforms == b""
+		isEmpty = platforms == ""
 		if isEmpty:
 			venues += ["CoinGecko"]
 			for ids in supported.traditionalExchanges.values():
 				venues += [self.exchanges[e].name for e in ids]
 		else:
-			for platform in platforms.split(b","):
-				if platform == b"CoinGecko":
+			for platform in platforms.split(","):
+				if platform == "CoinGecko":
 					venues += ["CoinGecko"]
 				else:
-					venues += [self.exchanges[e].name for e in supported.traditionalExchanges.get(platform.decode(), [])]
+					venues += [self.exchanges[e].name for e in supported.traditionalExchanges.get(platform, [])]
 		return [dumps(venues)]
 
 	def _check_overrides(self, tickerId, platform):

@@ -889,13 +889,15 @@ class TickerParserServer(object):
 
 		isEmpty = platforms == ""
 		if isEmpty:
-			venues += ["CoinGecko"]
+			venues += ["CoinGecko", "Serum"]
 			for ids in supported.traditionalExchanges.values():
 				venues += [self.exchanges[e].name for e in ids]
 		else:
 			for platform in platforms.split(","):
 				if platform == "CoinGecko":
 					venues += ["CoinGecko"]
+				elif platform == "Serums":
+					venues += ["Serums"]
 				else:
 					venues += [self.exchanges[e].name for e in supported.traditionalExchanges.get(platform, [])]
 		return [dumps(venues)]

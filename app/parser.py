@@ -577,7 +577,7 @@ class TickerParserServer(object):
 			"base": simpleTicker.get("base", None),
 			"quote": simpleTicker.get("quote", None),
 			"symbol": simpleTicker.get("symbol", None),
-			"image": simpleTicker.get("image", None),
+			"image": simpleTicker.get("image", static_storage.icon),
 			"mcapRank": simpleTicker.get("mcapRank", MAXSIZE),
 			"isReversed": simpleTicker.get("isReversed", False),
 			"isSimple": isSimple
@@ -608,7 +608,7 @@ class TickerParserServer(object):
 									"base": tickerId,
 									"quote": quote,
 									"symbol": symbol,
-									"image": self.coinGeckoIndex.get(tickerId, {}).get("image"),
+									"image": self.coinGeckoIndex.get(tickerId, {}).get("image", static_storage.icon),
 									"exchange": e.to_dict(),
 									"mcapRank": self.coinGeckoIndex.get(tickerId, {}).get("market_cap_rank", MAXSIZE),
 									"isReversed": False
@@ -636,7 +636,7 @@ class TickerParserServer(object):
 											"base": base,
 											"quote": quote,
 											"symbol": symbol,
-											"image": self.coinGeckoIndex.get(base, {}).get("image"),
+											"image": self.coinGeckoIndex.get(base, {}).get("image", static_storage.icon),
 											"exchange": e.to_dict(),
 											"mcapRank": mcapRank,
 											"isReversed": isReversed
@@ -657,7 +657,7 @@ class TickerParserServer(object):
 											"base": base,
 											"quote": quote,
 											"symbol": symbol,
-											"image": self.coinGeckoIndex.get(base, {}).get("image"),
+											"image": self.coinGeckoIndex.get(base, {}).get("image", static_storage.icon),
 											"exchange": e.to_dict(),
 											"mcapRank": mcapRank,
 											"isReversed": isReversed

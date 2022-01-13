@@ -426,7 +426,7 @@ class TickerParserServer(object):
 					return [b"1", dumps(self.exchanges[exchangeId].to_dict())]
 				if exchangeId in self.exchanges and self.exchanges[exchangeId].name is not None:
 					name = self.exchanges[exchangeId].name.split(" ")[0].lower()
-					nameNoSpaces = self.exchanges[exchangeId].name.replace(" ", "").lower()
+					nameNoSpaces = self.exchanges[exchangeId].name.replace(" ", "").replace(".", "").lower()
 				else:
 					name, nameNoSpaces = exchangeId, exchangeId
 
@@ -445,7 +445,7 @@ class TickerParserServer(object):
 						return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
 					if exchangeId in self.exchanges and self.exchanges[exchangeId].name is not None:
 						name = self.exchanges[exchangeId].name.split(" ")[0].lower()
-						nameNoSpaces = self.exchanges[exchangeId].name.replace(" ", "").lower()
+						nameNoSpaces = self.exchanges[exchangeId].name.replace(" ", "").replace(".", "").lower()
 					else:
 						name, nameNoSpaces = exchangeId, exchangeId
 
@@ -462,7 +462,7 @@ class TickerParserServer(object):
 					return [b"1", dumps(self.exchanges[exchangeId].to_dict())]
 				if exchangeId in self.exchanges and self.exchanges[exchangeId].name is not None:
 					name = self.exchanges[exchangeId].name.split(" ")[0].lower()
-					nameNoSpaces = self.exchanges[exchangeId].name.replace(" ", "").lower()
+					nameNoSpaces = self.exchanges[exchangeId].name.replace(" ", "").replace(".", "").lower()
 				else:
 					name, nameNoSpaces = exchangeId, exchangeId
 
@@ -481,7 +481,7 @@ class TickerParserServer(object):
 						return [b"0", dumps(self.exchanges[exchangeId].to_dict())]
 					if exchangeId in self.exchanges and self.exchanges[exchangeId].name is not None:
 						name = self.exchanges[exchangeId].name.split(" ")[0].lower()
-						nameNoSpaces = self.exchanges[exchangeId].name.replace(" ", "").lower()
+						nameNoSpaces = self.exchanges[exchangeId].name.replace(" ", "").replace(".", "").lower()
 					else:
 						name, nameNoSpaces = exchangeId, exchangeId
 

@@ -1,7 +1,7 @@
 from os import environ
 from sys import maxsize as MAXSIZE
 from signal import signal, SIGINT, SIGTERM
-from time import sleep
+from time import sleep, time
 from datetime import datetime
 from pytz import utc
 from zmq import Context, Poller, ROUTER, REQ, LINGER, POLLIN
@@ -49,6 +49,11 @@ GRAMMAR = """
 
 	NAME: LETTER ("_"|":"|LETTER|DIGIT)*
 """
+
+larkParser = Lark(GRAMMAR, parser='lalr')
+Ticker = larkParser.parse
+reconstructor = Reconstructor(larkParser)
+
 
 TICKER_OVERRIDES = {
 	"TradingView": [
@@ -111,12 +116,14 @@ class TickerParserServer(object):
 				origin, delimeter, service = message[:3]
 				request = message[3:]
 
-				if service == b"find_exchange":
+				if service == b"match_ticker":
+					[tickerId, exchangeId, platform, bias] = request
+					start = time()
+					response = self.match_ticker(tickerId.decode(), exchangeId.decode(), platform.decode(), bias.decode())
+					print(time() - start)
+				elif service == b"find_exchange":
 					[raw, platform, bias] = request
 					response = self.find_exchange(raw.decode(), platform.decode(), bias.decode())
-				elif service == b"match_ticker":
-					[tickerId, exchangeId, platform, bias] = request
-					response = self.match_ticker(tickerId.decode(), exchangeId.decode(), platform.decode(), bias.decode())
 				elif service == b"check_if_fiat":
 					[tickerId] = request
 					response = self.check_if_fiat(tickerId.decode())
@@ -493,42 +500,6 @@ class TickerParserServer(object):
 
 		exchange = {} if exchangeId == "" else self.exchanges.get(exchangeId).to_dict()
 
-		larkParser = Lark(GRAMMAR, parser='lalr')
-		Ticker = larkParser.parse
-
-		def match(_tickerId):
-			if _tickerId.startswith("$"): _tickerId = _tickerId[1:] + "USD"
-			elif _tickerId.startswith("€"): _tickerId = _tickerId[1:] + "EUR"
-			_tickerId, _ticker = self._check_overrides(_tickerId, platform), None
-			if bias == "crypto":
-				if platform in ["CoinGecko"] and exchangeId == "": _ticker = self.find_coingecko_crypto_market(_tickerId)
-				elif platform in ["Serum"] and exchangeId == "": _ticker = self.find_serum_crypto_market(_tickerId)
-				else: _ticker = self.find_ccxt_crypto_market(_tickerId, exchangeId, platform)
-			else:
-				if platform in ["IEXC"]: _ticker = self.find_iexc_market(_tickerId, exchangeId, platform)
-			if _ticker is None:
-				_ticker = {
-					"id": _tickerId,
-					"name": _tickerId,
-					"base": None,
-					"quote": None,
-					"symbol": None,
-					"exchange": exchange,
-					"mcapRank": MAXSIZE,
-					"isReversed": False
-				}
-			return _ticker
-
-		def search(node, shouldMatch=False):
-			for i, child in enumerate(node.children):
-				if not isinstance(child, Token):
-					node.children[i] = search(child, shouldMatch)
-				elif child.type == "NAME":
-					newValue = match(child.value)
-					if not shouldMatch: newValue = newValue["id"]
-					node.children[i] = child.update(value=newValue)
-			return node
-
 		try:
 			ticker = Ticker(tickerId)
 		except:
@@ -560,14 +531,14 @@ class TickerParserServer(object):
 				"isSimple": True
 			}), b""]
 
-		search(ticker, shouldMatch=True)
+		self.ticker_tree_search(ticker, exchangeId, platform, bias, shouldMatch=True)
 
 		isSimple = isinstance(ticker.children[0], Token) and ticker.children[0].type == "NAME"
 		simpleTicker = ticker.children[0].value if isSimple else {}
 		if not isSimple and platform not in ["TradingView", "Alternative.me", "CoinGecko", "CCXT", "Serum", "IEXC", "LLD"]:
 			return [b"", f"Aggregated tickers aren't available on {platform}".encode()]
 
-		reconstructedId = Reconstructor(larkParser).reconstruct(search(Ticker(tickerId)))
+		reconstructedId = reconstructor.reconstruct(self.ticker_tree_search(Ticker(tickerId), exchangeId, platform, bias))
 
 		response = {
 			"tree": TickerTree().transform(ticker),
@@ -582,9 +553,43 @@ class TickerParserServer(object):
 			"isReversed": simpleTicker.get("isReversed", False),
 			"isSimple": isSimple
 		}
-		if isSimple and bias == "crypto": response["isTradable"] = self.check_if_tradable(reconstructedId)
+		if isSimple and bias == "crypto": response["tradable"] = self.find_tradable_markets(reconstructedId, exchangeId, platform)
 
 		return [dumps(response), b""]
+
+	def ticker_tree_search(self, node, exchangeId, platform, bias, shouldMatch=False):
+		for i, child in enumerate(node.children):
+			if not isinstance(child, Token):
+				node.children[i] = self.ticker_tree_search(child, exchangeId, platform, bias, shouldMatch)
+			elif child.type == "NAME":
+				newValue = self.internal_match(child.value, exchangeId, platform, bias)
+				if not shouldMatch: newValue = newValue["id"]
+				node.children[i] = child.update(value=newValue)
+		return node
+
+	def internal_match(self, tickerId, exchangeId, platform, bias):
+		if tickerId.startswith("$"): tickerId = tickerId[1:] + "USD"
+		elif tickerId.startswith("€"): tickerId = tickerId[1:] + "EUR"
+		tickerId, _ticker = self._check_overrides(tickerId, platform), None
+		if bias == "crypto":
+			if platform in ["CoinGecko"] and exchangeId == "": _ticker = self.find_coingecko_crypto_market(tickerId)
+			elif platform in ["Serum"] and exchangeId == "": _ticker = self.find_serum_crypto_market(tickerId)
+			else: _ticker = self.find_ccxt_crypto_market(tickerId, exchangeId, platform)
+		else:
+			if platform in ["IEXC"]: _ticker = self.find_iexc_market(tickerId, exchangeId, platform)
+		if _ticker is None:
+			_ticker = {
+				"id": tickerId,
+				"name": tickerId,
+				"base": None,
+				"quote": None,
+				"symbol": None,
+				"exchange": {} if exchangeId == "" else self.exchanges.get(exchangeId).to_dict(),
+				"mcapRank": MAXSIZE,
+				"isReversed": False
+			}
+		return _ticker
+
 
 	def find_ccxt_crypto_market(self, tickerId, exchangeId, platform):
 		exchange = None if exchangeId == "" else self.exchanges[exchangeId]
@@ -619,6 +624,7 @@ class TickerParserServer(object):
 					currentBestFit = MAXSIZE
 					currentResult = None
 					for symbol in e.properties.symbols:
+						if exchange is None and platform not in ["Ichibot"] and self._is_tokenized_stock(e, symbol): continue
 						base = e.properties.markets[symbol]["base"]
 						quote = e.properties.markets[symbol]["quote"]
 						marketPair = symbol.split("/")
@@ -648,7 +654,7 @@ class TickerParserServer(object):
 							elif marketPair[0] in self.ccxtIndex[platform] and marketPair[1] in self.ccxtIndex[platform][marketPair[0]]:
 								rankScore = self.ccxtIndex[platform][marketPair[0]].index(marketPair[1])
 								for _ in range(2):
-									if (tickerId == marketPair[0] + marketPair[1] or (marketId.startswith(tickerId) and len(marketId) * 0.5 <= len(tickerId))) and currentBestFit >= 1 and base not in self.coingeckoFiatCurrencies and rankScore < currentBestMatch and not self._is_tokenized_stock(e, symbol):
+									if (tickerId == marketPair[0] + marketPair[1] or (marketId.startswith(tickerId) and len(marketId) * 0.5 <= len(tickerId))) and currentBestFit >= 1 and base not in self.coingeckoFiatCurrencies and rankScore < currentBestMatch:
 										currentBestMatch = rankScore
 										currentBestFit = 1
 										currentResult = {
@@ -848,15 +854,15 @@ class TickerParserServer(object):
 	def get_listings(self, tickerBase, tickerQuote):
 		listings = {tickerQuote: []}
 		total = 0
-		for id in supported.cryptoExchanges["CCXT"]:
-			if self.exchanges[id].properties is not None and self.exchanges[id].properties.symbols is not None:
-				for symbol in self.exchanges[id].properties.symbols:
-					base = self.exchanges[id].properties.markets[symbol]["base"]
-					quote = self.exchanges[id].properties.markets[symbol]["quote"]
+		for e in supported.cryptoExchanges["CCXT"]:
+			if self.exchanges[e].properties is not None and self.exchanges[e].properties.symbols is not None:
+				for symbol in self.exchanges[e].properties.symbols:
+					base = self.exchanges[e].properties.markets[symbol]["base"]
+					quote = self.exchanges[e].properties.markets[symbol]["quote"]
 					if tickerBase == base:
 						if quote not in listings: listings[quote] = []
-						if self.exchanges[id].name not in listings[quote]:
-							listings[quote].append(self.exchanges[id].name)
+						if self.exchanges[e].name not in listings[quote]:
+							listings[quote].append(self.exchanges[e].name)
 							total += 1
 
 		response = [[tickerQuote, listings.pop(tickerQuote)]]
@@ -877,9 +883,17 @@ class TickerParserServer(object):
 		precision = exchange.markets.get(symbol, {}).get("precision", {}).get("amount", 8)
 		return [dtp.decimal_to_precision(amount, rounding_mode=dtp.TRUNCATE, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.NO_PADDING).encode()]
 
-	def check_if_tradable(self, tickerId):
-		match = self.find_ccxt_crypto_market(tickerId, "", "Ichibot")
-		return match is not None
+	def find_tradable_markets(self, tickerId, exchangeId, platform):
+		if exchangeId != "" and exchangeId not in supported.cryptoExchanges["Ichibot"]: return {}
+		exchangeIds = supported.cryptoExchanges["Ichibot"] if exchangeId == "" else [exchangeId]
+
+		matches = {}
+		for e in exchangeIds:
+			match = self.find_ccxt_crypto_market(tickerId, e, "Ichibot")
+			check = self.find_ccxt_crypto_market(tickerId, exchangeId, platform)
+			if match is not None and check is not None:
+				matches[e] = self.exchanges[e].properties.markets[match.get("symbol")]["id"]
+		return matches
 
 	def get_venues(self, platforms, tickerId):
 		venues = []

@@ -6,7 +6,7 @@ class Utils(object):
 	@staticmethod
 	def generate_market_id(symbol, exchange):
 		symbolInfo = exchange.properties.markets[symbol]
-		marketPair = symbol.replace("-", "").split("/")
+		marketPair = symbol.replace("-", "").replace("USD:USD", "").split("/")
 		marketName1 = "".join(marketPair)
 		marketName2 = symbolInfo["id"].replace("_", "").replace("/", "").replace("-", "").upper()
 

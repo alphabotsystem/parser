@@ -1,7 +1,7 @@
 from os import environ
 from sys import maxsize as MAXSIZE
 from signal import signal, SIGINT, SIGTERM
-from time import sleep, time
+from time import sleep
 from datetime import datetime
 from pytz import utc
 from zmq import Context, Poller, ROUTER, REQ, LINGER, POLLIN
@@ -118,9 +118,7 @@ class TickerParserServer(object):
 
 				if service == b"match_ticker":
 					[tickerId, exchangeId, platform, bias] = request
-					start = time()
 					response = self.match_ticker(tickerId.decode(), exchangeId.decode(), platform.decode(), bias.decode())
-					print(time() - start)
 				elif service == b"find_exchange":
 					[raw, platform, bias] = request
 					response = self.find_exchange(raw.decode(), platform.decode(), bias.decode())

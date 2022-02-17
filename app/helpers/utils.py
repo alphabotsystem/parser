@@ -5,13 +5,7 @@ from time import time
 class Utils(object):
 	@staticmethod
 	def generate_market_id(symbol, exchange):
-		symbolInfo = exchange.properties.markets[symbol]
-		marketPair = symbol.replace("-", "").replace("USD:USD", "").split("/")
-		marketName1 = "".join(marketPair)
-		marketName2 = symbolInfo["id"].replace("_", "").replace("/", "").replace("-", "").upper()
-
-		if any(e in marketName2 for e in ["XBT"]) or exchange.id in ["bitmex"]: return marketName2
-		else: return marketName1
+		return exchange.properties.markets[symbol]["id"].replace("_", "").replace("/", "").replace("-", "").upper()
 
 	@staticmethod
 	def seconds_until_cycle():

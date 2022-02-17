@@ -197,13 +197,8 @@ class TickerParserServer(object):
 
 				for symbol in self.exchanges[exchange].properties.symbols:
 					if '.' not in symbol and (self.exchanges[exchange].properties.markets[symbol].get("active") is None or self.exchanges[exchange].properties.markets[symbol].get("active")):
-						base = self.exchanges[exchange].properties.markets[symbol]["base"]
-						quote = self.exchanges[exchange].properties.markets[symbol]["quote"]
-						marketPair = symbol.split("/")
-
-						if base != marketPair[0] or quote != marketPair[-1]:
-							if marketPair[0] != marketPair[-1]: base, quote = marketPair[0], marketPair[-1]
-							else: continue
+						base = self.exchanges[exchange].properties.markets[symbol].get("base")
+						quote = self.exchanges[exchange].properties.markets[symbol].get("quote")
 
 						isIdentifiable = quote in self.coinGeckoIndex and self.coinGeckoIndex[quote]["market_cap_rank"] is not None
 
@@ -513,8 +508,7 @@ class TickerParserServer(object):
 							"quote": None,
 							"symbol": None,
 							"exchange": exchange,
-							"mcapRank": MAXSIZE,
-							"isReversed": False
+							"mcapRank": MAXSIZE
 						}
 					]]
 				],
@@ -525,7 +519,6 @@ class TickerParserServer(object):
 				"quote": None,
 				"symbol": None,
 				"mcapRank": MAXSIZE,
-				"isReversed": False,
 				"isSimple": True
 			}), b""]
 
@@ -548,7 +541,6 @@ class TickerParserServer(object):
 			"symbol": simpleTicker.get("symbol", None),
 			"image": simpleTicker.get("image", static_storage.icon),
 			"mcapRank": simpleTicker.get("mcapRank", MAXSIZE),
-			"isReversed": simpleTicker.get("isReversed", False),
 			"isSimple": isSimple
 		}
 		if isSimple and bias == "crypto": response["tradable"] = self.find_tradable_markets(reconstructedId, exchangeId, platform)
@@ -583,8 +575,7 @@ class TickerParserServer(object):
 				"quote": None,
 				"symbol": None,
 				"exchange": {} if exchangeId == "" else self.exchanges.get(exchangeId).to_dict(),
-				"mcapRank": MAXSIZE,
-				"isReversed": False
+				"mcapRank": MAXSIZE
 			}
 		return _ticker
 
@@ -601,8 +592,8 @@ class TickerParserServer(object):
 						symbol = "{}/{}".format(tickerId, quote)
 						if symbol in e.properties.symbols:
 							if exchange is None and platform not in ["Ichibot"] and self._is_tokenized_stock(e, symbol): continue
-							base = e.properties.markets[symbol]["base"]
-							quote = e.properties.markets[symbol]["quote"]
+							base = e.properties.markets[symbol].get("base")
+							quote = e.properties.markets[symbol].get("quote")
 							if not base in self.coingeckoFiatCurrencies and e.properties.markets[symbol].get("active"):
 								marketId = Utils.generate_market_id(symbol, e)
 								return {
@@ -613,8 +604,7 @@ class TickerParserServer(object):
 									"symbol": symbol,
 									"image": self.coinGeckoIndex.get(tickerId, {}).get("image", static_storage.icon),
 									"exchange": e.to_dict(),
-									"mcapRank": self.coinGeckoIndex.get(tickerId, {}).get("market_cap_rank", MAXSIZE),
-									"isReversed": False
+									"mcapRank": self.coinGeckoIndex.get(tickerId, {}).get("market_cap_rank", MAXSIZE)
 								}
 
 				else:
@@ -623,53 +613,41 @@ class TickerParserServer(object):
 					currentResult = None
 					for symbol in e.properties.symbols:
 						if exchange is None and platform not in ["Ichibot"] and self._is_tokenized_stock(e, symbol): continue
-						base = e.properties.markets[symbol]["base"]
-						quote = e.properties.markets[symbol]["quote"]
+						base = e.properties.markets[symbol].get("base")
+						quote = e.properties.markets[symbol].get("quote")
 						marketPair = symbol.split("/")
 						marketId = Utils.generate_market_id(symbol, e)
 						mcapRank = self.coinGeckoIndex.get(base, {}).get("market_cap_rank", MAXSIZE)
-						isReversed = False
 						if e.properties.markets[symbol].get("active"):
 							if len(marketPair) == 1:
-								for _ in range(2):
-									if (tickerId == marketPair[0] or (marketId.startswith(tickerId) and len(marketId) * 0.5 <= len(tickerId))) and currentBestFit > 2:
-										currentBestFit = 2
-										currentResult = {
-											"id": marketId,
-											"name": self.coinGeckoIndex.get(base, {}).get("name", marketId),
-											"base": base,
-											"quote": quote,
-											"symbol": symbol,
-											"image": self.coinGeckoIndex.get(base, {}).get("image", static_storage.icon),
-											"exchange": e.to_dict(),
-											"mcapRank": mcapRank,
-											"isReversed": isReversed
-										}
-									if platform not in ["CoinGecko", "CCXT", "Serum", "IEXC"]: break
-									marketPair.reverse()
-									base, quote, marketId, isReversed = quote, base, "".join(marketPair), True
+								if (tickerId == base or (marketId.startswith(tickerId) and len(marketId) * 0.5 <= len(tickerId))) and currentBestFit > 2:
+									currentBestFit = 2
+									currentResult = {
+										"id": marketId,
+										"name": self.coinGeckoIndex.get(base, {}).get("name", marketId),
+										"base": base,
+										"quote": quote,
+										"symbol": symbol,
+										"image": self.coinGeckoIndex.get(base, {}).get("image", static_storage.icon),
+										"exchange": e.to_dict(),
+										"mcapRank": mcapRank
+									}
 
-							elif marketPair[0] in self.ccxtIndex[platform] and marketPair[1] in self.ccxtIndex[platform][marketPair[0]]:
-								rankScore = self.ccxtIndex[platform][marketPair[0]].index(marketPair[1])
-								for _ in range(2):
-									if (tickerId == marketPair[0] + marketPair[1] or (marketId.startswith(tickerId) and len(marketId) * 0.5 <= len(tickerId))) and currentBestFit >= 1 and base not in self.coingeckoFiatCurrencies and rankScore < currentBestMatch:
-										currentBestMatch = rankScore
-										currentBestFit = 1
-										currentResult = {
-											"id": marketId,
-											"name": self.coinGeckoIndex.get(base, {}).get("name", marketId),
-											"base": base,
-											"quote": quote,
-											"symbol": symbol,
-											"image": self.coinGeckoIndex.get(base, {}).get("image", static_storage.icon),
-											"exchange": e.to_dict(),
-											"mcapRank": mcapRank,
-											"isReversed": isReversed
-										}
-										break
-									if platform not in ["CoinGecko", "CCXT", "Serum", "IEXC"]: break
-									marketPair.reverse()
-									base, quote, marketId, isReversed = quote, base, "".join(marketPair), True
+							elif base in self.ccxtIndex[platform] and quote in self.ccxtIndex[platform][base]:
+								rankScore = self.ccxtIndex[platform][base].index(quote)
+								if (tickerId == base + quote or (marketId.startswith(tickerId) and len(marketId) * 0.5 <= len(tickerId))) and currentBestFit >= 1 and base not in self.coingeckoFiatCurrencies and rankScore < currentBestMatch:
+									currentBestMatch = rankScore
+									currentBestFit = 1
+									currentResult = {
+										"id": marketId,
+										"name": self.coinGeckoIndex.get(base, {}).get("name", marketId),
+										"base": base,
+										"quote": quote,
+										"symbol": symbol,
+										"image": self.coinGeckoIndex.get(base, {}).get("image", static_storage.icon),
+										"exchange": e.to_dict(),
+										"mcapRank": mcapRank
+									}
 
 					if currentResult is not None: return currentResult
 
@@ -693,8 +671,7 @@ class TickerParserServer(object):
 				"symbol": self.coinGeckoIndex[tickerId]["id"],
 				"image": self.coinGeckoIndex[tickerId].get("image"),
 				"exchange": {},
-				"mcapRank": self.coinGeckoIndex[tickerId]["market_cap_rank"],
-				"isReversed": False
+				"mcapRank": self.coinGeckoIndex[tickerId]["market_cap_rank"]
 			}
 
 		else:
@@ -710,8 +687,7 @@ class TickerParserServer(object):
 								"symbol": self.coinGeckoIndex[base + rank]["id"],
 								"image": self.coinGeckoIndex[base + rank].get("image"),
 								"exchange": {},
-								"mcapRank": self.coinGeckoIndex[base + rank]["market_cap_rank"],
-								"isReversed": False
+								"mcapRank": self.coinGeckoIndex[base + rank]["market_cap_rank"]
 							}
 
 			for base in self.coinGeckoIndex:
@@ -724,8 +700,7 @@ class TickerParserServer(object):
 						"symbol": self.coinGeckoIndex[base + rank]["id"],
 						"image": self.coinGeckoIndex[base + rank].get("image"),
 						"exchange": {},
-						"mcapRank": self.coinGeckoIndex[base + rank]["market_cap_rank"],
-						"isReversed": False
+						"mcapRank": self.coinGeckoIndex[base + rank]["market_cap_rank"]
 					}
 
 			for base in self.coinGeckoIndex:
@@ -740,8 +715,7 @@ class TickerParserServer(object):
 								"symbol": self.coinGeckoIndex[quote + rank]["id"],
 								"image": self.coinGeckoIndex[quote + rank].get("image"),
 								"exchange": {},
-								"mcapRank": self.coinGeckoIndex[quote + rank]["market_cap_rank"],
-								"isReversed": True
+								"mcapRank": self.coinGeckoIndex[quote + rank]["market_cap_rank"]
 							}
 
 		return None
@@ -759,8 +733,7 @@ class TickerParserServer(object):
 				"base": matchedTicker["base"],
 				"quote": matchedTicker["quote"],
 				"symbol": "{}/{}".format(matchedTicker["base"], matchedTicker["quote"]),
-				"exchange": {},
-				"isReversed": matchedTicker["reversed"]
+				"exchange": {}
 			}
 
 		else:
@@ -773,8 +746,7 @@ class TickerParserServer(object):
 						"base": matchedTicker["base"],
 						"quote": matchedTicker["quote"],
 						"symbol": tickerId,
-						"exchange": e.to_dict(),
-						"isReversed": False
+						"exchange": e.to_dict()
 					}
 
 				else:
@@ -787,8 +759,7 @@ class TickerParserServer(object):
 							"base": matchedTicker["base"],
 							"quote": matchedTicker["quote"],
 							"symbol": symbol,
-							"exchange": e.to_dict(),
-							"isReversed": False
+							"exchange": e.to_dict()
 						}
 
 		return None
@@ -805,8 +776,7 @@ class TickerParserServer(object):
 					"symbol": market["program"],
 					"image": market.get("image"),
 					"exchange": {},
-					"mcapRank": mcapRank,
-					"isReversed": False
+					"mcapRank": mcapRank
 				}
 		
 		else:
@@ -822,8 +792,7 @@ class TickerParserServer(object):
 								"quote": market["quote"],
 								"symbol": market["program"],
 								"image": market.get("image"),
-								"mcapRank": mcapRank,
-								"isReversed": False
+								"mcapRank": mcapRank
 							}
 
 			for base in self.serumIndex:
@@ -838,8 +807,7 @@ class TickerParserServer(object):
 						"symbol": market["program"],
 						"image": market.get("image"),
 						"exchange": {},
-						"mcapRank": mcapRank,
-						"isReversed": False
+						"mcapRank": mcapRank
 					}
 
 		return None

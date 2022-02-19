@@ -196,7 +196,7 @@ class TickerParserServer(object):
 					completedTasks.add(exchange)
 
 				for symbol in self.exchanges[exchange].properties.symbols:
-					if '.' not in symbol and self.exchanges[exchange].properties.markets[symbol].get("active", True):
+					if '.' not in symbol and Utils.is_active(symbol, self.exchanges[exchange]):
 						base = self.exchanges[exchange].properties.markets[symbol].get("base")
 						quote = self.exchanges[exchange].properties.markets[symbol].get("quote")
 
@@ -579,7 +579,6 @@ class TickerParserServer(object):
 			}
 		return _ticker
 
-
 	def find_ccxt_crypto_market(self, tickerId, exchangeId, platform):
 		exchange = None if exchangeId == "" else self.exchanges[exchangeId]
 		if platform not in supported.cryptoExchanges or (exchange is not None and exchange.type != "crypto"): return None
@@ -594,7 +593,7 @@ class TickerParserServer(object):
 							if exchange is None and platform not in ["Ichibot"] and self._is_tokenized_stock(e, symbol): continue
 							base = e.properties.markets[symbol].get("base")
 							quote = e.properties.markets[symbol].get("quote")
-							if not base in self.coingeckoFiatCurrencies and e.properties.markets[symbol].get("active", True):
+							if not base in self.coingeckoFiatCurrencies and Utils.is_active(symbol, e):
 								marketId = Utils.generate_market_id(symbol, e)
 								return {
 									"id": marketId,
@@ -618,7 +617,7 @@ class TickerParserServer(object):
 						marketPair = symbol.split("/")
 						marketId = Utils.generate_market_id(symbol, e)
 						mcapRank = self.coinGeckoIndex.get(base, {}).get("market_cap_rank", MAXSIZE)
-						if e.properties.markets[symbol].get("active", True):
+						if Utils.is_active(symbol, e):
 							if len(marketPair) == 1:
 								if (tickerId == base or (marketId.startswith(tickerId) and len(marketId) * 0.5 <= len(tickerId))) and currentBestFit > 2:
 									currentBestFit = 2

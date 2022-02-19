@@ -8,6 +8,10 @@ class Utils(object):
 		return exchange.properties.markets[symbol]["id"].replace("_", "").replace("/", "").replace("-", "").upper()
 
 	@staticmethod
+	def is_active(symbol, exchange):
+		return exchange.properties.markets[symbol].get("active") is None or exchange.properties.markets[symbol].get("active")
+
+	@staticmethod
 	def seconds_until_cycle():
 		return (time() + 60) // 60 * 60 - time()
 

@@ -6,7 +6,7 @@ metadata:
   labels:
     app: parser
 spec:
-  replicas: 5
+  replicas: 10
   selector:
     matchLabels:
       app: parser
@@ -26,7 +26,7 @@ spec:
         resources:
           requests:
             memory: "600Mi"
-            cpu: "40m"
+            cpu: "20m"
         env:
           - name: PRODUCTION_MODE
             value: "1"

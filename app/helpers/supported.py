@@ -15,7 +15,7 @@ cryptoExchanges = {
 		"binance", "bitmex", "coinbasepro", "huobi", "bitfinex2"
 	],
 	"CCXT": [
-		"binance", "bitmex", "binanceusdm", "binancecoinm", "ftx", "coinbasepro", "huobi", "okx", "bithumb", "kraken", "bitfinex2", "bitstamp", "poloniex", "kucoin", "kucoinfutures", "bittrex", "bybit", "deribit", "binanceus", "bitpanda", "cex", "coinbaseprime", "cryptocom", "delta", "ftxus", "gateio", "gemini", "hitbtc3", "huobipro", "huobijp", "mercado", "okcoin", "phemex"
+		"binance", "bitmex", "binanceusdm", "binancecoinm", "ftx", "coinbasepro", "huobi", "okx", "bithumb", "kraken", "bitfinex2", "bitstamp", "poloniex", "kucoin", "kucoinfutures", "bittrex", "bybit", "deribit", "binanceus", "bitpanda", "cex", "coinbaseprime", "cryptocom", "delta", "ftxus", "gateio", "gemini", "hitbtc3", "huobijp", "mercado", "okcoin", "phemex"
 		# "binance", "bitmex", "binanceusdm", "binancecoinm", "ftx", "coinbasepro", "huobi", "okx", "bithumb", "kraken", "bitfinex2", "bitstamp", "bitflyer", "poloniex", "kucoin", "kucoinfutures", "bittrex", "bybit", "deribit", "aax", "ascendex", "bequant", "bigone", "binanceus", "bitbank", "bitbay", "bitcoincom", "bitget", "bitmart", "bitpanda", "bitopro", "bitrue", "bitvavo", "bkex", "btcalpha", "btcmarkets", "btcturk", "buda", "bw", "bytetrade", "cdax", "cex", "coinbaseprime", "coinex", "crex24", "cryptocom", "delta", "digifinex", "exmo", "fmfwio", "ftxus", "gateio", "gemini", "hitbtc3", "hollaex", "huobipro", "huobijp", "lbank", "mercado", "mexc", "oceanex", "okcoin", "phemex", "probit", "qtrade", "tidebit", "timex", "upbit", "vcc", "wavesexchange", "whitebit", "woo", "xena", "zb", "zonda"
 	],
 	"IEXC": [
@@ -43,7 +43,7 @@ traditionalExchanges = {
 		"binance", "bitmex", "coinbasepro", "huobi", "bitfinex2"
 	],
 	"CCXT": [
-		"binance", "bitmex", "binanceusdm", "binancecoinm", "ftx", "coinbasepro", "huobi", "okx", "bithumb", "kraken", "bitfinex2", "bitstamp", "poloniex", "kucoin", "kucoinfutures", "bittrex", "bybit", "deribit", "binanceus", "bitpanda", "cex", "coinbaseprime", "cryptocom", "delta", "ftxus", "gateio", "gemini", "hitbtc3", "huobipro", "huobijp", "mercado", "okcoin", "phemex"
+		"binance", "bitmex", "binanceusdm", "binancecoinm", "ftx", "coinbasepro", "huobi", "okx", "bithumb", "kraken", "bitfinex2", "bitstamp", "poloniex", "kucoin", "kucoinfutures", "bittrex", "bybit", "deribit", "binanceus", "bitpanda", "cex", "coinbaseprime", "cryptocom", "delta", "ftxus", "gateio", "gemini", "hitbtc3", "huobijp", "mercado", "okcoin", "phemex"
 		# "binance", "bitmex", "binanceusdm", "binancecoinm", "ftx", "coinbasepro", "huobi", "okx", "bithumb", "kraken", "bitfinex2", "bitstamp", "bitflyer", "poloniex", "kucoin", "kucoinfutures", "bittrex", "bybit", "deribit", "aax", "ascendex", "bequant", "bigone", "binanceus", "bitbank", "bitbay", "bitcoincom", "bitget", "bitmart", "bitpanda", "bitopro", "bitrue", "bitvavo", "bkex", "btcalpha", "btcmarkets", "btcturk", "buda", "bw", "bytetrade", "cdax", "cex", "coinbaseprime", "coinex", "crex24", "cryptocom", "delta", "digifinex", "exmo", "fmfwio", "ftxus", "gateio", "gemini", "hitbtc3", "hollaex", "huobipro", "huobijp", "lbank", "mercado", "mexc", "oceanex", "okcoin", "phemex", "probit", "qtrade", "tidebit", "timex", "upbit", "vcc", "wavesexchange", "whitebit", "woo", "xena", "zb", "zonda"
 	],
 	"IEXC": [

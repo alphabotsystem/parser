@@ -179,9 +179,9 @@ class TickerParserServer(object):
 			if e not in supported.ccxtExchanges:
 				if ex.has['fetchOHLCV'] != False and ex.has['fetchOrderBook'] != False and ex.timeframes is not None and len(ex.timeframes) != 0: newSupportedExchanges.append(e)
 				else: newExchanges.append(e)
-		if len(newSupportedExchanges) != 0: print("New supported CCXT exchanges: {}".format(newSupportedExchanges))
-		if len(newExchanges) != 0: print("New partially unsupported CCXT exchanges: {}".format(newExchanges))
-		if len(unsupportedCryptoExchanges) != 0: print("New deprecated CCXT exchanges: {}".format(unsupportedCryptoExchanges))
+		if len(newSupportedExchanges) != 0: print(f"New supported CCXT exchanges: {newSupportedExchanges}")
+		if len(newExchanges) != 0: print(f"New partially unsupported CCXT exchanges: {newExchanges}")
+		if len(unsupportedCryptoExchanges) != 0: print(f"New deprecated CCXT exchanges: {unsupportedCryptoExchanges}")
 
 		completedTasks = set()
 		sortedIndexReference = {}
@@ -303,7 +303,7 @@ class TickerParserServer(object):
 					indexReference[symbol] = {"id": e["id"], "name": e["name"], "base": symbol, "quote": "USD", "image": e["image"], "market_cap_rank": rank}
 				elif indexReference[symbol]["id"] != e["id"]:
 					for i in range(2, 11):
-						adjustedSymbol = "{}:{}".format(symbol, i)
+						adjustedSymbol = f"{symbol}:{i}"
 						if adjustedSymbol not in indexReference:
 							rank = MAXSIZE if e["market_cap_rank"] is None else e["market_cap_rank"]
 							indexReference[adjustedSymbol] = {"id": e["id"], "name": e["name"], "base": symbol, "quote": "USD", "image": e["image"], "market_cap_rank": rank}
@@ -336,7 +336,7 @@ class TickerParserServer(object):
 
 
 			iexcExchanges = set()
-			exchanges = get_url("https://cloud.iexapis.com/stable/ref-data/market/us/exchanges?token={}".format(environ["IEXC_KEY"]))
+			exchanges = get_url(f"https://cloud.iexapis.com/stable/ref-data/market/us/exchanges?token={environ['IEXC_KEY']}")
 			suffixMap = {}
 
 			for exchange in exchanges:
@@ -344,7 +344,7 @@ class TickerParserServer(object):
 				exchangeId = exchange["mic"]
 				iexcExchanges.add(exchangeId.lower())
 				self.exchanges[exchangeId.lower()] = Exchange(exchangeId, "traditional", exchange["longName"], region="us")
-			exchanges = get_url("https://cloud.iexapis.com/stable/ref-data/exchanges?token={}".format(environ["IEXC_KEY"]))
+			exchanges = get_url(f"https://cloud.iexapis.com/stable/ref-data/exchanges?token={environ['IEXC_KEY']}")
 			for exchange in exchanges:
 				exchangeId = exchange["mic"]
 				if exchangeId.lower() in iexcExchanges: continue
@@ -360,12 +360,12 @@ class TickerParserServer(object):
 					newSupportedExchanges.append(exchangeId)
 				else:
 					unsupportedCryptoExchanges.append(exchangeId)
-			if len(newSupportedExchanges) != 0: print("New supported IEXC exchanges: {}".format(newSupportedExchanges))
-			if len(unsupportedCryptoExchanges) != 0: print("New deprecated IEXC exchanges: {}".format(unsupportedCryptoExchanges))
+			if len(newSupportedExchanges) != 0: print(f"New supported IEXC exchanges: {newSupportedExchanges}")
+			if len(unsupportedCryptoExchanges) != 0: print(f"New deprecated IEXC exchanges: {unsupportedCryptoExchanges}")
 
 			for exchangeId in supported.traditionalExchanges["IEXC"]:
-				symbols = get_url("https://cloud.iexapis.com/stable/ref-data/exchange/{}/symbols?token={}".format(self.exchanges[exchangeId].id, environ["IEXC_KEY"]))
-				if len(symbols) == 0: print("No symbols found on {}".format(exchangeId))
+				symbols = get_url(f"https://cloud.iexapis.com/stable/ref-data/exchange/{self.exchanges[exchangeId].id}/symbols?token={environ['IEXC_KEY']}")
+				if len(symbols) == 0: print(f"No symbols found on {exchangeId}")
 				for symbol in symbols:
 					suffix = suffixMap.get(exchangeId, "")
 					tickerId = symbol["symbol"]
@@ -373,7 +373,7 @@ class TickerParserServer(object):
 						self.iexcStocksIndex[tickerId] = {"id": tickerId.removesuffix(suffix), "name": symbol["name"], "base": tickerId.removesuffix(suffix), "quote": symbol["currency"]}
 					self.exchanges[exchangeId].properties.symbols.append(tickerId)
 
-			forexSymbols = get_url("https://cloud.iexapis.com/stable/ref-data/fx/symbols?token={}".format(environ["IEXC_KEY"]))
+			forexSymbols = get_url(f"https://cloud.iexapis.com/stable/ref-data/fx/symbols?token={environ['IEXC_KEY']}")
 			derivedCurrencies = set()
 			for pair in forexSymbols["pairs"]:
 				derivedCurrencies.add(pair["fromCurrency"])
@@ -588,7 +588,7 @@ class TickerParserServer(object):
 			if e.properties is not None and e.properties.symbols is not None:
 				if tickerId in self.ccxtIndex[platform]:
 					for quote in self.ccxtIndex[platform][tickerId]:
-						symbol = "{}/{}".format(tickerId, quote)
+						symbol = f"{tickerId}/{quote}"
 						if symbol in e.properties.symbols:
 							if exchange is None and platform not in ["Ichibot"] and self._is_tokenized_stock(e, symbol): continue
 							base = e.properties.markets[symbol].get("base")
@@ -655,15 +655,15 @@ class TickerParserServer(object):
 	def find_coingecko_crypto_market(self, tickerId):
 		split = tickerId.split(":")
 		if len(split) == 2:
-			_tickerId, rank = split[0], "" if split[1] == "1" else ":{}".format(split[1])
+			_tickerId, rank = split[0], "" if split[1] == "1" else f":{split[1]}"
 		elif len(split) == 3:
-			_tickerId, rank = split[0] + split[2], "" if split[1] == "1" else ":{}".format(split[1])
+			_tickerId, rank = split[0] + split[2], "" if split[1] == "1" else f":{split[1]}"
 		else:
 			_tickerId, rank = tickerId, ""
 
 		if tickerId in self.coinGeckoIndex:
 			return {
-				"id": "{}USD".format(_tickerId),
+				"id": f"{_tickerId}USD",
 				"name": self.coinGeckoIndex[tickerId]["name"],
 				"base": tickerId,
 				"quote": "USD",
@@ -677,7 +677,7 @@ class TickerParserServer(object):
 			for base in self.coinGeckoIndex:
 				if tickerId.startswith(base) and base + rank in self.coinGeckoIndex:
 					for quote in self.coingeckoVsCurrencies:
-						if _tickerId == "{}{}".format(base, quote):
+						if _tickerId == f"{base}{quote}":
 							return {
 								"id": _tickerId,
 								"name": self.coinGeckoIndex[base + rank]["name"],
@@ -692,7 +692,7 @@ class TickerParserServer(object):
 			for base in self.coinGeckoIndex:
 				if base.startswith(_tickerId) and base + rank in self.coinGeckoIndex:
 					return {
-						"id": "{}USD".format(base),
+						"id": f"{base}USD",
 						"name": self.coinGeckoIndex[base + rank]["name"],
 						"base": base + rank,
 						"quote": "USD",
@@ -701,21 +701,6 @@ class TickerParserServer(object):
 						"exchange": {},
 						"mcapRank": self.coinGeckoIndex[base + rank]["market_cap_rank"]
 					}
-
-			for base in self.coinGeckoIndex:
-				if _tickerId.endswith(base):
-					for quote in self.coingeckoVsCurrencies:
-						if _tickerId == "{}{}".format(quote, base) and quote + rank in self.coinGeckoIndex:
-							return {
-								"id": _tickerId,
-								"name": self.coinGeckoIndex[quote + rank]["name"],
-								"base": quote,
-								"quote": base + rank,
-								"symbol": self.coinGeckoIndex[quote + rank]["id"],
-								"image": self.coinGeckoIndex[quote + rank].get("image"),
-								"exchange": {},
-								"mcapRank": self.coinGeckoIndex[quote + rank]["market_cap_rank"]
-							}
 
 		return None
 
@@ -731,7 +716,7 @@ class TickerParserServer(object):
 				"name": matchedTicker["name"],
 				"base": matchedTicker["base"],
 				"quote": matchedTicker["quote"],
-				"symbol": "{}/{}".format(matchedTicker["base"], matchedTicker["quote"]),
+				"symbol": f"{matchedTicker['base']}/{matchedTicker['quote']}",
 				"exchange": {}
 			}
 
@@ -782,7 +767,7 @@ class TickerParserServer(object):
 			for base in self.serumIndex:
 				if tickerId.startswith(base):
 					for market in self.serumIndex[base]:
-						if tickerId == "{}{}".format(base, market["quote"]):
+						if tickerId == f"{base}{market['quote']}":
 							mcapRank = self.coinGeckoIndex[base]["market_cap_rank"] if base in self.coinGeckoIndex else None
 							return {
 								"id": market["id"],

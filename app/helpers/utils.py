@@ -1,6 +1,7 @@
 from math import ceil
 from time import time
 from requests import get
+from traceback import format_exc
 
 
 class Utils(object):

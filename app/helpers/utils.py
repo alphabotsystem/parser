@@ -1,5 +1,6 @@
 from math import ceil
 from time import time
+from requests import get
 
 
 class Utils(object):
@@ -41,3 +42,12 @@ class Utils(object):
 		elif t == "3m": return 180
 		elif t == "2m": return 120
 		elif t == "1m": return 60
+
+	@staticmethod
+	def get_url(url):
+		while True:
+			try:
+				return get(url).json()
+			except:
+				print(format_exc())
+				sleep(10)

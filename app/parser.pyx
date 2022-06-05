@@ -1,7 +1,11 @@
+# cython: language_level=3, boundscheck=False, wraparound=False, cdivision=True, always_allow_keywords=False
+
+import cython
+
 from os import environ
 from sys import maxsize as MAXSIZE
 from signal import signal, SIGINT, SIGTERM
-from time import sleep
+from time import sleep, perf_counter
 from datetime import datetime
 from pytz import utc
 from zmq import Context, Poller, ROUTER, REQ, LINGER, POLLIN
@@ -10,7 +14,6 @@ from lark.reconstruct import Reconstructor
 from orjson import dumps, loads
 from traceback import format_exc
 from threading import Thread
-from requests import get
 
 import ccxt
 from ccxt.base import decimal_to_precision as dtp
@@ -63,29 +66,34 @@ TICKER_OVERRIDES = {
 }
 
 
-class TickerParserServer(object):
-	coinGecko = CoinGeckoAPI()
-
-	exchanges = {}
-	ccxtIndex = {}
-	serumIndex = {}
-	coinGeckoIndex = {}
-	iexcStocksIndex = {}
-	iexcForexIndex = {}
-
-	coingeckoVsCurrencies = []
-	coingeckoFiatCurrencies = []
+cdef class TickerParserServer(object):
+	cdef object coinGecko, logging, context, jobQueue, socket
+	cdef dict exchanges, ccxtIndex, serumIndex, coinGeckoIndex, iexcStocksIndex, iexcForexIndex
+	cdef list coingeckoVsCurrencies, coingeckoFiatCurrencies
+	cdef int isServiceAvailable
 
 	def __init__(self):
+		self.coinGecko = CoinGeckoAPI()
+
+		self.exchanges = {}
+		self.ccxtIndex = {}
+		self.serumIndex = {}
+		self.coinGeckoIndex = {}
+		self.iexcStocksIndex = {}
+		self.iexcForexIndex = {}
+
+		self.coingeckoVsCurrencies = []
+		self.coingeckoFiatCurrencies = []
+
 		self.logging = ErrorReportingClient(service="parser")
 		self.context = Context.instance()
 
 		self.refresh_coingecko_index()
-		processes = [
-			Thread(target=self.refresh_coingecko_exchange_rates),
-			Thread(target=self.refresh_ccxt_index),
-			Thread(target=self.refresh_serum_index),
-			Thread(target=self.refresh_iexc_index)
+		cdef list processes = [
+			Thread(target=lambda: self.refresh_coingecko_exchange_rates()),
+			Thread(target=lambda: self.refresh_ccxt_index()),
+			Thread(target=lambda: self.refresh_serum_index()),
+			Thread(target=lambda: self.refresh_iexc_index())
 		]
 		for p in processes: p.start()
 		for p in processes: p.join()
@@ -96,18 +104,19 @@ class TickerParserServer(object):
 		self.socket = self.context.socket(ROUTER)
 		self.socket.bind("tcp://*:6900")
 
-		self.isServiceAvailable = True
+		self.isServiceAvailable = 1
 		signal(SIGINT, self.exit_gracefully)
 		signal(SIGTERM, self.exit_gracefully)
 
 		print("[Startup]: Ticker Parser is online")
 
-	def exit_gracefully(self, signum, frame):
+	cdef void exit_gracefully(self, int signum, object frame):
 		print("[Startup]: Ticker Parser is exiting")
 		self.socket.close()
-		self.isServiceAvailable = False
+		self.isServiceAvailable = 0
 
-	def run(self):
+	cpdef void run(self):
+		cdef list response, message, request
 		while self.isServiceAvailable:
 			try:
 				response = []
@@ -146,7 +155,9 @@ class TickerParserServer(object):
 				try: self.socket.send_multipart([origin, delimeter] + response)
 				except: pass
 
-	def job_queue(self):
+	cpdef void job_queue(self):
+		cdef object t
+		cdef list timeframes
 		while True:
 			try:
 				sleep(Utils.seconds_until_cycle())
@@ -165,11 +176,13 @@ class TickerParserServer(object):
 				print(format_exc())
 				if environ["PRODUCTION_MODE"]: self.logging.report_exception()
 
-	def refresh_ccxt_index(self):
-		difference = set(ccxt.exchanges).symmetric_difference(supported.ccxtExchanges)
-		newExchanges = []
-		newSupportedExchanges = []
-		unsupportedCryptoExchanges = []
+	cdef void refresh_ccxt_index(self):
+		cdef set difference = set(ccxt.exchanges).symmetric_difference(supported.ccxtExchanges)
+		cdef list newExchanges = []
+		cdef list newSupportedExchanges = []
+		cdef list unsupportedCryptoExchanges = []
+		cdef object ex
+		cdef str e
 		for e in difference:
 			try:
 				ex = getattr(ccxt, e)()
@@ -183,8 +196,9 @@ class TickerParserServer(object):
 		if len(newExchanges) != 0: print(f"New partially unsupported CCXT exchanges: {newExchanges}")
 		if len(unsupportedCryptoExchanges) != 0: print(f"New deprecated CCXT exchanges: {unsupportedCryptoExchanges}")
 
-		completedTasks = set()
-		sortedIndexReference = {}
+		cdef set completedTasks = set()
+		cdef dict sortedIndexReference = {}
+		cdef str platform, exchange, symbol, base, quote
 
 		for platform in supported.cryptoExchanges:
 			if platform not in sortedIndexReference: sortedIndexReference[platform] = {}
@@ -200,15 +214,10 @@ class TickerParserServer(object):
 						base = self.exchanges[exchange].properties.markets[symbol].get("base")
 						quote = self.exchanges[exchange].properties.markets[symbol].get("quote")
 
-						isIdentifiable = quote in self.coinGeckoIndex and self.coinGeckoIndex[quote]["market_cap_rank"] is not None
-
 						if base not in sortedIndexReference[platform]:
 							sortedIndexReference[platform][base] = {}
 						if quote not in sortedIndexReference[platform][base]:
-							if isIdentifiable:
-								sortedIndexReference[platform][base][quote] = self.coinGeckoIndex[quote]["market_cap_rank"]
-							else:
-								sortedIndexReference[platform][base][quote] = MAXSIZE
+							sortedIndexReference[platform][base][quote] = self.coinGeckoIndex.get(quote, {}).get("market_cap_rank", MAXSIZE)
 
 		for platform in sortedIndexReference:
 			self.ccxtIndex[platform] = {}
@@ -220,9 +229,12 @@ class TickerParserServer(object):
 				try: self.ccxtIndex[platform][base].insert(0, self.ccxtIndex[platform][base].pop(self.ccxtIndex[platform][base].index("USD")))
 				except: pass
 
-	def refresh_serum_index(self):
+	cdef void refresh_serum_index(self):
+		cdef dict rawData, market, token, usdcMarket
+		cdef object socket, poller
+		cdef list responses, processed
+		cdef str base, quote, symbol
 		try:
-			rawData = []
 			for i in range(3):
 				socket = self.context.socket(REQ)
 				socket.connect("tcp://serum-server:6900")
@@ -265,22 +277,25 @@ class TickerParserServer(object):
 				if len(self.serumIndex[symbol]) == 0:
 					self.serumIndex.pop(symbol)
 				elif self.serumIndex[symbol][0]["quote"] != "USDC":
-					usdcMarket = None
+					usdcMarket = {}
 					for index, market in enumerate(self.serumIndex[symbol]):
 						if market["quote"] == "USDC":
 							usdcMarket = self.serumIndex[symbol].pop(index)
 							break
-					if usdcMarket is not None:
+					if usdcMarket:
 						self.serumIndex[symbol].insert(0, usdcMarket)
 
 		except Exception:
 			print(format_exc())
 
-	def refresh_coingecko_index(self):
+	cdef void refresh_coingecko_index(self):
+		cdef list blacklist = ["UNIUSD", "AAPL", "TSLA", "ETHUSDADL4"]
+		cdef list rawData = []
+		cdef dict indexReference = {}
+		cdef int page = 1
+		cdef list response
+		cdef str symbol, adjustedSymbol
 		try:
-			blacklist = ["UNIUSD", "AAPL", "TSLA", "ETHUSDADL4"]
-			rawData = []
-			indexReference, page = {}, 1
 			while True:
 				try:
 					response = self.coinGecko.get_coins_markets(vs_currency="usd", order="id_asc", per_page=250, page=page)
@@ -299,101 +314,102 @@ class TickerParserServer(object):
 				symbol = e["symbol"].upper()
 				if symbol in blacklist: continue
 				if symbol not in indexReference:
-					rank = MAXSIZE if e["market_cap_rank"] is None else e["market_cap_rank"]
-					indexReference[symbol] = {"id": e["id"], "name": e["name"], "base": symbol, "quote": "USD", "image": e["image"], "market_cap_rank": rank}
+					indexReference[symbol] = {
+						"id": e["id"],
+						"name": e["name"],
+						"base": symbol,
+						"quote": "USD",
+						"image": e["image"],
+						"market_cap_rank": MAXSIZE if e["market_cap_rank"] is None else e["market_cap_rank"]
+					}
 				elif indexReference[symbol]["id"] != e["id"]:
 					for i in range(2, 11):
-						adjustedSymbol = f"{symbol}:{i}"
+						adjustedSymbol = "{}:{}".format(symbol, i)
 						if adjustedSymbol not in indexReference:
-							rank = MAXSIZE if e["market_cap_rank"] is None else e["market_cap_rank"]
-							indexReference[adjustedSymbol] = {"id": e["id"], "name": e["name"], "base": symbol, "quote": "USD", "image": e["image"], "market_cap_rank": rank}
+							indexReference[adjustedSymbol] = {
+								"id": e["id"],
+								"name": e["name"],
+								"base": symbol,
+								"quote": "USD",
+								"image": e["image"],
+								"market_cap_rank": MAXSIZE if e["market_cap_rank"] is None else e["market_cap_rank"]
+							}
 							break
 			self.coinGeckoIndex = indexReference
 
 		except Exception:
 			print(format_exc())
 
-	def refresh_coingecko_exchange_rates(self):
+	cdef void refresh_coingecko_exchange_rates(self):
 		try:
-			coingeckoVsCurrencies = self.coinGecko.get_supported_vs_currencies()
-			self.coingeckoVsCurrencies = [e.upper() for e in coingeckoVsCurrencies]
-			exchangeRates = self.coinGecko.get_exchange_rates()
-			for ticker, value in exchangeRates["rates"].items():
+			self.coingeckoVsCurrencies = [e.upper() for e in self.coinGecko.get_supported_vs_currencies()]
+			for ticker, value in self.coinGecko.get_exchange_rates()["rates"].items():
 				if value["type"] == "fiat":
 					self.coingeckoFiatCurrencies.append(ticker.upper())
 		except Exception:
 			print(format_exc())
 
-	def refresh_iexc_index(self):
-		try:
-			def get_url(url):
-				while True:
-					try:
-						return get(url).json()
-					except:
-						print(format_exc())
-						sleep(10)
+	cdef void refresh_iexc_index(self):
+		cdef set iexcExchanges = set()
+		cdef list exchanges = Utils.get_url("https://cloud.iexapis.com/stable/ref-data/market/us/exchanges?token={}".format(environ['IEXC_KEY']))
+		cdef dict suffixMap = {}
 
+		cdef dict exchange
+		cdef str exchangeId
+		for exchange in exchanges:
+			if exchange["mic"] == "": continue
+			exchangeId = exchange["mic"]
+			iexcExchanges.add(exchangeId.lower())
+			self.exchanges[exchangeId.lower()] = Exchange(exchangeId, "traditional", exchange["longName"], region="us")
+		exchanges = Utils.get_url("https://cloud.iexapis.com/stable/ref-data/exchanges?token={}".format(environ['IEXC_KEY']))
+		for exchange in exchanges:
+			exchangeId = exchange["mic"]
+			if exchangeId.lower() in iexcExchanges: continue
+			iexcExchanges.add(exchangeId.lower())
+			self.exchanges[exchangeId.lower()] = Exchange(exchangeId, "traditional", exchange["description"], region=exchange["region"])
+			suffixMap[exchangeId.lower()] = exchange["exchangeSuffix"]
 
-			iexcExchanges = set()
-			exchanges = get_url(f"https://cloud.iexapis.com/stable/ref-data/market/us/exchanges?token={environ['IEXC_KEY']}")
-			suffixMap = {}
+		cdef set difference = set(iexcExchanges).symmetric_difference(supported.iexcExchanges)
+		cdef list newSupportedExchanges = []
+		cdef list unsupportedCryptoExchanges = []
+		for exchangeId in difference:
+			if exchangeId not in supported.iexcExchanges:
+				newSupportedExchanges.append(exchangeId)
+			else:
+				unsupportedCryptoExchanges.append(exchangeId)
+		if len(newSupportedExchanges) != 0: print(f"New supported IEXC exchanges: {newSupportedExchanges}")
+		if len(unsupportedCryptoExchanges) != 0: print(f"New deprecated IEXC exchanges: {unsupportedCryptoExchanges}")
 
-			for exchange in exchanges:
-				if exchange["mic"] == "": continue
-				exchangeId = exchange["mic"]
-				iexcExchanges.add(exchangeId.lower())
-				self.exchanges[exchangeId.lower()] = Exchange(exchangeId, "traditional", exchange["longName"], region="us")
-			exchanges = get_url(f"https://cloud.iexapis.com/stable/ref-data/exchanges?token={environ['IEXC_KEY']}")
-			for exchange in exchanges:
-				exchangeId = exchange["mic"]
-				if exchangeId.lower() in iexcExchanges: continue
-				iexcExchanges.add(exchangeId.lower())
-				self.exchanges[exchangeId.lower()] = Exchange(exchangeId, "traditional", exchange["description"], region=exchange["region"])
-				suffixMap[exchangeId.lower()] = exchange["exchangeSuffix"]
+		for exchangeId in supported.traditionalExchanges["IEXC"]:
+			symbols = Utils.get_url("https://cloud.iexapis.com/stable/ref-data/exchange/{}/symbols?token={}".format(self.exchanges[exchangeId].id, environ['IEXC_KEY']))
+			if len(symbols) == 0: print(f"No symbols found on {exchangeId}")
+			for symbol in symbols:
+				suffix = suffixMap.get(exchangeId, "")
+				tickerId = symbol["symbol"]
+				if tickerId not in self.iexcStocksIndex:
+					self.iexcStocksIndex[tickerId] = {"id": tickerId.removesuffix(suffix), "name": symbol["name"], "base": tickerId.removesuffix(suffix), "quote": symbol["currency"]}
+				self.exchanges[exchangeId].properties.symbols.append(tickerId)
 
-			difference = set(iexcExchanges).symmetric_difference(supported.iexcExchanges)
-			newSupportedExchanges = []
-			unsupportedCryptoExchanges = []
-			for exchangeId in difference:
-				if exchangeId not in supported.iexcExchanges:
-					newSupportedExchanges.append(exchangeId)
-				else:
-					unsupportedCryptoExchanges.append(exchangeId)
-			if len(newSupportedExchanges) != 0: print(f"New supported IEXC exchanges: {newSupportedExchanges}")
-			if len(unsupportedCryptoExchanges) != 0: print(f"New deprecated IEXC exchanges: {unsupportedCryptoExchanges}")
+		cdef dict forexSymbols = Utils.get_url("https://cloud.iexapis.com/stable/ref-data/fx/symbols?token={}".format(environ['IEXC_KEY']))
+		cdef set derivedCurrencies = set()
+		cdef dict pair
+		for pair in forexSymbols["pairs"]:
+			derivedCurrencies.add(pair["fromCurrency"])
+			derivedCurrencies.add(pair["toCurrency"])
+			self.iexcForexIndex[pair["symbol"]] = {"id": pair["symbol"], "name": pair["symbol"], "base": pair["fromCurrency"], "quote": pair["toCurrency"], "reversed": False}
+			self.iexcForexIndex[pair["toCurrency"] + pair["fromCurrency"]] = {"id": pair["symbol"], "name": pair["toCurrency"] + pair["fromCurrency"], "base": pair["toCurrency"], "quote": pair["fromCurrency"], "reversed": True}
+		cdef str fromCurrency, toCurrency
+		for fromCurrency in derivedCurrencies:
+			for toCurrency in derivedCurrencies:
+				symbol = fromCurrency + toCurrency
+				if fromCurrency != toCurrency and symbol not in self.iexcForexIndex:
+					self.iexcForexIndex[symbol] = {"id": symbol, "name": symbol, "base": fromCurrency, "quote": toCurrency, "reversed": False}
 
-			for exchangeId in supported.traditionalExchanges["IEXC"]:
-				symbols = get_url(f"https://cloud.iexapis.com/stable/ref-data/exchange/{self.exchanges[exchangeId].id}/symbols?token={environ['IEXC_KEY']}")
-				if len(symbols) == 0: print(f"No symbols found on {exchangeId}")
-				for symbol in symbols:
-					suffix = suffixMap.get(exchangeId, "")
-					tickerId = symbol["symbol"]
-					if tickerId not in self.iexcStocksIndex:
-						self.iexcStocksIndex[tickerId] = {"id": tickerId.removesuffix(suffix), "name": symbol["name"], "base": tickerId.removesuffix(suffix), "quote": symbol["currency"]}
-					self.exchanges[exchangeId].properties.symbols.append(tickerId)
-
-			forexSymbols = get_url(f"https://cloud.iexapis.com/stable/ref-data/fx/symbols?token={environ['IEXC_KEY']}")
-			derivedCurrencies = set()
-			for pair in forexSymbols["pairs"]:
-				derivedCurrencies.add(pair["fromCurrency"])
-				derivedCurrencies.add(pair["toCurrency"])
-				self.iexcForexIndex[pair["symbol"]] = {"id": pair["symbol"], "name": pair["symbol"], "base": pair["fromCurrency"], "quote": pair["toCurrency"], "reversed": False}
-				self.iexcForexIndex[pair["toCurrency"] + pair["fromCurrency"]] = {"id": pair["symbol"], "name": pair["toCurrency"] + pair["fromCurrency"], "base": pair["toCurrency"], "quote": pair["fromCurrency"], "reversed": True}
-			for fromCurrency in derivedCurrencies:
-				for toCurrency in derivedCurrencies:
-					symbol = fromCurrency + toCurrency
-					if fromCurrency != toCurrency and symbol not in self.iexcForexIndex:
-						self.iexcForexIndex[symbol] = {"id": symbol, "name": symbol, "base": fromCurrency, "quote": toCurrency, "reversed": False}
-
-		except Exception:
-			print(format_exc())
-
-	def find_exchange(self, raw, platform, bias):
+	cdef list find_exchange(self, str raw, str platform, str bias):
 		if platform not in supported.cryptoExchanges and platform not in supported.traditionalExchanges: return [b"0", b""]
 		if raw in ["pro"]: return [b"0", b""]
 
-		shortcuts = {
+		cdef dict shortcuts = {
 			"crypto": {
 				"binance": ["bin", "bi", "b"],
 				"bitmex": ["bmx", "mex", "btmx", "bx"],
@@ -413,6 +429,7 @@ class TickerParserServer(object):
 		elif platform in ["IEXC"]:
 			bias = "traditional"
 
+		cdef str name, nameNoSpaces, exchangeId
 		if bias == "crypto":
 			for exchangeId in supported.cryptoExchanges[platform]:
 				if exchangeId in shortcuts["crypto"] and raw in shortcuts["crypto"][exchangeId]:
@@ -487,12 +504,13 @@ class TickerParserServer(object):
 
 		return [b"0", b""]
 
-	def match_ticker(self, tickerId, exchangeId, platform, bias):
+	cdef list match_ticker(self, str tickerId, str exchangeId, str platform, str bias):
 		if platform in ["TradingLite", "Bookmap", "LLD", "CoinGecko", "CCXT", "Serum", "Ichibot"]: bias = "crypto"
 		elif platform in ["IEXC"]: bias = "traditional"
 
-		exchange = {} if exchangeId == "" else self.exchanges.get(exchangeId).to_dict()
+		cdef dict exchange = {} if exchangeId == "" else self.exchanges.get(exchangeId).to_dict()
 
+		cdef object ticker
 		try:
 			ticker = Ticker(tickerId)
 		except:
@@ -522,14 +540,14 @@ class TickerParserServer(object):
 				"isSimple": True
 			}), b""]
 
-		self.ticker_tree_search(ticker, exchangeId, platform, bias, shouldMatch=True)
+		self.ticker_tree_search(ticker, exchangeId, platform, bias, shouldMatch=1)
 
-		isSimple = isinstance(ticker.children[0], Token) and ticker.children[0].type == "NAME"
-		simpleTicker = ticker.children[0].value if isSimple else {}
+		cdef int isSimple = isinstance(ticker.children[0], Token) and ticker.children[0].type == "NAME"
+		cdef dict simpleTicker = ticker.children[0].value if isSimple else {}
 		if not isSimple and platform not in ["TradingView", "Alternative.me", "CoinGecko", "CCXT", "Serum", "IEXC", "LLD"]:
 			return [b"", f"Aggregated tickers aren't available on {platform}".encode()]
 
-		reconstructedId = reconstructor.reconstruct(self.ticker_tree_search(Ticker(tickerId), exchangeId, platform, bias))
+		cdef str reconstructedId = reconstructor.reconstruct(self.ticker_tree_search(Ticker(tickerId), exchangeId, platform, bias))
 
 		response = {
 			"tree": TickerTree().transform(ticker),
@@ -541,13 +559,15 @@ class TickerParserServer(object):
 			"symbol": simpleTicker.get("symbol", None),
 			"image": simpleTicker.get("image", static_storage.icon),
 			"mcapRank": simpleTicker.get("mcapRank", MAXSIZE),
-			"isSimple": isSimple
+			"isSimple": bool(isSimple)
 		}
 		if isSimple and bias == "crypto": response["tradable"] = self.find_tradable_markets(reconstructedId, exchangeId, platform)
 
 		return [dumps(response), b""]
 
-	def ticker_tree_search(self, node, exchangeId, platform, bias, shouldMatch=False):
+	cdef object ticker_tree_search(self, object node, str exchangeId, str platform, str bias, int shouldMatch=0):
+		cdef int i
+		cdef object child, newValue
 		for i, child in enumerate(node.children):
 			if not isinstance(child, Token):
 				node.children[i] = self.ticker_tree_search(child, exchangeId, platform, bias, shouldMatch)
@@ -557,7 +577,8 @@ class TickerParserServer(object):
 				node.children[i] = child.update(value=newValue)
 		return node
 
-	def internal_match(self, tickerId, exchangeId, platform, bias):
+	cdef dict internal_match(self, str tickerId, str exchangeId, str platform, str bias):
+		cdef dict _ticker
 		if tickerId.startswith("$"): tickerId = tickerId[1:] + "USD"
 		elif tickerId.startswith("€"): tickerId = tickerId[1:] + "EUR"
 		tickerId, _ticker = self._check_overrides(tickerId, platform), None
@@ -567,7 +588,7 @@ class TickerParserServer(object):
 			else: _ticker = self.find_ccxt_crypto_market(tickerId, exchangeId, platform)
 		else:
 			if platform in ["IEXC"]: _ticker = self.find_iexc_market(tickerId, exchangeId, platform)
-		if _ticker is None:
+		if not _ticker:
 			_ticker = {
 				"id": tickerId,
 				"name": tickerId,
@@ -579,16 +600,21 @@ class TickerParserServer(object):
 			}
 		return _ticker
 
-	def find_ccxt_crypto_market(self, tickerId, exchangeId, platform):
-		exchange = None if exchangeId == "" else self.exchanges[exchangeId]
+	cdef dict find_ccxt_crypto_market(self, str tickerId, str exchangeId, str platform):
+		cdef object exchange = None if exchangeId == "" else self.exchanges[exchangeId]
 		if platform not in supported.cryptoExchanges or (exchange is not None and exchange.type != "crypto"): return None
-		exchanges = [self.exchanges[e] for e in supported.cryptoExchanges[platform] if self.exchanges[e].type == "crypto"] if exchange is None else [exchange]
+		cdef list exchanges = [self.exchanges[e] for e in supported.cryptoExchanges[platform] if self.exchanges[e].type == "crypto"] if exchange is None else [exchange]
 
+		cdef object e
+		cdef str symbol, base, quote, marketId
+		cdef long currentBestMatch, currentBestFit, mcapRank
+		cdef dict currentResult
+		cdef list marketPair
 		for e in exchanges:
 			if e.properties is not None and e.properties.symbols is not None:
 				if tickerId in self.ccxtIndex[platform]:
 					for quote in self.ccxtIndex[platform][tickerId]:
-						symbol = f"{tickerId}/{quote}"
+						symbol = tickerId + "/" + quote
 						if symbol in e.properties.symbols:
 							if exchange is None and platform not in ["Ichibot"] and self._is_tokenized_stock(e, symbol): continue
 							base = e.properties.markets[symbol].get("base")
@@ -609,7 +635,7 @@ class TickerParserServer(object):
 				else:
 					currentBestMatch = MAXSIZE
 					currentBestFit = MAXSIZE
-					currentResult = None
+					currentResult = {}
 					for symbol in e.properties.symbols:
 						if exchange is None and platform not in ["Ichibot"] and self._is_tokenized_stock(e, symbol): continue
 						base = e.properties.markets[symbol].get("base")
@@ -648,19 +674,21 @@ class TickerParserServer(object):
 										"mcapRank": mcapRank
 									}
 
-					if currentResult is not None: return currentResult
+					if currentResult: return currentResult
 
-		return None
+		return {}
 
-	def find_coingecko_crypto_market(self, tickerId):
-		split = tickerId.split(":")
+	cdef dict find_coingecko_crypto_market(self, str tickerId):
+		cdef list split = tickerId.split(":")
+		cdef str _tickerId, rank
 		if len(split) == 2:
-			_tickerId, rank = split[0], "" if split[1] == "1" else f":{split[1]}"
+			_tickerId, rank = split[0], "" if split[1] == "1" else ":" + split[1]
 		elif len(split) == 3:
-			_tickerId, rank = split[0] + split[2], "" if split[1] == "1" else f":{split[1]}"
+			_tickerId, rank = split[0] + split[2], "" if split[1] == "1" else ":" + split[1]
 		else:
 			_tickerId, rank = tickerId, ""
 
+		cdef str base, quote
 		if tickerId in self.coinGeckoIndex:
 			return {
 				"id": f"{_tickerId}USD",
@@ -702,13 +730,16 @@ class TickerParserServer(object):
 						"mcapRank": self.coinGeckoIndex[base + rank]["market_cap_rank"]
 					}
 
-		return None
+		return {}
 
-	def find_iexc_market(self, tickerId, exchangeId, platform):
-		exchange = None if exchangeId == "" else self.exchanges[exchangeId]
+	cdef dict find_iexc_market(self, str tickerId, str exchangeId, str platform):
+		cdef object exchange = None if exchangeId == "" else self.exchanges[exchangeId]
 		if platform not in supported.traditionalExchanges or (exchange is not None and exchange.type != "traditional"): return None
-		exchanges = [self.exchanges[e] for e in supported.traditionalExchanges[platform] if self.exchanges[e].type == "traditional"] if exchange is None else [exchange]
+		cdef list exchanges = [self.exchanges[e] for e in supported.traditionalExchanges[platform] if self.exchanges[e].type == "traditional"] if exchange is None else [exchange]
 
+		cdef object e
+		cdef dict matchedTicker
+		cdef str symbol
 		if tickerId in self.iexcForexIndex and exchange is None:
 			matchedTicker = self.iexcForexIndex[tickerId]
 			return {
@@ -734,24 +765,27 @@ class TickerParserServer(object):
 					}
 
 				else:
-					symbols = {self.iexcStocksIndex[s]["id"]: (s, self.iexcStocksIndex[s]) for s in e.properties.symbols if s in self.iexcStocksIndex}
-					if tickerId in symbols:
-						symbol, matchedTicker = symbols[tickerId]
-						return {
-							"id": matchedTicker["id"],
-							"name": matchedTicker["name"],
-							"base": matchedTicker["base"],
-							"quote": matchedTicker["quote"],
-							"symbol": symbol,
-							"exchange": e.to_dict()
-						}
+					for symbol in e.properties.symbols:
+						if tickerId == self.iexcStocksIndex.get(symbol, {}).get("id"):
+							matchedTicker = self.iexcStocksIndex[symbol]
+							return {
+								"id": matchedTicker["id"],
+								"name": matchedTicker["name"],
+								"base": matchedTicker["base"],
+								"quote": matchedTicker["quote"],
+								"symbol": symbol,
+								"exchange": e.to_dict()
+							}
 
-		return None
+		return {}
 
-	def find_serum_crypto_market(self, tickerId):
+	cdef dict find_serum_crypto_market(self, str tickerId):
+		cdef long mcapRank
+		cdef dict market
+		cdef str base
 		if tickerId in self.serumIndex:
 			for market in self.serumIndex[tickerId]:
-				mcapRank = self.coinGeckoIndex[tickerId]["market_cap_rank"] if tickerId in self.coinGeckoIndex else None
+				mcapRank = self.coinGeckoIndex[tickerId]["market_cap_rank"] if tickerId in self.coinGeckoIndex else MAXSIZE
 				return {
 					"id": market["id"],
 					"name": self.coinGeckoIndex.get(tickerId, {}).get("name", tickerId + market["quote"]),
@@ -768,7 +802,7 @@ class TickerParserServer(object):
 				if tickerId.startswith(base):
 					for market in self.serumIndex[base]:
 						if tickerId == f"{base}{market['quote']}":
-							mcapRank = self.coinGeckoIndex[base]["market_cap_rank"] if base in self.coinGeckoIndex else None
+							mcapRank = self.coinGeckoIndex[base]["market_cap_rank"] if base in self.coinGeckoIndex else MAXSIZE
 							return {
 								"id": market["id"],
 								"name": self.coinGeckoIndex.get(tickerId, {}).get("name", tickerId + market["quote"]),
@@ -782,7 +816,7 @@ class TickerParserServer(object):
 			for base in self.serumIndex:
 				if base.startswith(tickerId):
 					market = self.serumIndex[base][0]
-					mcapRank = self.coinGeckoIndex[base]["market_cap_rank"] if base in self.coinGeckoIndex else None
+					mcapRank = self.coinGeckoIndex[base]["market_cap_rank"] if base in self.coinGeckoIndex else MAXSIZE
 					return {
 						"id": market["id"],
 						"name": self.coinGeckoIndex.get(tickerId, {}).get("name", tickerId + market["quote"]),
@@ -794,16 +828,18 @@ class TickerParserServer(object):
 						"mcapRank": mcapRank
 					}
 
-		return None
+		return {}
 
-	def check_if_fiat(self, tickerId):
+	cdef list check_if_fiat(self, str tickerId):
+		cdef str fiat
 		for fiat in self.coingeckoFiatCurrencies:
 			if fiat.upper() in tickerId: return [b"1", fiat.encode()]
 		return [b"0", b""]
 
-	def get_listings(self, tickerBase, tickerQuote):
-		listings = {tickerQuote: []}
-		total = 0
+	cdef list get_listings(self, str tickerBase, str tickerQuote):
+		cdef dict listings = {tickerQuote: []}
+		cdef int total = 0
+		cdef str e, symbol, base, quote
 		for e in supported.cryptoExchanges["CCXT"]:
 			if self.exchanges[e].properties is not None and self.exchanges[e].properties.symbols is not None:
 				for symbol in self.exchanges[e].properties.symbols:
@@ -815,7 +851,7 @@ class TickerParserServer(object):
 							listings[quote].append(self.exchanges[e].name)
 							total += 1
 
-		response = [[tickerQuote, listings.pop(tickerQuote)]]
+		cdef list response = [[tickerQuote, listings.pop(tickerQuote)]]
 		if tickerBase in self.ccxtIndex["CCXT"]:
 			for quote in self.ccxtIndex["CCXT"][tickerBase]:
 				if quote in listings:
@@ -823,36 +859,38 @@ class TickerParserServer(object):
 
 		return [dumps(response), str(total).encode()]
 
-	def format_price(self, exchangeId, symbol, price):
-		exchange = self.exchanges[exchangeId].properties
-		precision = exchange.markets.get(symbol, {}).get("precision", {}).get("price", 8)
+	cdef list format_price(self, str exchangeId, str symbol, str price):
+		cdef object exchange = self.exchanges[exchangeId].properties
+		cdef int precision = exchange.markets.get(symbol, {}).get("precision", {}).get("price", 8)
 		return [dtp.decimal_to_precision(price, rounding_mode=dtp.ROUND, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.PAD_WITH_ZERO).encode()]
 
-	def format_amount(self, exchangeId, symbol, amount):
-		exchange = self.exchanges[exchangeId].properties
-		precision = exchange.markets.get(symbol, {}).get("precision", {}).get("amount", 8)
+	cdef list format_amount(self, str exchangeId, str symbol, str amount):
+		cdef object exchange = self.exchanges[exchangeId].properties
+		cdef int precision = exchange.markets.get(symbol, {}).get("precision", {}).get("amount", 8)
 		return [dtp.decimal_to_precision(amount, rounding_mode=dtp.TRUNCATE, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.NO_PADDING).encode()]
 
-	def find_tradable_markets(self, tickerId, exchangeId, platform):
+	cdef dict find_tradable_markets(self, str tickerId, str exchangeId, str platform):
 		if exchangeId != "" and exchangeId not in supported.cryptoExchanges["Ichibot"]: return {}
-		exchangeIds = supported.cryptoExchanges["Ichibot"] if exchangeId == "" else [exchangeId]
+		cdef list exchangeIds = supported.cryptoExchanges["Ichibot"] if exchangeId == "" else [exchangeId]
 
-		matches = {}
+		cdef dict matches = {}
+		cdef str e
+		cdef dict match, check
 		for e in exchangeIds:
 			match = self.find_ccxt_crypto_market(tickerId, e, "Ichibot")
 			check = self.find_ccxt_crypto_market(tickerId, exchangeId, platform)
-			if match is not None and check is not None:
+			if match and check:
 				matches[e] = self.exchanges[e].properties.markets[match.get("symbol")]["id"]
 		return matches
 
-	def get_venues(self, platforms, tickerId):
-		venues = []
+	cdef list get_venues(self, str platforms, str tickerId):
+		cdef list venues = []
 
 		# self.find_coingecko_crypto_market(tickerId)
 		# self.find_iexc_market(tickerId, "", "IEXC")
-
-		isEmpty = platforms == ""
-		if isEmpty:
+ 
+		cdef str platform
+		if platforms == "":
 			venues += ["CoinGecko", "Serum"]
 			for ids in supported.traditionalExchanges.values():
 				venues += [self.exchanges[e].name for e in ids]
@@ -866,39 +904,36 @@ class TickerParserServer(object):
 					venues += [self.exchanges[e].name for e in supported.traditionalExchanges.get(platform, [])]
 		return [dumps(venues)]
 
-	def _check_overrides(self, tickerId, platform):
+	cdef str _check_overrides(self, str tickerId, str platform):
+		cdef str tickerOverride
+		cdef list triggers
 		for tickerOverride, triggers in TICKER_OVERRIDES.get(platform, []):
 			if tickerId in triggers:
 				tickerId = tickerOverride
 				return tickerId
 		return tickerId
 
-	def _is_tokenized_stock(self, e, symbol):
-		ftxTokenizedStock = e.id == "ftx" and e.properties.markets[symbol]["info"].get("tokenizedEquity", False)
-		bittrexTokenizedStock = e.id == "bittrex" and "TOKENIZED_SECURITY" in e.properties.markets[symbol]["info"].get("tags", [])
+	cdef int _is_tokenized_stock(self, object e, str symbol):
+		cdef int ftxTokenizedStock = e.id == "ftx" and e.properties.markets[symbol]["info"].get("tokenizedEquity", False)
+		cdef int bittrexTokenizedStock = e.id == "bittrex" and "TOKENIZED_SECURITY" in e.properties.markets[symbol]["info"].get("tags", [])
 		return ftxTokenizedStock or bittrexTokenizedStock
 
 
 class TickerTree(Transformer):
-	def add(self, tree): return self.genenrate_dict(tree, "add")
-	def sub(self, tree): return self.genenrate_dict(tree, "sub")
-	def mul(self, tree): return self.genenrate_dict(tree, "mul")
-	def div(self, tree): return self.genenrate_dict(tree, "div")
-	def neg(self, tree): return self.genenrate_dict(tree, "neg")
-	def var(self, tree): return self.genenrate_dict(tree, "var")
-	def number(self, tree): return self.genenrate_dict(tree, "number")
-	def name(self, tree): return self.genenrate_dict(tree, "name")
-	def literal(self, tree): return self.genenrate_dict(tree, "literal")
+	def add(self, list tree): return self.genenrate_list(tree, "add")
+	def sub(self, list tree): return self.genenrate_list(tree, "sub")
+	def mul(self, list tree): return self.genenrate_list(tree, "mul")
+	def div(self, list tree): return self.genenrate_list(tree, "div")
+	def neg(self, list tree): return self.genenrate_list(tree, "neg")
+	def var(self, list tree): return self.genenrate_list(tree, "var")
+	def number(self, list tree): return self.genenrate_list(tree, "number")
+	def name(self, list tree): return self.genenrate_list(tree, "name")
+	def literal(self, list tree): return self.genenrate_list(tree, "literal")
 
-	def genenrate_dict(self, tree, method):
-		l = [method, []]
+	def genenrate_list(self, list tree, str method):
+		cdef list l = [method, []]
+		cdef object child
 		for child in tree:
 			if not isinstance(child, Token): l[1].append(child)
 			else: l[1].append([child.type, child.value])
 		return l
-
-
-if __name__ == "__main__":
-	environ["PRODUCTION_MODE"] = environ["PRODUCTION_MODE"] if "PRODUCTION_MODE" in environ and environ["PRODUCTION_MODE"] else ""
-	tickerParser = TickerParserServer()
-	tickerParser.run()

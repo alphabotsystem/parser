@@ -1,5 +1,5 @@
 from math import ceil
-from time import time
+from time import time, sleep
 from requests import get
 from traceback import format_exc
 

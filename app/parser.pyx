@@ -5,7 +5,7 @@ import cython
 from os import environ
 from sys import maxsize as MAXSIZE
 from signal import signal, SIGINT, SIGTERM
-from time import sleep, perf_counter
+from time import sleep
 from datetime import datetime
 from pytz import utc
 from zmq import Context, Poller, ROUTER, REQ, LINGER, POLLIN

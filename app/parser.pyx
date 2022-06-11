@@ -391,6 +391,7 @@ cdef class TickerParserServer(object):
 				else:
 					self.iexcStocksIndex[tickerId]["exchanges"].append(exchangeId)
 				self.exchanges[exchangeId].properties.symbols.append(tickerId)
+				self.exchanges[exchangeId].properties.markets[tickerId] = {"id": tickerId.removesuffix(suffix), "name": symbol["name"], "base": tickerId.removesuffix(suffix), "quote": symbol["currency"]}
 
 		cdef dict forexSymbols = Utils.get_url("https://cloud.iexapis.com/stable/ref-data/fx/symbols?token={}".format(environ['IEXC_KEY']))
 		cdef set derivedCurrencies = set()
@@ -767,7 +768,7 @@ cdef class TickerParserServer(object):
 		else:
 			for e in exchanges:
 				if tickerId in e.properties.symbols:
-					matchedTicker = self.iexcStocksIndex[tickerId]
+					matchedTicker = e.markets[tickerId]
 					return {
 						"id": matchedTicker["id"],
 						"name": matchedTicker["name"],
@@ -779,8 +780,8 @@ cdef class TickerParserServer(object):
 
 				else:
 					for symbol in e.properties.symbols:
-						if tickerId == self.iexcStocksIndex.get(symbol, {}).get("id"):
-							matchedTicker = self.iexcStocksIndex[symbol]
+						if tickerId == e.markets[tickerId]["id"]:
+							matchedTicker = e.markets[tickerId]
 							return {
 								"id": matchedTicker["id"],
 								"name": matchedTicker["name"],

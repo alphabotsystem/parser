@@ -779,14 +779,13 @@ cdef class TickerParserServer(object):
 					}
 
 				else:
-					for symbol in e.properties.symbols:
-						if tickerId == e.properties.markets[tickerId]["id"]:
-							matchedTicker = e.properties.markets[tickerId]
+					for symbol, market in e.properties.markets.items():
+						if tickerId == market["id"]:
 							return {
-								"id": matchedTicker["id"],
-								"name": matchedTicker["name"],
-								"base": matchedTicker["base"],
-								"quote": matchedTicker["quote"],
+								"id": market["id"],
+								"name": market["name"],
+								"base": market["base"],
+								"quote": market["quote"],
 								"symbol": symbol,
 								"exchange": e.to_dict()
 							}

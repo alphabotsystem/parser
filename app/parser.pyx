@@ -768,7 +768,7 @@ cdef class TickerParserServer(object):
 		else:
 			for e in exchanges:
 				if tickerId in e.properties.symbols:
-					matchedTicker = e.markets[tickerId]
+					matchedTicker = e.properties.markets[tickerId]
 					return {
 						"id": matchedTicker["id"],
 						"name": matchedTicker["name"],
@@ -780,8 +780,8 @@ cdef class TickerParserServer(object):
 
 				else:
 					for symbol in e.properties.symbols:
-						if tickerId == e.markets[tickerId]["id"]:
-							matchedTicker = e.markets[tickerId]
+						if tickerId == e.properties.markets[tickerId]["id"]:
+							matchedTicker = e.properties.markets[tickerId]
 							return {
 								"id": matchedTicker["id"],
 								"name": matchedTicker["name"],

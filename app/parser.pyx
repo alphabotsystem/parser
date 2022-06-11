@@ -387,7 +387,9 @@ cdef class TickerParserServer(object):
 				suffix = suffixMap.get(exchangeId, "")
 				tickerId = symbol["symbol"]
 				if tickerId not in self.iexcStocksIndex:
-					self.iexcStocksIndex[tickerId] = {"id": tickerId.removesuffix(suffix), "name": symbol["name"], "base": tickerId.removesuffix(suffix), "quote": symbol["currency"]}
+					self.iexcStocksIndex[tickerId] = {"id": tickerId.removesuffix(suffix), "name": symbol["name"], "base": tickerId.removesuffix(suffix), "quote": symbol["currency"], "exchanges": [exchangeId]}
+				else:
+					self.iexcStocksIndex[tickerId]["exchanges"].append(exchangeId)
 				self.exchanges[exchangeId].properties.symbols.append(tickerId)
 
 		cdef dict forexSymbols = Utils.get_url("https://cloud.iexapis.com/stable/ref-data/fx/symbols?token={}".format(environ['IEXC_KEY']))
@@ -749,6 +751,17 @@ cdef class TickerParserServer(object):
 				"quote": matchedTicker["quote"],
 				"symbol": f"{matchedTicker['base']}/{matchedTicker['quote']}",
 				"exchange": {}
+			}
+
+		elif tickerId in self.iexcStocksIndex and exchange is None:
+			matchedTicker = self.iexcStocksIndex[tickerId]
+			return {
+				"id": matchedTicker["id"],
+				"name": matchedTicker["name"],
+				"base": matchedTicker["base"],
+				"quote": matchedTicker["quote"],
+				"symbol": tickerId,
+				"exchange": self.exchanges[matchedTicker["exchanges"][0]].to_dict()
 			}
 
 		else:

@@ -117,7 +117,9 @@ cdef class TickerParserServer(object):
 
 	cpdef void run(self):
 		cdef list response, message
+		cdef bytes origin, delimeter
 		cdef list request = []
+		cdef bytes service = b""
 		while self.isServiceAvailable:
 			try:
 				response = []
@@ -151,7 +153,7 @@ cdef class TickerParserServer(object):
 			except (KeyboardInterrupt, SystemExit): return
 			except Exception:
 				print(format_exc())
-				print(request)
+				print(service, request)
 				if environ["PRODUCTION_MODE"]: self.logging.report_exception(user=f"{request}")
 			finally:
 				try: self.socket.send_multipart([origin, delimeter] + response)

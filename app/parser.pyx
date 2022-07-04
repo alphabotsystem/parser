@@ -147,8 +147,8 @@ cdef class TickerParserServer(object):
 					[exchangeId, symbol, amount] = request
 					response = self.format_amount(exchangeId.decode(), symbol.decode(), amount.decode())
 				elif service == b"get_venues":
-					[platforms, tickerId] = request
-					response = self.get_venues(platforms.decode(), tickerId.decode())
+					[platforms] = request
+					response = self.get_venues(platforms.decode())
 
 			except (KeyboardInterrupt, SystemExit): return
 			except Exception:
@@ -900,12 +900,9 @@ cdef class TickerParserServer(object):
 				matches[e] = self.exchanges[e].properties.markets[match.get("symbol")]["id"]
 		return matches
 
-	cdef list get_venues(self, str platforms, str tickerId):
+	cdef list get_venues(self, str platforms):
 		cdef list venues = []
 
-		# self.find_coingecko_crypto_market(tickerId)
-		# self.find_iexc_market(tickerId, "", "IEXC")
- 
 		cdef str platform
 		if platforms == "":
 			venues += ["CoinGecko", "Serum"]

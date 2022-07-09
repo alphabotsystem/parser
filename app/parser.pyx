@@ -551,7 +551,7 @@ cdef class TickerParserServer(object):
 
 		cdef int isSimple = isinstance(ticker.children[0], Token) and ticker.children[0].type == "NAME"
 		cdef dict simpleTicker = ticker.children[0].value if isSimple else {}
-		if not isSimple and platform not in ["TradingView", "Alternative.me", "CoinGecko", "CCXT", "Serum", "IEXC", "LLD"]:
+		if not isSimple and platform not in ["TradingView", "CoinGecko", "CCXT", "Serum", "IEXC", "LLD"]:
 			return [b"", f"Aggregated tickers aren't available on {platform}".encode()]
 
 		cdef str reconstructedId = reconstructor.reconstruct(self.ticker_tree_search(Ticker(tickerId), exchangeId, platform, bias))

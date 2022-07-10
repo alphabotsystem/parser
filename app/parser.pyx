@@ -35,8 +35,8 @@ GRAMMAR = """
 	?product: atom
 		| product "*" atom  -> mul
 		| product "/" atom  -> div
-	?atom: NUMBER           -> number
-		 | "-" atom         -> neg
+	?atom: "-" atom         -> neg
+		 | CONSTANT         -> number
 		 | NAME             -> var
 		 | NAME ":" NUMBER  -> var
 		 | "'" NAME "'"     -> literal
@@ -50,7 +50,8 @@ GRAMMAR = """
 	%import common.WS_INLINE
 	%ignore WS_INLINE
 
-	NAME: LETTER ("_"|":"|LETTER|DIGIT)*
+	NAME: DIGIT* LETTER ("_"|":"|LETTER|DIGIT)*
+	CONSTANT: DIGIT ("." DIGIT+)?
 """
 
 larkParser = Lark(GRAMMAR, parser='lalr')

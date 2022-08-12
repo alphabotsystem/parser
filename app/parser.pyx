@@ -419,15 +419,13 @@ cdef class TickerParserServer(object):
 
 		cdef dict shortcuts = {
 			"crypto": {
-				"binance": ["bin", "bi", "b"],
-				"bitmex": ["bmx", "mex", "btmx", "bx"],
-				"binanceusdm": ["binancefutures", "binancef", "fbin", "binf", "bif", "bf", "bnf"],
+				"binance": ["bin", "bi", "b", "nance"],
+				"bitmex": ["bmx", "mex", "btmx"],
+				"binanceusdm": ["binancefutures", "binancef", "fbin", "binf", "bif", "bnf"],
 				"coinbasepro": ["cbp", "coin", "base", "cb", "coinbase", "coinbasepro", "cbpro"],
-				"bitfinex2": ["bfx", "finex", "bf"],
+				"bitfinex2": ["bfx", "finex"],
 				"bittrex": ["btrx", "brx"],
-				"poloniex": ["po", "polo"],
-				"kraken": ["k", "kra"],
-				"gemini": ["ge", "gem"]
+				"poloniex": ["polo"],
 			},
 			"traditional": {}
 		}
@@ -448,7 +446,7 @@ cdef class TickerParserServer(object):
 				else:
 					name, nameNoSpaces = exchangeId, exchangeId
 
-				if len(name) * 0.33 > len(raw): continue
+				if len(name) * 0.25 > len(raw): continue
 
 				if name.startswith(raw) or name.endswith(raw):
 					return [b"1", dumps(self.exchanges[exchangeId].to_dict())]

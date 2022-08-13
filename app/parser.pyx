@@ -304,7 +304,7 @@ cdef class TickerParserServer(object):
 			while True:
 				try:
 					response = self.coinGecko.get_coins_markets(vs_currency="usd", order="id_asc", per_page=250, page=page)
-					sleep(1.5)
+					sleep(2)
 				except:
 					print(format_exc())
 					sleep(10)

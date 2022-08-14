@@ -847,7 +847,7 @@ class TickerParserServer(object):
 				matches[e] = self.exchanges[e].properties.markets[match.get("symbol")]["id"]
 		return matches
 
-	def get_venues(self, platforms, tickerId):
+	def get_venues(self, platforms):
 		venues = []
 		if platforms == "":
 			venues += ["CoinGecko", "Serum"]

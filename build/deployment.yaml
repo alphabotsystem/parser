@@ -28,7 +28,7 @@ spec:
             memory: "760Mi"
             cpu: "7m"
         env:
-          - name: PRODUCTION_MODE
+          - name: PRODUCTION
             value: "1"
           - name: IEXC_KEY
             valueFrom:

@@ -1,5 +1,6 @@
-Cython>=3.0.0a11
 google-cloud-error-reporting>=0.33.0
+fastapi>=0.79.0
+uvicorn[standard]>=0.18.2
 pytz>=2019.2
 ccxt>=1.92.19
 pycoingecko>=0.3.0

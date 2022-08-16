@@ -896,6 +896,7 @@ if __name__ == "__main__":
 	for p in processes: p.join()
 
 	print("[Startup]: Ticker Parser is online")
-	config = Config(app=app, port=int(environ.get("PORT", 8080)), host="0.0.0.0", loop=loop)
+	# config = Config(app=app, port=int(environ.get("PORT", 6900)), host="0.0.0.0", loop=loop)
+	config = Config(app=app, port=6900, host="0.0.0.0", loop=loop)
 	server = Server(config)
 	loop.run_until_complete(server.serve())

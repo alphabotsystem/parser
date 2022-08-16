@@ -122,7 +122,7 @@ coingeckoFiatCurrencies = []
 # -------------------------
 
 def refresh_coingecko_index():
-	global coingeckoIndex, coingeckoVsCurrencies, coingeckoFiatCurrencies
+	global coinGeckoIndex, coingeckoVsCurrencies, coingeckoFiatCurrencies
 
 	coingeckoVsCurrencies = database.collection("parser").document("coingecko").collection("meta").document("base").get().to_dict()["symbols"]
 	coingeckoFiatCurrencies = database.collection("parser").document("coingecko").collection("meta").document("fiat").get().to_dict()["symbols"]
@@ -158,9 +158,9 @@ def refresh_ccxt_index():
 		if platform not in sortedIndexReference: sortedIndexReference[platform] = {}
 		for exchange in supported.cryptoExchanges[platform]:
 			if exchange not in completedTasks:
-				if exchange not in exchanges: exchanges[exchange] = Exchange(exchange, "crypto" if exchange in ccxt.exchanges else "traditional")
-				try: exchanges[exchange].properties.load_markets()
-				except: continue
+				if exchange not in exchanges: 
+					exchanges[exchange] = Exchange(exchange, "crypto" if exchange in ccxt.exchanges else "traditional")
+					if exchanges[exchange].stale: continue
 				completedTasks.add(exchange)
 
 			for symbol in exchanges[exchange].properties.symbols:
@@ -552,21 +552,21 @@ def find_coingecko_crypto_market(tickerId):
 	else:
 		_tickerId, rank = tickerId, ""
 
-	if tickerId in coinGeckoIndex:
+	if _tickerId in coinGeckoIndex:
 		return {
 			"id": f"{_tickerId}USD",
-			"name": coinGeckoIndex[tickerId]["name"],
-			"base": tickerId,
+			"name": coinGeckoIndex[_tickerId]["name"],
+			"base": _tickerId,
 			"quote": "USD",
-			"symbol": coinGeckoIndex[tickerId]["id"],
-			"image": coinGeckoIndex[tickerId].get("image"),
+			"symbol": coinGeckoIndex[_tickerId]["id"],
+			"image": coinGeckoIndex[_tickerId].get("image"),
 			"exchange": {},
-			"mcapRank": coinGeckoIndex[tickerId]["market_cap_rank"]
+			"mcapRank": coinGeckoIndex[_tickerId]["market_cap_rank"]
 		}
 
 	else:
 		for base in coinGeckoIndex:
-			if tickerId.startswith(base) and base + rank in coinGeckoIndex:
+			if _tickerId.startswith(base) and base + rank in coinGeckoIndex:
 				for quote in coingeckoVsCurrencies:
 					if _tickerId == f"{base}{quote}":
 						return {

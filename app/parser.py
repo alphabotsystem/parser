@@ -13,11 +13,11 @@ from lark import Lark, Token, Transformer
 from lark.reconstruct import Reconstructor
 from orjson import dumps, loads
 from traceback import format_exc
-from threading import Thread
 
 import ccxt
 from ccxt.base import decimal_to_precision as dtp
 from pycoingecko import CoinGeckoAPI
+from google.cloud.firestore import Client
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
 from TickerParser import Exchange
@@ -28,6 +28,7 @@ from helpers import supported
 
 
 app = FastAPI()
+database = Client()
 logging = ErrorReportingClient(service="parser")
 loop = new_event_loop()
 set_event_loop(loop)
@@ -117,8 +118,20 @@ coingeckoFiatCurrencies = []
 
 
 # -------------------------
-# Main functions
+# Startup
 # -------------------------
+
+def refresh_coingecko_index():
+	global coingeckoIndex, coingeckoVsCurrencies, coingeckoFiatCurrencies
+
+	coingeckoVsCurrencies = database.collection("parser").document("coingecko").collection("meta").document("base").get().to_dict()["symbols"]
+	coingeckoFiatCurrencies = database.collection("parser").document("coingecko").collection("meta").document("fiat").get().to_dict()["symbols"]
+
+	pages = database.collection("parser").document("coingecko").collection("assets").get()
+	coinGeckoIndex = {}
+	for page in pages:
+		for key, value in page.to_dict().items():
+			coinGeckoIndex[key] = value
 
 def refresh_ccxt_index():
 	difference = set(ccxt.exchanges).symmetric_difference(supported.ccxtExchanges)
@@ -226,126 +239,48 @@ def refresh_serum_index():
 	except Exception:
 		print(format_exc())
 
-def refresh_coingecko_index():
-	global coinGeckoIndex
-	try:
-		blacklist = ["UNIUSD", "AAPL", "TSLA", "ETHUSDADL4"]
-		rawData = []
-		indexReference, page = {}, 1
-		while True:
-			try:
-				response = coinGecko.get_coins_markets(vs_currency="usd", order="id_asc", per_page=250, page=page)
-				sleep(2)
-			except:
-				print(format_exc())
-				sleep(10)
-				continue
-
-			if len(response) == 0: break
-			rawData += response
-			page += 1
-
-		rawData.sort(reverse=True, key=lambda k: (float('-inf') if k["market_cap_rank"] is None else -k["market_cap_rank"], 0 if k["total_volume"] is None else k["total_volume"], k["name"], k["id"]))
-		for e in rawData:
-			symbol = e["symbol"].upper()
-			if symbol in blacklist: continue
-			if symbol not in indexReference:
-				indexReference[symbol] = {
-					"id": e["id"],
-					"name": e["name"],
-					"base": symbol,
-					"quote": "USD",
-					"image": e["image"],
-					"market_cap_rank": MAXSIZE if e["market_cap_rank"] is None else e["market_cap_rank"]
-				}
-			elif indexReference[symbol]["id"] != e["id"]:
-				for i in range(2, 11):
-					adjustedSymbol = f"{symbol}:{i}"
-					if adjustedSymbol not in indexReference:
-						indexReference[adjustedSymbol] = {
-							"id": e["id"],
-							"name": e["name"],
-							"base": symbol,
-							"quote": "USD",
-							"image": e["image"],
-							"market_cap_rank": MAXSIZE if e["market_cap_rank"] is None else e["market_cap_rank"]
-						}
-						break
-		coinGeckoIndex = indexReference
-
-	except Exception:
-		print(format_exc())
-
-def refresh_coingecko_exchange_rates():
-	global coingeckoVsCurrencies
-	try:
-		coingeckoVsCurrencies = [e.upper() for e in coinGecko.get_supported_vs_currencies()]
-		for ticker, value in coinGecko.get_exchange_rates()["rates"].items():
-			if value["type"] == "fiat":
-				coingeckoFiatCurrencies.append(ticker.upper())
-	except Exception:
-		print(format_exc())
-
 def refresh_iexc_index():
-	try:
-		iexcExchanges = set()
-		exchanges = Utils.get_url(f"https://cloud.iexapis.com/stable/ref-data/market/us/exchanges?token={environ['IEXC_KEY']}")
-		suffixMap = {}
+	global exchanges, iexcStocksIndex, iexcForexIndex
 
-		for exchange in exchanges:
-			if exchange["mic"] == "": continue
-			exchangeId = exchange["mic"]
-			iexcExchanges.add(exchangeId.lower())
-			exchanges[exchangeId.lower()] = Exchange(exchangeId, "traditional", exchange["longName"], region="us")
-		exchanges = Utils.get_url(f"https://cloud.iexapis.com/stable/ref-data/exchanges?token={environ['IEXC_KEY']}")
-		for exchange in exchanges:
-			exchangeId = exchange["mic"]
-			if exchangeId.lower() in iexcExchanges: continue
-			iexcExchanges.add(exchangeId.lower())
-			exchanges[exchangeId.lower()] = Exchange(exchangeId, "traditional", exchange["description"], region=exchange["region"])
-			suffixMap[exchangeId.lower()] = exchange["exchangeSuffix"]
+	availableExchanges = set()
+	suffixMap = {}
 
-		difference = set(iexcExchanges).symmetric_difference(supported.iexcExchanges)
-		newSupportedExchanges = []
-		unsupportedCryptoExchanges = []
-		for exchangeId in difference:
-			if exchangeId not in supported.iexcExchanges:
-				newSupportedExchanges.append(exchangeId)
-			else:
-				unsupportedCryptoExchanges.append(exchangeId)
-		if len(newSupportedExchanges) != 0: print(f"New supported IEXC exchanges: {newSupportedExchanges}")
-		if len(unsupportedCryptoExchanges) != 0: print(f"New deprecated IEXC exchanges: {unsupportedCryptoExchanges}")
+	index = database.collection("parser").document("iexc").collection("stocks").get()
+	for doc in index:
+		exchange = doc.to_dict()
+		exchanges[doc.id] = Exchange.from_dict(exchange)
+		suffixMap[doc.id] = exchange.pop("suffix", "")
+		availableExchanges.add(doc.id)
 
-		for exchangeId in supported.traditionalExchanges["IEXC"]:
-			symbols = Utils.get_url(f"https://cloud.iexapis.com/stable/ref-data/exchange/{exchanges[exchangeId].id}/symbols?token={environ['IEXC_KEY']}")
-			if len(symbols) == 0: print(f"No symbols found on {exchangeId}")
-			for symbol in symbols:
-				suffix = suffixMap.get(exchangeId, "")
-				tickerId = symbol["symbol"]
+	difference = set(availableExchanges).symmetric_difference(supported.iexcExchanges)
+	newSupportedExchanges = []
+	unsupportedCryptoExchanges = []
+	for exchangeId in difference:
+		if exchangeId not in supported.iexcExchanges:
+			newSupportedExchanges.append(exchangeId)
+		else:
+			unsupportedCryptoExchanges.append(exchangeId)
+	if len(newSupportedExchanges) != 0: print(f"New supported IEXC exchanges: {newSupportedExchanges}")
+	if len(unsupportedCryptoExchanges) != 0: print(f"New deprecated IEXC exchanges: {unsupportedCryptoExchanges}")
+
+	for exchangeId in supported.traditionalExchanges["IEXC"]:
+		suffix = suffixMap.get(exchangeId)
+		pages = database.collection("parser").document("iexc").collection("stocks").document(exchangeId).collection("markets").get()
+		for page in pages:
+			for tickerId, market in page.to_dict().items():
+				exchanges[exchangeId].properties.symbols.append(tickerId)
+				exchanges[exchangeId].properties.markets[tickerId] = market
 				if tickerId not in iexcStocksIndex:
-					iexcStocksIndex[tickerId] = {"id": tickerId.removesuffix(suffix), "name": symbol["name"], "base": tickerId.removesuffix(suffix), "quote": symbol["currency"], "exchanges": [exchangeId]}
+					iexcStocksIndex[tickerId] = {"id": tickerId.removesuffix(suffix), "name": market["name"], "base": tickerId.removesuffix(suffix), "quote": market["quote"], "exchanges": [exchangeId]}
 				else:
 					iexcStocksIndex[tickerId]["exchanges"].append(exchangeId)
-				exchanges[exchangeId].properties.symbols.append(tickerId)
-				exchanges[exchangeId].properties.markets[tickerId] = {"id": tickerId.removesuffix(suffix), "name": symbol["name"], "base": tickerId.removesuffix(suffix), "quote": symbol["currency"]}
 
-		forexSymbols = Utils.get_url(f"https://cloud.iexapis.com/stable/ref-data/fx/symbols?token={environ['IEXC_KEY']}")
-		derivedCurrencies = set()
-		for pair in forexSymbols["pairs"]:
-			derivedCurrencies.add(pair["fromCurrency"])
-			derivedCurrencies.add(pair["toCurrency"])
-			iexcForexIndex[pair["symbol"]] = {"id": pair["symbol"], "name": pair["symbol"], "base": pair["fromCurrency"], "quote": pair["toCurrency"], "reversed": False}
-			iexcForexIndex[pair["toCurrency"] + pair["fromCurrency"]] = {"id": pair["symbol"], "name": pair["toCurrency"] + pair["fromCurrency"], "base": pair["toCurrency"], "quote": pair["fromCurrency"], "reversed": True}
-		for fromCurrency in derivedCurrencies:
-			for toCurrency in derivedCurrencies:
-				symbol = fromCurrency + toCurrency
-				if fromCurrency != toCurrency and symbol not in iexcForexIndex:
-					iexcForexIndex[symbol] = {"id": symbol, "name": symbol, "base": fromCurrency, "quote": toCurrency, "reversed": False}
-
-	except Exception:
-		print(format_exc())
+	iexcForexIndex = database.collection("parser").document("iexc").collection("forex").document("index").get().to_dict()
 
 
+# -------------------------
+# Main functions
+# -------------------------
 
 def find_exchange(raw, platform, bias):
 	if platform not in supported.cryptoExchanges and platform not in supported.traditionalExchanges: return {"success": False, "match": None}
@@ -670,7 +605,7 @@ def find_iexc_market(tickerId, exchangeId, platform):
 		return {
 			"id": matchedTicker["id"],
 			"name": matchedTicker["name"],
-			"base": matchedTicker["base"],
+			"base": matchedTicker["id"],
 			"quote": matchedTicker["quote"],
 			"symbol": f"{matchedTicker['base']}/{matchedTicker['quote']}",
 			"exchange": {}
@@ -681,10 +616,10 @@ def find_iexc_market(tickerId, exchangeId, platform):
 		return {
 			"id": matchedTicker["id"],
 			"name": matchedTicker["name"],
-			"base": matchedTicker["base"],
+			"base": matchedTicker["id"],
 			"quote": matchedTicker["quote"],
 			"symbol": tickerId,
-			"exchange": relevantExchanges[matchedTicker["exchanges"][0]].to_dict()
+			"exchange": exchanges[matchedTicker["exchanges"][0]].to_dict()
 		}
 
 	else:
@@ -694,7 +629,7 @@ def find_iexc_market(tickerId, exchangeId, platform):
 				return {
 					"id": matchedTicker["id"],
 					"name": matchedTicker["name"],
-					"base": matchedTicker["base"],
+					"base": matchedTicker["id"],
 					"quote": matchedTicker["quote"],
 					"symbol": tickerId,
 					"exchange": e.to_dict()
@@ -706,7 +641,7 @@ def find_iexc_market(tickerId, exchangeId, platform):
 						return {
 							"id": market["id"],
 							"name": market["name"],
-							"base": market["base"],
+							"base": market["id"],
 							"quote": market["quote"],
 							"symbol": symbol,
 							"exchange": e.to_dict()
@@ -886,14 +821,9 @@ async def run(req: Request):
 
 if __name__ == "__main__":
 	refresh_coingecko_index()
-	processes = [
-		Thread(target=refresh_coingecko_exchange_rates),
-		Thread(target=refresh_ccxt_index),
-		Thread(target=refresh_serum_index),
-		Thread(target=refresh_iexc_index)
-	]
-	for p in processes: p.start()
-	for p in processes: p.join()
+	refresh_iexc_index()
+	refresh_ccxt_index()
+	refresh_serum_index()
 
 	print("[Startup]: Ticker Parser is online")
 	# config = Config(app=app, port=int(environ.get("PORT", 6900)), host="0.0.0.0", loop=loop)

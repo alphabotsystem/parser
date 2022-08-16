@@ -36,7 +36,7 @@ spec:
                 name: alpha-credentials
                 key: IEXC_KEY
         ports:
-          - containerPort: 6900
+          - containerPort: 8080
       volumes:
         - name: google-cloud-auth
           secret:
@@ -56,5 +56,5 @@ spec:
     app: parser
   ports:
     - protocol: TCP
-      port: 6900
-      targetPort: 6900
+      port: 8080
+      targetPort: 8080

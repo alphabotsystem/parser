@@ -102,6 +102,7 @@ TICKER_OVERRIDES = {
 		("NFTY", ["NIFTY"])
 	]
 }
+STRICT_MATCH = ["TradingLite", "Bookmap", "LLD", "CoinGecko", "CCXT", "Serum",  "IEXC", "LLD", "Ichibot"]
 
 
 coinGecko = CoinGeckoAPI()
@@ -158,10 +159,10 @@ def refresh_ccxt_index():
 		if platform not in sortedIndexReference: sortedIndexReference[platform] = {}
 		for exchange in supported.cryptoExchanges[platform]:
 			if exchange not in completedTasks:
-				if exchange not in exchanges: 
+				completedTasks.add(exchange)
+				if exchange not in exchanges:
 					exchanges[exchange] = Exchange(exchange, "crypto" if exchange in ccxt.exchanges else "traditional")
 					if exchanges[exchange].stale: continue
-				completedTasks.add(exchange)
 
 			for symbol in exchanges[exchange].properties.symbols:
 				if '.' not in symbol and Utils.is_active(symbol, exchanges[exchange]):
@@ -293,8 +294,6 @@ def find_exchange(raw, platform, bias):
 			"binanceusdm": ["binancefutures", "binancef", "fbin", "binf", "bif", "bnf"],
 			"coinbasepro": ["cbp", "coin", "base", "cb", "coinbase", "coinbasepro", "cbpro"],
 			"bitfinex2": ["bfx", "finex"],
-			"bittrex": ["btrx", "brx"],
-			"poloniex": ["polo"],
 		},
 		"traditional": {}
 	}
@@ -387,31 +386,34 @@ def match_ticker(tickerId, exchangeId, platform, bias):
 	try:
 		ticker = Ticker(tickerId)
 	except:
-		return {"response": {
-			"tree": [
-				"var",
-				[[
-					"NAME",
-					{
-						"id": "BTC",
-						"name": "BTC",
-						"base": None,
-						"quote": None,
-						"symbol": None,
-						"exchange": exchange,
-						"mcapRank": MAXSIZE
-					}
-				]]
-			],
-			"id": tickerId,
-			"name": tickerId,
-			"exchange": exchange,
-			"base": None,
-			"quote": None,
-			"symbol": None,
-			"mcapRank": MAXSIZE,
-			"isSimple": True
-		}, "message": None}
+		if platform in STRICT_MATCH:
+			return {"response": None, "message": "Requested ticker could not be found."}
+		else:
+			return {"response": {
+				"tree": [
+					"var",
+					[[
+						"NAME",
+						{
+							"id": tickerId,
+							"name": tickerId,
+							"base": None,
+							"quote": None,
+							"symbol": None,
+							"exchange": exchange,
+							"mcapRank": MAXSIZE
+						}
+					]]
+				],
+				"id": tickerId,
+				"name": tickerId,
+				"exchange": exchange,
+				"base": None,
+				"quote": None,
+				"symbol": None,
+				"mcapRank": MAXSIZE,
+				"isSimple": True
+			}, "message": None}
 
 	ticker_tree_search(ticker, exchangeId, platform, bias, shouldMatch=True)
 
@@ -458,7 +460,7 @@ def internal_match(tickerId, exchangeId, platform, bias):
 		else: _ticker = find_ccxt_crypto_market(tickerId, exchangeId, platform)
 	else:
 		if platform in ["IEXC"]: _ticker = find_iexc_market(tickerId, exchangeId, platform)
-	if _ticker is None:
+	if _ticker is None and platform not in STRICT_MATCH:
 		_ticker = {
 			"id": tickerId,
 			"name": tickerId,
@@ -779,37 +781,37 @@ def _is_tokenized_stock(e, symbol):
 # Endpoints
 # -------------------------
 
-@app.post("/match_ticker")
+@app.post("/parser/match_ticker")
 async def run(req: Request):
 	request = await req.json()
 	return match_ticker(request["tickerId"], request["exchangeId"], request["platform"], request["bias"])
 
-@app.post("/find_exchange")
+@app.post("/parser/find_exchange")
 async def run(req: Request):
 	request = await req.json()
 	return find_exchange(request["raw"], request["platform"], request["bias"])
 
-@app.post("/check_if_fiat")
+@app.post("/parser/check_if_fiat")
 async def run(req: Request):
 	request = await req.json()
 	return check_if_fiat(request["tickerId"])
 
-@app.post("/get_listings")
+@app.post("/parser/get_listings")
 async def run(req: Request):
 	request = await req.json()
 	return get_listings(request["tickerBase"], request["tickerQuote"])
 
-@app.post("/get_formatted_price_ccxt")
+@app.post("/parser/get_formatted_price_ccxt")
 async def run(req: Request):
 	request = await req.json()
 	return format_price(request["exchangeId"], request["symbol"], request["price"])
 
-@app.post("/get_formatted_amount_ccxt")
+@app.post("/parser/get_formatted_amount_ccxt")
 async def run(req: Request):
 	request = await req.json()
 	return format_amount(request["exchangeId"], request["symbol"], request["amount"])
 
-@app.post("/get_venues")
+@app.post("/parser/get_venues")
 async def run(req: Request):
 	request = await req.json()
 	return get_venues(request["platforms"])

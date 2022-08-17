@@ -9,22 +9,21 @@ from fastapi import FastAPI, Request
 from uvicorn import Config, Server
 from zmq import Context, Poller, ROUTER, REQ, LINGER, POLLIN
 from asyncio import new_event_loop, set_event_loop, create_task
-from lark import Lark, Token, Transformer
-from lark.reconstruct import Reconstructor
+from lark import Token
 from orjson import dumps, loads
 from traceback import format_exc
 
 import ccxt
 from ccxt.base import decimal_to_precision as dtp
-from pycoingecko import CoinGeckoAPI
 from google.cloud.firestore import Client
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
 from TickerParser import Exchange
 
 from assets import static_storage
-from helpers.utils import Utils
+from helpers.utils import Utils, TokenNotFoundException, STRICT_MATCH
 from helpers import supported
+from helpers.lark import Ticker, Reconstructor, TickerTree
 
 
 app = FastAPI()
@@ -32,80 +31,6 @@ database = Client()
 logging = ErrorReportingClient(service="parser")
 loop = new_event_loop()
 set_event_loop(loop)
-
-
-# -------------------------
-# Lark
-# -------------------------
-
-GRAMMAR = """
-	?start: sum
-	?sum: product
-		| sum "+" product   -> add
-		| sum "-" product   -> sub
-	?product: atom
-		| product "*" atom  -> mul
-		| product "/" atom  -> div
-	?atom: "-" atom         -> neg
-		 | CONSTANT         -> number
-		 | NAME             -> var
-		 | NAME ":" NUMBER  -> var
-		 | "'" NAME "'"     -> literal
-		 | "\\"" NAME "\\"" -> literal
-		 | "‘" NAME "’"     -> literal
-		 | "“" NAME "”"     -> literal
-		 | "(" sum ")"
-	%import common.LETTER
-	%import common.DIGIT
-	%import common.NUMBER
-	%import common.WS_INLINE
-	%ignore WS_INLINE
-
-	NAME: DIGIT* LETTER ("_"|":"|LETTER|DIGIT)*
-	CONSTANT: DIGIT ("." DIGIT+)?
-"""
-
-larkParser = Lark(GRAMMAR, parser='lalr')
-Ticker = larkParser.parse
-reconstructor = Reconstructor(larkParser)
-
-class TickerTree(Transformer):
-	def add(self, tree): return self.genenrate_list(tree, "add")
-	def sub(self, tree): return self.genenrate_list(tree, "sub")
-	def mul(self, tree): return self.genenrate_list(tree, "mul")
-	def div(self, tree): return self.genenrate_list(tree, "div")
-	def neg(self, tree): return self.genenrate_list(tree, "neg")
-	def var(self, tree): return self.genenrate_list(tree, "var")
-	def number(self, tree): return self.genenrate_list(tree, "number")
-	def name(self, tree): return self.genenrate_list(tree, "name")
-	def literal(self, tree): return self.genenrate_list(tree, "literal")
-
-	def genenrate_list(self, tree, method):
-		l = [method, []]
-		for child in tree:
-			if not isinstance(child, Token): l[1].append(child)
-			else: l[1].append([child.type, child.value])
-		return l
-
-
-# -------------------------
-# Global variables
-# -------------------------
-
-TICKER_OVERRIDES = {
-	"TradingView": [
-		("SPX500USD", ["SPX", "SP500", "SPX500"]),
-		("NFTY", ["NIFTY"])
-	],
-	"TradingView Premium": [
-		("SPX500USD", ["SPX", "SP500", "SPX500"]),
-		("NFTY", ["NIFTY"])
-	]
-}
-STRICT_MATCH = ["TradingLite", "Bookmap", "LLD", "CoinGecko", "CCXT", "Serum",  "IEXC", "LLD", "Ichibot"]
-
-
-coinGecko = CoinGeckoAPI()
 
 exchanges = {}
 ccxtIndex = {}
@@ -386,52 +311,30 @@ def match_ticker(tickerId, exchangeId, platform, bias):
 	try:
 		ticker = Ticker(tickerId)
 	except:
-		if platform in STRICT_MATCH:
-			return {"response": None, "message": "Requested ticker could not be found."}
-		else:
-			return {"response": {
-				"tree": [
-					"var",
-					[[
-						"NAME",
-						{
-							"id": tickerId,
-							"name": tickerId,
-							"base": None,
-							"quote": None,
-							"symbol": None,
-							"exchange": exchange,
-							"mcapRank": MAXSIZE
-						}
-					]]
-				],
-				"id": tickerId,
-				"name": tickerId,
-				"exchange": exchange,
-				"base": None,
-				"quote": None,
-				"symbol": None,
-				"mcapRank": MAXSIZE,
-				"isSimple": True
-			}, "message": None}
+		print(tickerId)
+		print(format_exc())
+		return {"response": None, "message": "Requested ticker could not be found."}
 
-	ticker_tree_search(ticker, exchangeId, platform, bias, shouldMatch=True)
+	try:
+		ticker_tree_search(ticker, exchangeId, platform, bias, shouldMatch=True)
+	except TokenNotFoundException as e:
+		return {"response": None, "message": e.message}
 
 	isSimple = isinstance(ticker.children[0], Token) and ticker.children[0].type == "NAME"
 	simpleTicker = ticker.children[0].value if isSimple else {}
 	if not isSimple and platform not in ["TradingView", "TradingView Premium", "CoinGecko", "CCXT", "Serum", "IEXC", "LLD"]:
 		return {"response": None, "message": f"Aggregated tickers aren't available on {platform}"}
 
-	reconstructedId = reconstructor.reconstruct(ticker_tree_search(Ticker(tickerId), exchangeId, platform, bias))
+	reconstructedId = Reconstructor.reconstruct(ticker_tree_search(Ticker(tickerId), exchangeId, platform, bias))
 
 	response = {
 		"tree": TickerTree().transform(ticker),
 		"id": reconstructedId,
 		"name": simpleTicker.get("name", reconstructedId),
 		"exchange": simpleTicker.get("exchange", {}),
-		"base": simpleTicker.get("base", None),
-		"quote": simpleTicker.get("quote", None),
-		"symbol": simpleTicker.get("symbol", None),
+		"base": simpleTicker.get("base"),
+		"quote": simpleTicker.get("quote"),
+		"symbol": simpleTicker.get("symbol"),
 		"image": simpleTicker.get("image", static_storage.icon),
 		"mcapRank": simpleTicker.get("mcapRank", MAXSIZE),
 		"isSimple": isSimple
@@ -446,22 +349,22 @@ def ticker_tree_search(node, exchangeId, platform, bias, shouldMatch=False):
 			node.children[i] = ticker_tree_search(child, exchangeId, platform, bias, shouldMatch)
 		elif child.type == "NAME":
 			newValue = internal_match(child.value, exchangeId, platform, bias)
-			if not shouldMatch: newValue = newValue["id"]
+			if not shouldMatch: newValue = newValue["base"]
 			node.children[i] = child.update(value=newValue)
 	return node
 
 def internal_match(tickerId, exchangeId, platform, bias):
-	if tickerId.startswith("$"): tickerId = tickerId[1:] + "USD"
-	elif tickerId.startswith("€"): tickerId = tickerId[1:] + "EUR"
-	tickerId, _ticker = _check_overrides(tickerId, platform), None
+	ticker = None
 	if bias == "crypto":
-		if platform in ["CoinGecko"] and exchangeId == "": _ticker = find_coingecko_crypto_market(tickerId)
-		elif platform in ["Serum"] and exchangeId == "": _ticker = find_serum_crypto_market(tickerId)
-		else: _ticker = find_ccxt_crypto_market(tickerId, exchangeId, platform)
+		if platform == "CoinGecko" and exchangeId == "": ticker = find_coingecko_crypto_market(tickerId)
+		elif platform == "Serum" and exchangeId == "": ticker = find_serum_crypto_market(tickerId)
+		else: ticker = find_ccxt_crypto_market(tickerId, exchangeId, platform)
 	else:
-		if platform in ["IEXC"]: _ticker = find_iexc_market(tickerId, exchangeId, platform)
-	if _ticker is None and platform not in STRICT_MATCH:
-		_ticker = {
+		if platform == "IEXC": ticker = find_iexc_market(tickerId, exchangeId, platform)
+	if ticker is None:
+		if platform in STRICT_MATCH:
+			raise TokenNotFoundException("Requested ticker could not be found.")
+		return {
 			"id": tickerId,
 			"name": tickerId,
 			"base": None,
@@ -470,7 +373,7 @@ def internal_match(tickerId, exchangeId, platform, bias):
 			"exchange": {} if exchangeId == "" else exchanges.get(exchangeId).to_dict(),
 			"mcapRank": MAXSIZE
 		}
-	return _ticker
+	return ticker
 
 def find_ccxt_crypto_market(tickerId, exchangeId, platform):
 	exchange = None if exchangeId == "" else exchanges[exchangeId]
@@ -483,7 +386,7 @@ def find_ccxt_crypto_market(tickerId, exchangeId, platform):
 				for quote in ccxtIndex[platform][tickerId]:
 					symbol = f"{tickerId}/{quote}"
 					if symbol in e.properties.symbols:
-						if exchange is None and platform not in ["Ichibot"] and _is_tokenized_stock(e, symbol): continue
+						if exchange is None and platform not in ["Ichibot"] and Utils.is_tokenized_stock(e, symbol): continue
 						base = e.properties.markets[symbol].get("base")
 						quote = e.properties.markets[symbol].get("quote")
 						if not base in coingeckoFiatCurrencies and Utils.is_active(symbol, e):
@@ -504,7 +407,7 @@ def find_ccxt_crypto_market(tickerId, exchangeId, platform):
 				currentBestFit = MAXSIZE
 				currentResult = None
 				for symbol in e.properties.symbols:
-					if exchange is None and platform not in ["Ichibot"] and _is_tokenized_stock(e, symbol): continue
+					if exchange is None and platform not in ["Ichibot"] and Utils.is_tokenized_stock(e, symbol): continue
 					base = e.properties.markets[symbol].get("base")
 					quote = e.properties.markets[symbol].get("quote")
 					marketPair = symbol.split("/")
@@ -699,12 +602,47 @@ def find_serum_crypto_market(tickerId):
 
 	return None
 
-def check_if_fiat(tickerId):
+def find_tradable_markets(tickerId, exchangeId, platform):
+	if exchangeId != "" and exchangeId not in supported.cryptoExchanges["Ichibot"]: return {}
+	exchangeIds = supported.cryptoExchanges["Ichibot"] if exchangeId == "" else [exchangeId]
+
+	matches = {}
+	for e in exchangeIds:
+		match = find_ccxt_crypto_market(tickerId, e, "Ichibot")
+		check = find_ccxt_crypto_market(tickerId, exchangeId, platform)
+		if match is not None and check is not None:
+			matches[e] = exchanges[e].properties.markets[match.get("symbol")]["id"]
+	return matches
+
+
+# -------------------------
+# Endpoints
+# -------------------------
+
+@app.post("/parser/match_ticker")
+async def run(req: Request):
+	request = await req.json()
+	return match_ticker(request["tickerId"], request["exchangeId"], request["platform"], request["bias"])
+
+@app.post("/parser/find_exchange")
+async def run(req: Request):
+	request = await req.json()
+	return find_exchange(request["raw"], request["platform"], request["bias"])
+
+@app.post("/parser/check_if_fiat")
+async def check_if_fiat(req: Request):
+	request = await req.json()
+	tickerId = request["tickerId"]
+
 	for fiat in coingeckoFiatCurrencies:
 		if fiat.upper() in tickerId: return {"asset": fiat, "isFieat": True}
 	return {"asset": None, "isFiat": False}
 
-def get_listings(tickerBase, tickerQuote):
+@app.post("/parser/get_listings")
+async def get_listings(req: Request):
+	request = await req.json()
+	tickerBase, tickerQuote = request["tickerBase"], request["tickerQuote"]
+
 	listings = {tickerQuote: []}
 	total = 0
 	for e in supported.cryptoExchanges["CCXT"]:
@@ -724,31 +662,29 @@ def get_listings(tickerBase, tickerQuote):
 			if quote in listings:
 				response.append([quote, listings.pop(quote)])
 
-	return {"response": response, "total": total}
+	return {"response": response, "total": total}	
 
-def format_price(exchangeId, symbol, price):
-	exchange = exchanges[exchangeId].properties
-	precision = exchange.markets.get(symbol, {}).get("precision", {}).get("price", 8)
-	return {"response": dtp.decimal_to_precision(price, rounding_mode=dtp.ROUND, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.PAD_WITH_ZERO)}
+@app.post("/parser/get_formatted_price_ccxt")
+async def format_price(req: Request):
+	request = await req.json()
+	exchange = exchanges[request["exchangeId"]].properties
+	precision = exchange.markets.get(request["symbol"], {}).get("precision", {}).get("price", 8)
+	text = dtp.decimal_to_precision(request["price"], rounding_mode=dtp.ROUND, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.PAD_WITH_ZERO)
+	return {"response": text.rstrip("0").rstrip(".")}
 
-def format_amount(exchangeId, symbol, amount):
-	exchange = exchanges[exchangeId].properties
-	precision = exchange.markets.get(symbol, {}).get("precision", {}).get("amount", 8)
-	return {"response": dtp.decimal_to_precision(amount, rounding_mode=dtp.TRUNCATE, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.NO_PADDING)}
+@app.post("/parser/get_formatted_amount_ccxt")
+async def format_amount(req: Request):
+	request = await req.json()
+	exchange = exchanges[request["exchangeId"]].properties
+	precision = exchange.markets.get(request["symbol"], {}).get("precision", {}).get("amount", 8)
+	text = dtp.decimal_to_precision(request["amount"], rounding_mode=dtp.TRUNCATE, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.NO_PADDING)
+	return {"response": text.rstrip("0").rstrip(".")}
 
-def find_tradable_markets(tickerId, exchangeId, platform):
-	if exchangeId != "" and exchangeId not in supported.cryptoExchanges["Ichibot"]: return {}
-	exchangeIds = supported.cryptoExchanges["Ichibot"] if exchangeId == "" else [exchangeId]
+@app.post("/parser/get_venues")
+async def get_venues(req: Request):
+	request = await req.json()
+	platforms = request["platforms"]
 
-	matches = {}
-	for e in exchangeIds:
-		match = find_ccxt_crypto_market(tickerId, e, "Ichibot")
-		check = find_ccxt_crypto_market(tickerId, exchangeId, platform)
-		if match is not None and check is not None:
-			matches[e] = exchanges[e].properties.markets[match.get("symbol")]["id"]
-	return matches
-
-def get_venues(platforms):
 	venues = []
 	if platforms == "":
 		venues += ["CoinGecko", "Serum"]
@@ -763,58 +699,6 @@ def get_venues(platforms):
 			else:
 				venues += [exchanges[e].name for e in supported.traditionalExchanges.get(platform, [])]
 	return {"response": venues}
-
-def _check_overrides(tickerId, platform):
-	for tickerOverride, triggers in TICKER_OVERRIDES.get(platform, []):
-		if tickerId in triggers:
-			tickerId = tickerOverride
-			return tickerId
-	return tickerId
-
-def _is_tokenized_stock(e, symbol):
-	ftxTokenizedStock = e.id == "ftx" and e.properties.markets[symbol]["info"].get("tokenizedEquity", False)
-	bittrexTokenizedStock = e.id == "bittrex" and "TOKENIZED_SECURITY" in e.properties.markets[symbol]["info"].get("tags", [])
-	return ftxTokenizedStock or bittrexTokenizedStock
-
-
-# -------------------------
-# Endpoints
-# -------------------------
-
-@app.post("/parser/match_ticker")
-async def run(req: Request):
-	request = await req.json()
-	return match_ticker(request["tickerId"], request["exchangeId"], request["platform"], request["bias"])
-
-@app.post("/parser/find_exchange")
-async def run(req: Request):
-	request = await req.json()
-	return find_exchange(request["raw"], request["platform"], request["bias"])
-
-@app.post("/parser/check_if_fiat")
-async def run(req: Request):
-	request = await req.json()
-	return check_if_fiat(request["tickerId"])
-
-@app.post("/parser/get_listings")
-async def run(req: Request):
-	request = await req.json()
-	return get_listings(request["tickerBase"], request["tickerQuote"])
-
-@app.post("/parser/get_formatted_price_ccxt")
-async def run(req: Request):
-	request = await req.json()
-	return format_price(request["exchangeId"], request["symbol"], request["price"])
-
-@app.post("/parser/get_formatted_amount_ccxt")
-async def run(req: Request):
-	request = await req.json()
-	return format_amount(request["exchangeId"], request["symbol"], request["amount"])
-
-@app.post("/parser/get_venues")
-async def run(req: Request):
-	request = await req.json()
-	return get_venues(request["platforms"])
 
 
 # -------------------------

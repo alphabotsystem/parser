@@ -4,7 +4,16 @@ from requests import get
 from traceback import format_exc
 
 
+STRICT_MATCH = ["TradingLite", "Bookmap", "CoinGecko", "CCXT", "Serum",  "IEXC", "LLD", "Ichibot"]
+
+
 class Utils(object):
+	@staticmethod
+	def is_tokenized_stock(e, symbol):
+		ftxTokenizedStock = e.id == "ftx" and e.properties.markets[symbol]["info"].get("tokenizedEquity", False)
+		bittrexTokenizedStock = e.id == "bittrex" and "TOKENIZED_SECURITY" in e.properties.markets[symbol]["info"].get("tags", [])
+		return ftxTokenizedStock or bittrexTokenizedStock
+
 	@staticmethod
 	def generate_market_id(symbol, exchange):
 		return exchange.properties.markets[symbol]["id"].replace("_", "").replace("/", "").replace("-", "").upper()
@@ -52,3 +61,8 @@ class Utils(object):
 			except:
 				print(format_exc())
 				sleep(10)
+
+class TokenNotFoundException(Exception):
+	def __init__(self, message):
+		self.message = message
+		super().__init__(message)

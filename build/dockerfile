@@ -1,5 +1,7 @@
-FROM python:latest
+FROM python:slim
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y git
 
 # Install dependencies
 COPY ./build/requirements.txt ./

@@ -608,7 +608,7 @@ def find_iexc_market(tickerId, exchangeId, platform):
 			"base": matchedTicker["id"],
 			"quote": matchedTicker["quote"],
 			"symbol": f"{matchedTicker['base']}/{matchedTicker['quote']}",
-			"exchange": {}
+			"exchange": { "id": "fx" }
 		}
 
 	elif tickerId in iexcStocksIndex and exchange is None:

@@ -34,7 +34,6 @@ set_event_loop(loop)
 
 exchanges = {}
 ccxtIndex = {}
-serumIndex = {}
 coinGeckoIndex = {}
 iexcStocksIndex = {}
 iexcForexIndex = {}
@@ -110,62 +109,6 @@ def refresh_ccxt_index():
 			try: ccxtIndex[platform][base].insert(0, ccxtIndex[platform][base].pop(ccxtIndex[platform][base].index("USD")))
 			except: pass
 
-def refresh_serum_index():
-	try:
-		rawData = []
-		for i in range(3):
-			socket = Context.instance().socket(REQ)
-			socket.connect("tcp://serum-server:6900")
-			socket.setsockopt(LINGER, 0)
-			poller = Poller()
-			poller.register(socket, POLLIN)
-
-			socket.send(dumps({"endpoint": "list"}))
-			responses = poller.poll(10000)
-
-			if len(responses) != 0:
-				response = socket.recv()
-				socket.close()
-				rawData = loads(response)
-				break
-			else:
-				socket.close()
-
-		for market in rawData["markets"]:
-			base, quote = market["name"].split("/", 1)
-			if base not in serumIndex:
-				serumIndex[base] = []
-			serumIndex[base].append({"id": market["address"], "name": base, "base": base, "quote": quote, "image": None, "program": market["programId"]})
-
-		for token in rawData["tokenList"]:
-			symbol = token["symbol"].upper()
-			if symbol not in serumIndex:
-				serumIndex[symbol] = []
-			processed = []
-			for market in serumIndex[symbol]:
-				processed.append(market["quote"])
-				market["name"] = token["name"]
-				market["image"] = token.get("logoURI")
-			for extension, address in token.get("extensions", {}).items():
-				if extension.startswith("serumV3"):
-					quote = extension.removeprefix("serumV3").upper()
-					if quote not in processed:
-						processed.append(quote)
-						serumIndex[symbol].append({"id": address, "name": token["name"], "base": symbol, "quote": quote, "image": token.get("logoURI"), "program": "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin"})
-			if len(serumIndex[symbol]) == 0:
-				serumIndex.pop(symbol)
-			elif serumIndex[symbol][0]["quote"] != "USDC":
-				usdcMarket = None
-				for index, market in enumerate(serumIndex[symbol]):
-					if market["quote"] == "USDC":
-						usdcMarket = serumIndex[symbol].pop(index)
-						break
-				if usdcMarket is not None:
-					serumIndex[symbol].insert(0, usdcMarket)
-
-	except Exception:
-		print(format_exc())
-
 def refresh_iexc_index():
 	global exchanges, iexcStocksIndex, iexcForexIndex
 
@@ -224,7 +167,7 @@ def find_exchange(raw, platform, bias):
 		"traditional": {}
 	}
 
-	if platform in ["TradingLite", "Bookmap", "GoCharting", "LLD", "CoinGecko", "CCXT", "Serum", "Ichibot"]:
+	if platform in ["TradingLite", "Bookmap", "GoCharting", "LLD", "CoinGecko", "CCXT", "Ichibot"]:
 		bias = "crypto"
 	elif platform in ["IEXC"]:
 		bias = "traditional"
@@ -304,7 +247,7 @@ def find_exchange(raw, platform, bias):
 	return {"success": False, "match": None}
 
 def match_ticker(tickerId, exchangeId, platform, bias):
-	if platform in ["TradingLite", "Bookmap", "LLD", "CoinGecko", "CCXT", "Serum", "Ichibot"]: bias = "crypto"
+	if platform in ["TradingLite", "Bookmap", "LLD", "CoinGecko", "CCXT", "Ichibot"]: bias = "crypto"
 	elif platform in ["IEXC"]: bias = "traditional"
 
 	exchange = {} if exchangeId == "" else exchanges.get(exchangeId).to_dict()
@@ -323,7 +266,7 @@ def match_ticker(tickerId, exchangeId, platform, bias):
 
 	isSimple = isinstance(ticker.children[0], Token) and ticker.children[0].type == "NAME"
 	simpleTicker = ticker.children[0].value if isSimple else {}
-	if not isSimple and platform not in ["TradingView", "TradingView Premium", "CoinGecko", "CCXT", "Serum", "IEXC", "LLD"]:
+	if not isSimple and platform not in ["TradingView", "TradingView Premium", "CoinGecko", "CCXT", "IEXC", "LLD"]:
 		return {"response": None, "message": f"Aggregated tickers aren't available on {platform}"}
 
 	reconstructedId = Reconstructor.reconstruct(ticker_tree_search(Ticker(tickerId), exchangeId, platform, bias))
@@ -358,7 +301,6 @@ def internal_match(tickerId, exchangeId, platform, bias):
 	ticker = None
 	if bias == "crypto":
 		if platform == "CoinGecko" and exchangeId == "": ticker = find_coingecko_crypto_market(tickerId)
-		elif platform == "Serum" and exchangeId == "": ticker = find_serum_crypto_market(tickerId)
 		else: ticker = find_ccxt_crypto_market(tickerId, exchangeId, platform)
 	else:
 		if platform == "IEXC": ticker = find_iexc_market(tickerId, exchangeId, platform)
@@ -553,39 +495,6 @@ def find_iexc_market(tickerId, exchangeId, platform):
 
 	return None
 
-def find_serum_crypto_market(tickerId):
-	if tickerId in serumIndex:
-		for market in serumIndex[tickerId]:
-			mcapRank = coinGeckoIndex[tickerId]["market_cap_rank"] if tickerId in coinGeckoIndex else MAXSIZE
-			return {
-				"id": market["id"],
-				"name": coinGeckoIndex.get(tickerId, {}).get("name", tickerId + market["quote"]),
-				"base": tickerId,
-				"quote": market["quote"],
-				"symbol": market["program"],
-				"image": market.get("image"),
-				"exchange": {},
-				"mcapRank": mcapRank
-			}
-	
-	else:
-		for base in serumIndex:
-			if tickerId.startswith(base):
-				for market in serumIndex[base]:
-					if tickerId == f"{base}{market['quote']}":
-						mcapRank = coinGeckoIndex[base]["market_cap_rank"] if base in coinGeckoIndex else MAXSIZE
-						return {
-							"id": market["id"],
-							"name": coinGeckoIndex.get(tickerId, {}).get("name", tickerId + market["quote"]),
-							"base": tickerId,
-							"quote": market["quote"],
-							"symbol": market["program"],
-							"image": market.get("image"),
-							"mcapRank": mcapRank
-						}
-
-	return None
-
 def find_tradable_markets(tickerId, exchangeId, platform):
 	if exchangeId != "" and exchangeId not in supported.cryptoExchanges["Ichibot"]: return {}
 	exchangeIds = supported.cryptoExchanges["Ichibot"] if exchangeId == "" else [exchangeId]
@@ -671,15 +580,13 @@ async def get_venues(req: Request):
 
 	venues = []
 	if platforms == "":
-		venues += ["CoinGecko", "Serum"]
+		venues += ["CoinGecko"]
 		for ids in supported.traditionalExchanges.values():
 			venues += [exchanges[e].name for e in ids]
 	else:
 		for platform in platforms.split(","):
 			if platform == "CoinGecko":
 				venues += ["CoinGecko"]
-			elif platform == "Serums":
-				venues += ["Serums"]
 			else:
 				venues += [exchanges[e].name for e in supported.traditionalExchanges.get(platform, [])]
 	return {"response": venues}
@@ -693,7 +600,6 @@ if __name__ == "__main__":
 	refresh_coingecko_index()
 	refresh_iexc_index()
 	refresh_ccxt_index()
-	refresh_serum_index()
 
 	print("[Startup]: Ticker Parser is online")
 	# config = Config(app=app, port=int(environ.get("PORT", 6900)), host="0.0.0.0", loop=loop)

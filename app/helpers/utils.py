@@ -4,7 +4,7 @@ from requests import get
 from traceback import format_exc
 
 
-STRICT_MATCH = ["TradingLite", "Bookmap", "CoinGecko", "CCXT", "Serum",  "IEXC", "LLD", "Ichibot"]
+STRICT_MATCH = ["TradingLite", "Bookmap", "CoinGecko", "CCXT", "IEXC", "LLD", "Ichibot"]
 
 
 class Utils(object):

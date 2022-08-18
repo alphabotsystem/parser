@@ -485,19 +485,6 @@ def find_coingecko_crypto_market(tickerId):
 							"mcapRank": coinGeckoIndex[base + rank]["market_cap_rank"]
 						}
 
-		for base in coinGeckoIndex:
-			if base.startswith(_tickerId) and base + rank in coinGeckoIndex:
-				return {
-					"id": f"{base}USD",
-					"name": coinGeckoIndex[base + rank]["name"],
-					"base": base + rank,
-					"quote": "USD",
-					"symbol": coinGeckoIndex[base + rank]["id"],
-					"image": coinGeckoIndex[base + rank].get("image"),
-					"exchange": {},
-					"mcapRank": coinGeckoIndex[base + rank]["market_cap_rank"]
-				}
-
 	return None
 
 def find_iexc_market(tickerId, exchangeId, platform):
@@ -507,6 +494,17 @@ def find_iexc_market(tickerId, exchangeId, platform):
 
 	if tickerId in iexcForexIndex and exchange is None:
 		matchedTicker = iexcForexIndex[tickerId]
+		return {
+			"id": matchedTicker["id"],
+			"name": matchedTicker["name"],
+			"base": matchedTicker["id"],
+			"quote": matchedTicker["quote"],
+			"symbol": f"{matchedTicker['base']}/{matchedTicker['quote']}",
+			"exchange": { "id": "fx" }
+		}
+
+	elif tickerId + "USD" in iexcForexIndex and exchange is None:
+		matchedTicker = iexcForexIndex[tickerId + "USD"]
 		return {
 			"id": matchedTicker["id"],
 			"name": matchedTicker["name"],
@@ -584,21 +582,6 @@ def find_serum_crypto_market(tickerId):
 							"image": market.get("image"),
 							"mcapRank": mcapRank
 						}
-
-		for base in serumIndex:
-			if base.startswith(tickerId):
-				market = serumIndex[base][0]
-				mcapRank = coinGeckoIndex[base]["market_cap_rank"] if base in coinGeckoIndex else MAXSIZE
-				return {
-					"id": market["id"],
-					"name": coinGeckoIndex.get(tickerId, {}).get("name", tickerId + market["quote"]),
-					"base": tickerId,
-					"quote": market["quote"],
-					"symbol": market["program"],
-					"image": market.get("image"),
-					"exchange": {},
-					"mcapRank": mcapRank
-				}
 
 	return None
 

@@ -87,7 +87,8 @@ def refresh_ccxt_index():
 				completedTasks.add(exchange)
 				if exchange not in exchanges:
 					exchanges[exchange] = Exchange(exchange, "crypto" if exchange in ccxt.exchanges else "traditional")
-					if exchanges[exchange].stale: continue
+					try: exchanges[exchange].properties.load_markets()
+					except: continue
 
 			for symbol in exchanges[exchange].properties.symbols:
 				if '.' not in symbol and Utils.is_active(symbol, exchanges[exchange]):

@@ -349,7 +349,7 @@ def ticker_tree_search(node, exchangeId, platform, bias, shouldMatch=False):
 			node.children[i] = ticker_tree_search(child, exchangeId, platform, bias, shouldMatch)
 		elif child.type == "NAME":
 			newValue = internal_match(child.value, exchangeId, platform, bias)
-			if not shouldMatch: newValue = newValue["base"]
+			if not shouldMatch: newValue = newValue["id"]
 			node.children[i] = child.update(value=newValue)
 	return node
 

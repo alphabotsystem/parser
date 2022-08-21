@@ -17,12 +17,8 @@ spec:
     spec:
       containers:
       - name: parser
-        image: europe-west4-docker.pkg.dev/nlc-bot-36685/alpha-bot/parser
+        image: us-central1-docker.pkg.dev/nlc-bot-36685/parser/production
         imagePullPolicy: Always
-        volumeMounts:
-          - name: google-cloud-auth
-            mountPath: /run/secrets/google-cloud-auth
-            readOnly: true
         resources:
           requests:
             memory: "800Mi"
@@ -37,13 +33,7 @@ spec:
                 key: IEXC_KEY
         ports:
           - containerPort: 6900
-      volumes:
-        - name: google-cloud-auth
-          secret:
-            secretName: google-cloud-auth
-            items:
-              - key: gcloud_credentials.json
-                path: key
+
 ---
 apiVersion: v1
 kind: Service

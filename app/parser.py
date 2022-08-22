@@ -83,11 +83,11 @@ def refresh_ccxt_index():
 		if platform not in sortedIndexReference: sortedIndexReference[platform] = {}
 		for exchange in supported.cryptoExchanges[platform]:
 			if exchange not in completedTasks:
-				completedTasks.add(exchange)
 				if exchange not in exchanges:
 					exchanges[exchange] = Exchange(exchange, "crypto" if exchange in ccxt.exchanges else "traditional")
-					try: exchanges[exchange].properties.load_markets()
-					except: continue
+				try: exchanges[exchange].properties.load_markets()
+				except: continue
+				completedTasks.add(exchange)
 
 			for symbol in exchanges[exchange].properties.symbols:
 				if '.' not in symbol and Utils.is_active(symbol, exchanges[exchange]):
@@ -182,13 +182,11 @@ def find_exchange(raw, platform, bias):
 			else:
 				name, nameNoSpaces = exchangeId, exchangeId
 
-			if len(name) * 0.25 > len(raw): continue
-
-			if name.startswith(raw) or name.endswith(raw):
+			if name == raw:
 				return {"success": True, "match": exchanges[exchangeId].to_dict()}
-			elif nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw):
+			elif name != nameNoSpaces and nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw):
 				return {"success": True, "match": exchanges[exchangeId].to_dict()}
-			elif exchangeId.startswith(raw) or exchangeId.endswith(raw):
+			elif exchangeId == raw:
 				return {"success": True, "match": exchanges[exchangeId].to_dict()}
 
 		for platform in supported.cryptoExchanges:
@@ -201,11 +199,11 @@ def find_exchange(raw, platform, bias):
 				else:
 					name, nameNoSpaces = exchangeId, exchangeId
 
-				if name.startswith(raw) or name.endswith(raw):
+				if name == raw:
 					return {"success": False, "match": exchanges[exchangeId].to_dict()}
-				elif nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw):
+				elif name != nameNoSpaces and nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw):
 					return {"success": False, "match": exchanges[exchangeId].to_dict()}
-				elif exchangeId.startswith(raw) or exchangeId.endswith(raw):
+				elif exchangeId == raw:
 					return {"success": False, "match": exchanges[exchangeId].to_dict()}
 
 	else:
@@ -218,13 +216,11 @@ def find_exchange(raw, platform, bias):
 			else:
 				name, nameNoSpaces = exchangeId, exchangeId
 
-			if len(name) * 0.25 > len(raw): continue
-
-			if name.startswith(raw) or name.endswith(raw):
+			if name == raw:
 				return {"success": True, "match": exchanges[exchangeId].to_dict()}
-			elif nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw):
+			elif name != nameNoSpaces and nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw):
 				return {"success": True, "match": exchanges[exchangeId].to_dict()}
-			elif exchangeId.startswith(raw) or exchangeId.endswith(raw):
+			elif exchangeId == raw:
 				return {"success": True, "match": exchanges[exchangeId].to_dict()}
 
 		for platform in supported.traditionalExchanges:
@@ -237,11 +233,11 @@ def find_exchange(raw, platform, bias):
 				else:
 					name, nameNoSpaces = exchangeId, exchangeId
 
-				if name.startswith(raw) or name.endswith(raw):
+				if name == raw:
 					return {"success": False, "match": exchanges[exchangeId].to_dict()}
-				elif nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw):
+				elif name != nameNoSpaces and nameNoSpaces.startswith(raw) or nameNoSpaces.endswith(raw):
 					return {"success": False, "match": exchanges[exchangeId].to_dict()}
-				elif exchangeId.startswith(raw) or exchangeId.endswith(raw):
+				elif exchangeId == raw:
 					return {"success": False, "match": exchanges[exchangeId].to_dict()}
 
 	return {"success": False, "match": None}
@@ -249,8 +245,6 @@ def find_exchange(raw, platform, bias):
 def match_ticker(tickerId, exchangeId, platform, bias):
 	if platform in ["TradingLite", "Bookmap", "LLD", "CoinGecko", "CCXT", "Ichibot"]: bias = "crypto"
 	elif platform in ["IEXC"]: bias = "traditional"
-
-	exchange = {} if exchangeId == "" else exchanges.get(exchangeId).to_dict()
 
 	try:
 		ticker = Ticker(tickerId)
@@ -299,10 +293,10 @@ def ticker_tree_search(node, exchangeId, platform, bias, shouldMatch=False):
 
 def internal_match(tickerId, exchangeId, platform, bias):
 	ticker = None
-	if bias == "crypto":
-		if platform == "CoinGecko" and exchangeId == "": ticker = find_coingecko_crypto_market(tickerId)
+	if bias == "crypto" and (exchangeId is None or exchanges[exchangeId].type == "crypto"):
+		if platform == "CoinGecko" and exchangeId is None: ticker = find_coingecko_crypto_market(tickerId)
 		else: ticker = find_ccxt_crypto_market(tickerId, exchangeId, platform)
-	else:
+	elif bias == "traditional" and (exchangeId is None or exchanges[exchangeId].type == "traditional"):
 		if platform == "IEXC": ticker = find_iexc_market(tickerId, exchangeId, platform)
 	if ticker is None:
 		if platform in STRICT_MATCH:
@@ -313,13 +307,13 @@ def internal_match(tickerId, exchangeId, platform, bias):
 			"base": None,
 			"quote": None,
 			"symbol": None,
-			"exchange": {} if exchangeId == "" else exchanges.get(exchangeId).to_dict(),
+			"exchange": {} if exchangeId is None else exchanges.get(exchangeId).to_dict(),
 			"mcapRank": MAXSIZE
 		}
 	return ticker
 
 def find_ccxt_crypto_market(tickerId, exchangeId, platform):
-	exchange = None if exchangeId == "" else exchanges[exchangeId]
+	exchange = None if exchangeId is None else exchanges.get(exchangeId, None)
 	if platform not in supported.cryptoExchanges or (exchange is not None and exchange.type != "crypto"): return None
 	relevantExchanges = [exchanges[e] for e in supported.cryptoExchanges[platform] if exchanges[e].type == "crypto"] if exchange is None else [exchange]
 
@@ -431,7 +425,7 @@ def find_coingecko_crypto_market(tickerId):
 	return None
 
 def find_iexc_market(tickerId, exchangeId, platform):
-	exchange = None if exchangeId == "" else exchanges[exchangeId]
+	exchange = None if exchangeId is None else exchanges.get(exchangeId, None)
 	if platform not in supported.traditionalExchanges or (exchange is not None and exchange.type != "traditional"): return None
 	relevantExchanges = [exchanges[e] for e in supported.traditionalExchanges[platform] if exchanges[e].type == "traditional"] if exchange is None else [exchange]
 
@@ -496,8 +490,8 @@ def find_iexc_market(tickerId, exchangeId, platform):
 	return None
 
 def find_tradable_markets(tickerId, exchangeId, platform):
-	if exchangeId != "" and exchangeId not in supported.cryptoExchanges["Ichibot"]: return {}
-	exchangeIds = supported.cryptoExchanges["Ichibot"] if exchangeId == "" else [exchangeId]
+	if exchangeId is not None and exchangeId not in supported.cryptoExchanges["Ichibot"]: return {}
+	exchangeIds = supported.cryptoExchanges["Ichibot"] if exchangeId is None else [exchangeId]
 
 	matches = {}
 	for e in exchangeIds:

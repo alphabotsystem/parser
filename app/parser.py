@@ -24,8 +24,11 @@ from helpers.utils import Utils, TokenNotFoundException
 
 
 app = FastAPI()
+print("!!!!!")
 print(environ["ELASTICSEARCH_CLOUD_ID"])
+print("!!!!!")
 print(environ["ELASTICSEARCH_API_KEY"])
+print("!!!!!")
 elasticsearch = AsyncElasticsearch(
     cloud_id=environ["ELASTICSEARCH_CLOUD_ID"],
     api_key=environ["ELASTICSEARCH_API_KEY"],

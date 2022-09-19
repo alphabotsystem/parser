@@ -26,11 +26,16 @@ spec:
         env:
           - name: PRODUCTION
             value: "1"
-          - name: IEXC_KEY
+          - name: ELASTICSEARCH_CLOUD_ID
             valueFrom:
               secretKeyRef:
                 name: alpha-credentials
-                key: IEXC_KEY
+                key: ELASTICSEARCH_CLOUD_ID
+          - name: ELASTICSEARCH_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: alpha-credentials
+                key: ELASTICSEARCH_API_KEY
         ports:
           - containerPort: 6900
 

@@ -142,8 +142,8 @@ async def prepare_instrument(instrument, exchangeId):
 	}
 
 async def find_instrument(tickerId, exchangeId, platform, bias):
-	search, tag = tickerId.split(":") if ":" in tickerId else (tickerId, None)
-	if tag is not None and not tag.isnumeric(): search, tag = tickerId, None
+	search, tag = tickerId.lower().split(":") if ":" in tickerId else (tickerId.lower(), None)
+	if tag is not None and not tag.isnumeric(): search, tag = tickerId.lower(), None
 
 	sort = [{
 		"rank.base": "asc",

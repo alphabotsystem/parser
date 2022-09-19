@@ -118,7 +118,9 @@ async def ticker_tree_search(node, exchangeId, platform, bias):
 
 async def prepare_instrument(instrument, exchangeId):
 	if instrument is None: return None
-	if instrument["market"]["venue"] in ["CCXT", "IEXC"]:
+	if instrument["market"]["source"] == "forex":
+		exchange = {"id": "forex"}
+	elif instrument["market"]["venue"] in ["CCXT", "IEXC"]:
 		if exchangeId is None: exchangeId = instrument["market"]["source"]
 		response = await elasticsearch.get(index="exchanges", id=exchangeId)
 		exchange = response["_source"]
@@ -176,7 +178,7 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 	else:
 		query["bool"]["must"].append({"term": {"market.source": exchangeId}})
 
-	response = await elasticsearch.search(index="assets", query=query, sort=sort, size=10)
+	response = await elasticsearch.search(index="assets", query=query, sort=sort, size=1)
 
 	if response["hits"]["total"]["value"] == 0:
 		if platform in STRICT_MATCH:

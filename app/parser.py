@@ -153,19 +153,15 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 			"must": [{
 				"bool": {
 					"should": [{
-						"term": { "base": search }
+						"term": {"base": search}
 					}, {
-						"match": { "name": search }
+						"match": {"name": search}
 					}, {
-						"match": { "ticker": search }
+						"match": {"ticker": search}
 					}, {
-						"prefix": { "ticker": search.lower() }
+						"match": {"triggers.name": search}
 					}, {
-						"match": { "triggers.name": search }
-					}, {
-						"match": { "triggers.pair": search }
-					}, {
-						"prefix": { "triggers.pair": search.lower() }
+						"match": {"triggers.pair": search}
 					}]
 				}
 			}, {
@@ -180,7 +176,7 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 	else:
 		query["bool"]["must"].append({"term": {"market.source": exchangeId}})
 
-	response = await elasticsearch.search(index="assets", query=query, sort=sort, size=1)
+	response = await elasticsearch.search(index="assets", query=query, sort=sort, size=10)
 
 	if response["hits"]["total"]["value"] == 0:
 		if platform in STRICT_MATCH:

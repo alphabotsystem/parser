@@ -4,10 +4,12 @@ from requests import get
 from traceback import format_exc
 
 
-STRICT_MATCH = ["TradingLite", "Bookmap", "CoinGecko", "CCXT", "IEXC", "LLD", "Ichibot"]
-
-
 class Utils(object):
+	@staticmethod
+	def overlap(search, string, k=0):
+		if not string.startswith(search): return 0
+		return max(0, len(search) - k) / max(1, len(string) - k)
+
 	@staticmethod
 	def is_tokenized_stock(e, symbol):
 		ftxTokenizedStock = e.id == "ftx" and e.properties.markets[symbol]["info"].get("tokenizedEquity", False)

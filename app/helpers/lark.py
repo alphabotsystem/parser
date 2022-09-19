@@ -1,5 +1,4 @@
 from lark import Lark, Token, Transformer
-from lark.reconstruct import Reconstructor
 
 GRAMMAR = """
 	?start: sum
@@ -9,10 +8,10 @@ GRAMMAR = """
 	?product: atom
 		| product "*" atom  -> mul
 		| product "/" atom  -> div
+		| product "^" atom  -> exp
 	?atom: "-" atom         -> neg
 		 | CONSTANT         -> number
 		 | NAME             -> var
-		 | NAME ":" NUMBER  -> var
 		 | "'" NAME "'"     -> literal
 		 | "\\"" NAME "\\"" -> literal
 		 | "‘" NAME "’"     -> literal
@@ -24,19 +23,19 @@ GRAMMAR = """
 	%import common.WS_INLINE
 	%ignore WS_INLINE
 
-	NAME: DIGIT* LETTER ("_"|":"|"!"|LETTER|DIGIT)*
+	NAME: /(?!.*[+\-\*\/^\()\'\"\‘\’\“\”]).+/
 	CONSTANT: DIGIT ("." DIGIT+)?
 """
 
 larkParser = Lark(GRAMMAR, parser='lalr')
 Ticker = larkParser.parse
-Reconstructor = Reconstructor(larkParser)
 
 class TickerTree(Transformer):
 	def add(self, tree): return self.genenrate_list(tree, "add")
 	def sub(self, tree): return self.genenrate_list(tree, "sub")
 	def mul(self, tree): return self.genenrate_list(tree, "mul")
 	def div(self, tree): return self.genenrate_list(tree, "div")
+	def exp(self, tree): return self.genenrate_list(tree, "exp")
 	def neg(self, tree): return self.genenrate_list(tree, "neg")
 	def var(self, tree): return self.genenrate_list(tree, "var")
 	def number(self, tree): return self.genenrate_list(tree, "number")

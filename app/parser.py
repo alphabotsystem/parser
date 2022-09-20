@@ -151,32 +151,43 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 		"rank.quote": "asc"
 	}]
 	query = {
-		"bool": {
-			"must": [{
-				"bool": {
-					"should": [{
-						"term": {"base": search}
-					}, {
-						"match": {"name": search}
-					}, {
-						"match": {"ticker": search}
-					}, {
-						"match": {"triggers.name": search}
-					}, {
-						"match": {"triggers.pair": search}
-					}]
-				}
+		"bool": {"should": [{
+			"bool": {"must": [{
+				"term": {"ticker": tickerId.lower()}
 			}, {
 				"match": {"supports": platform}
-			}]
-		}
+			}, {
+				"term": {"market.source": "forex"}
+			}]}
+		}, {
+			"bool": {"must": [{
+				"bool": {"should": [{
+					"term": {"base": search}
+				}, {
+					"match": {"name": search}
+				}, {
+					"match": {"ticker": search}
+				}, {
+					"match": {"triggers.name": search}
+				}, {
+					"match": {"triggers.pair": search}
+				}]}
+			}, {
+				"match": {"supports": platform}
+			}, {
+				"simple_query_string" : {
+					"query": "-(forex)",
+					"fields": ["market.source"]
+				}
+			}]}
+		}]}
 	}
 	if tag is not None:
-		query["bool"]["must"].append({"term": {"tag": int(tag)}})
+		query["bool"]["should"][1]["bool"]["must"].append({"term": {"tag": int(tag)}})
 	if exchangeId is None:
-		query["bool"]["must"].append({"term": {"market.passive": False}})
+		query["bool"]["should"][1]["bool"]["must"].append({"term": {"market.passive": False}})
 	else:
-		query["bool"]["must"].append({"term": {"market.source": exchangeId}})
+		query["bool"]["should"][1]["bool"]["must"].append({"term": {"market.source": exchangeId}})
 
 	response = await elasticsearch.search(index="assets", query=query, sort=sort, size=1)
 

@@ -212,6 +212,7 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 			if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
 				symbol += "PERP"
 			url = f"https://symbol-search.tradingview.com/symbol_search/?text={symbol}&hl=0&exchange={exchange}&lang=en&type=&domain=production"
+			print(instrument)
 			print(url)
 			async with session.get(url) as response:
 				response = await response.json()

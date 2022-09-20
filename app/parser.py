@@ -225,7 +225,6 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 			if (":" in symbol):
 				exchange, symbol = symbol.split(":", 1)
 			url = f"https://symbol-search.tradingview.com/symbol_search/?text={symbol}&hl=0&exchange={exchange}&lang=en&type=&domain=production"
-			print(instrument)
 			print(url)
 			async with session.get(url) as response:
 				response = await response.json()
@@ -234,6 +233,7 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 				elif instrument["id"] != response[0]["symbol"]:
 					print(f"Rewrite from {instrument['id']} to {response[0]['symbol']}")
 					instrument["id"] = response[0]["symbol"]
+					instrument["exchange"] = {"id": response[0]["exchange"]}
 
 	return instrument
 

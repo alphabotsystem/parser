@@ -222,6 +222,8 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 			symbol = instrument["id"]
 			if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
 				symbol += "PERP"
+			if (":" in symbol):
+				exchange, symbol = symbol.split(":", 1)
 			url = f"https://symbol-search.tradingview.com/symbol_search/?text={symbol}&hl=0&exchange={exchange}&lang=en&type=&domain=production"
 			print(instrument)
 			print(url)

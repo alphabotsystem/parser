@@ -153,7 +153,12 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 	query = {
 		"bool": {"should": [{
 			"bool": {"must": [{
-				"term": {"ticker": tickerId.lower()}
+				"match": {
+					"term": {
+						"query": search,
+						"boost": 10
+					}
+				}
 			}, {
 				"match": {"supports": platform}
 			}, {
@@ -162,6 +167,13 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 		}, {
 			"bool": {"must": [{
 				"bool": {"should": [{
+					"match": {
+						"base": {
+							"query": search,
+							"boost": 10
+						}
+					}
+				}, {
 					"term": {"base": search}
 				}, {
 					"match": {"name": search}

@@ -153,12 +153,7 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 	query = {
 		"bool": {"should": [{
 			"bool": {"must": [{
-				"match": {
-					"term": {
-						"query": search,
-						"boost": 10
-					}
-				}
+				"term": { "ticker": search }
 			}, {
 				"match": {"supports": platform}
 			}, {
@@ -167,22 +162,24 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 		}, {
 			"bool": {"must": [{
 				"bool": {"should": [{
-					"match": {
-						"base": {
-							"query": search,
-							"boost": 10
-						}
+					"constant_score": {
+						"filter": {
+							"bool": {
+								"should": [{
+									"match": { "base": search }
+								}, {
+									"match": { "ticker": search }
+								}, {
+									"match": { "triggers.pair": search }
+								}]
+							}
+						},
+						"boost": 10
 					}
-				}, {
-					"term": {"base": search}
-				}, {
-					"match": {"name": search}
-				}, {
-					"match": {"ticker": search}
-				}, {
-					"match": {"triggers.name": search}
-				}, {
-					"match": {"triggers.pair": search}
+				# }, {
+				# 	"match": {"triggers.name": search}
+				# }, {
+				# 	"match": {"triggers.pair": search}
 				}]}
 			}, {
 				"match": {"supports": platform}
@@ -229,7 +226,7 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 		instrument = await prepare_instrument(response["hits"]["hits"][0]["_source"], exchangeId)
 
 	if platform in ["TradingView", "TradingView Premium"]:
-		async with ClientSession() as session:
+		async with ClientSession(loop=loop) as session:
 			exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").upper())
 			symbol = instrument["id"]
 			if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):

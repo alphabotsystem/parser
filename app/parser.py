@@ -90,6 +90,7 @@ async def match_ticker(tickerId, exchangeId, platform, bias):
 		"exchange": match.get("exchange", {}),
 		"base": match.get("base"),
 		"quote": match.get("quote"),
+		"tag": match.get("tag"),
 		"symbol": match.get("symbol"),
 		"image": match.get("image"),
 		"metadata": match.get("metadata", {"type": "Unknown", "rank": MAXSIZE}),
@@ -273,17 +274,21 @@ async def run(req: Request):
 @app.post("/parser/get_listings")
 async def get_listings(req: Request):
 	request = await req.json()
-	ticker = request["ticker"]
+	ticker, platform = request["ticker"], request["platform"]
 
 	query = {
 		"bool": {
 			"must": [{
-				"term": { "base": ticker["base"] }
+				"term": { "base": ticker["base"].lower() }
 			}, {
 				"term": { "tag": int(ticker["tag"]) }
 			}]
 		}
 	}
+	if platform == "IEXC":
+		query["bool"]["must"].append({"match": {"market.venue": "IEXC"}})
+	else:
+		query["bool"]["must"].append({"match": {"market.venue": "CCXT"}})
 
 	instruments = await elasticsearch.search(index="assets", query=query, size=10000)
 	exchanges = await elasticsearch.search(index="exchanges", query={"match_all": {}}, size=10000)
@@ -291,7 +296,7 @@ async def get_listings(req: Request):
 	sources = {}
 	for instrument in instruments["hits"]["hits"]:
 		if instrument["_source"]["quote"] in sources:
-			sources.add(instrument["_source"]["market"]["source"])
+			sources[instrument["_source"]["quote"]].add(instrument["_source"]["market"]["source"])
 		else:
 			sources[instrument["_source"]["quote"]] = {instrument["_source"]["market"]["source"]}
 
@@ -303,13 +308,13 @@ async def get_listings(req: Request):
 		response.append([quote, sorted(names)])
 		total += len(names)
 
-	return {"response": response, "total": total}	
+	return {"response": sorted(response, key=lambda x: x[0]), "total": total}	
 
 @app.post("/parser/get_formatted_price_ccxt")
 async def format_price(req: Request):
 	request = await req.json()
 	exchange = getattr(ccxt, request["exchangeId"])()
-	loop.run_in_executor(None, exchange.load_markets)
+	await loop.run_in_executor(None, exchange.load_markets)
 	precision = exchange.markets.get(request["symbol"], {}).get("precision", {}).get("price", 8)
 	text = dtp.decimal_to_precision(request["price"], rounding_mode=dtp.ROUND, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.PAD_WITH_ZERO)
 	return {"response": text.rstrip("0").rstrip(".")}
@@ -318,7 +323,7 @@ async def format_price(req: Request):
 async def format_amount(req: Request):
 	request = await req.json()
 	exchange = getattr(ccxt, request["exchangeId"])()
-	loop.run_in_executor(None, exchange.load_markets)
+	await loop.run_in_executor(None, exchange.load_markets)
 	precision = exchange.markets.get(request["symbol"], {}).get("precision", {}).get("amount", 8)
 	text = dtp.decimal_to_precision(request["amount"], rounding_mode=dtp.TRUNCATE, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.NO_PADDING)
 	return {"response": text.rstrip("0").rstrip(".")}

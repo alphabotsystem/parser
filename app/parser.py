@@ -20,7 +20,7 @@ from google.cloud.error_reporting import Client as ErrorReportingClient
 
 from helpers.constants import STRICT_MATCH, EXCHANGE_SHORTCUTS, EXCHANGE_TO_TRADINGVIEW
 from helpers.lark import Ticker, TickerTree
-from helpers.utils import Utils, TokenNotFoundException
+from helpers.utils import TokenNotFoundException
 
 
 app = FastAPI()
@@ -36,14 +36,6 @@ set_event_loop(loop)
 # -------------------------
 # Exchange parsing
 # -------------------------
-
-def evaluate_exchange_match_score(raw, exchange):
-	if raw == exchange["id"]: return len(raw)
-
-	initials = "".join([word[0] for word in exchange["name"].split(" ")])
-	if raw == initials: return len(raw)
-
-	return Utils.overlap(raw, exchange["name"].replace(".", "").replace(" ", "").lower())
 
 async def find_exchange(raw, platform, bias):
 	if platform in ["CoinGecko"]: return {"success": False, "match": None}

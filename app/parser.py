@@ -113,6 +113,7 @@ async def prepare_instrument(instrument, exchangeId):
 	if instrument["market"]["source"] == "forex":
 		exchange = {"id": "forex"}
 	elif instrument["market"]["venue"] in ["CCXT", "IEXC"]:
+		print(instrument["market"]["source"], exchangeId)
 		if exchangeId is None: exchangeId = instrument["market"]["source"]
 		response = await elasticsearch.get(index="exchanges", id=exchangeId)
 		exchange = response["_source"]

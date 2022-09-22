@@ -45,7 +45,8 @@ kind: Service
 metadata:
   name: parser
   namespace: alpha-bot
-  cloud.google.com/load-balancer-type: Internal
+  annotations:
+    cloud.google.com/load-balancer-type: "Internal"
 spec:
   type: LoadBalancer
   selector:

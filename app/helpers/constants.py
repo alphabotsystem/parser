@@ -1,4 +1,18 @@
-STRICT_MATCH = ["TradingLite", "Bookmap", "CoinGecko", "CCXT", "IEXC", "LLD", "Ichibot"]
+QUERY_SORT = [
+	"rank.base",
+	"rank.exchange",
+	"rank.quote",
+]
+
+STRICT_MATCH = [
+	"TradingLite",
+	"Bookmap",
+	"CoinGecko",
+	"CCXT",
+	"IEXC",
+	"LLD",
+	"Ichibot"
+]
 
 EXCHANGE_SHORTCUTS = {
 	"crypto": {

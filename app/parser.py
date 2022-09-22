@@ -18,7 +18,7 @@ from ccxt.base import decimal_to_precision as dtp
 from elasticsearch import AsyncElasticsearch
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
-from helpers.constants import STRICT_MATCH, EXCHANGE_SHORTCUTS, EXCHANGE_TO_TRADINGVIEW
+from helpers.constants import QUERY_SORT, STRICT_MATCH, EXCHANGE_SHORTCUTS, EXCHANGE_TO_TRADINGVIEW
 from helpers.lark import Ticker, TickerTree
 from helpers.utils import TokenNotFoundException
 
@@ -114,7 +114,6 @@ async def prepare_instrument(instrument, exchangeId):
 	if instrument["market"]["source"] == "forex":
 		exchange = {"id": "forex"}
 	elif instrument["market"]["venue"] in ["CCXT", "IEXC"]:
-		print(instrument["market"]["source"], exchangeId)
 		if exchangeId is None: exchangeId = instrument["market"]["source"]
 		response = await elasticsearch.get(index="exchanges", id=exchangeId)
 		exchange = response["_source"]
@@ -135,64 +134,61 @@ async def prepare_instrument(instrument, exchangeId):
 		}
 	}
 
+def generate_query(search, tag, exchangeId, platform):
+	tickerQuery = {
+		"bool": {
+			"must": [{
+				"bool": {
+					"should": [{
+						"match": {"ticker": search} # Ticker should match
+					}, {
+						"match": {"triggers.pair": search} # Any of the pair triggers should match
+					}]
+				}
+			}, {
+				"match": {"supports": platform} # Platform must be supported
+			}]
+		}
+	}
+	nameQuery = {
+		"bool": {
+			"must": [{
+				"bool": {
+					"should": [{
+						"match": {"name": search} # Name should match
+					}, {
+						"match": {"triggers.name": search} # Any of the name triggers should match
+					}]
+				}
+			}, {
+				"match": {"supports": platform} # Platform must be supported
+			}]
+		}
+	}
+
+	if tag is not None:
+		tickerQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
+		nameQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
+	if exchangeId is None:
+		tickerQuery["bool"]["must"].append({"term": {"market.passive": False}})
+		nameQuery["bool"]["must"].append({"term": {"market.passive": False}})
+	else:
+		tickerQuery["bool"]["must"].append({"term": {"market.source": exchangeId}})
+		nameQuery["bool"]["must"].append({"term": {"market.source": exchangeId}})
+
+	return tickerQuery, nameQuery
+
 async def find_instrument(tickerId, exchangeId, platform, bias):
 	search, tag = tickerId.lower().split(":") if ":" in tickerId else (tickerId.lower(), None)
 	if tag is not None and not tag.isnumeric(): search, tag = tickerId.lower(), None
 
-	sort = [{
-		"rank.base": "asc",
-		"rank.exchange": "asc",
-		"rank.quote": "asc"
-	}]
-	query = {
-		"bool": {"should": [{
-			"bool": {"must": [{
-				"term": { "ticker": search }
-			}, {
-				"match": {"supports": platform}
-			}, {
-				"term": {"market.source": "forex"}
-			}]}
-		}, {
-			"bool": {"must": [{
-				"bool": {"should": [{
-					"constant_score": {
-						"filter": {
-							"bool": {
-								"should": [{
-									"match": { "base": search }
-								}, {
-									"match": { "ticker": search }
-								}, {
-									"match": { "triggers.pair": search }
-								}]
-							}
-						},
-						"boost": 10
-					}
-				# }, {
-				# 	"match": {"triggers.name": search}
-				# }, {
-				# 	"match": {"triggers.pair": search}
-				}]}
-			}, {
-				"match": {"supports": platform}
-			}, {
-				"simple_query_string" : {
-					"query": "-(forex)",
-					"fields": ["market.source"]
-				}
-			}]}
-		}]}
-	}
-	if tag is not None:
-		query["bool"]["should"][1]["bool"]["must"].append({"term": {"tag": int(tag)}})
-	if exchangeId is None:
-		query["bool"]["should"][1]["bool"]["must"].append({"term": {"market.passive": False}})
-	else:
-		query["bool"]["should"][1]["bool"]["must"].append({"term": {"market.source": exchangeId}})
+	# Generate queries and search by ticker first
+	query1, query2 = generate_query(search, tag, exchangeId, platform)
+	response = await elasticsearch.search(index="assets", query=query1, sort=QUERY_SORT, size=1)
 
-	response = await elasticsearch.search(index="assets", query=query, sort=sort, size=1)
+	# Search by name if no results were found
+	if response["hits"]["total"]["value"] == 0:
+		response = await elasticsearch.search(index="assets", query=query2, sort=QUERY_SORT, size=1)
 
 	if response["hits"]["total"]["value"] == 0:
 		if platform in STRICT_MATCH:

@@ -46,7 +46,7 @@ metadata:
   name: parser
   namespace: alpha-bot
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: parser
   ports:

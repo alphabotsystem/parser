@@ -329,6 +329,8 @@ async def get_venues(req: Request):
 	request = await req.json()
 	tickerId, platforms = request["tickerId"], request["platforms"]
 
+	exchanges = await elasticsearch.search(index="exchanges", query={"match_all": {}}, size=10000)
+
 	venues = []
 	if platforms == "":
 		venues += ["CoinGecko"]

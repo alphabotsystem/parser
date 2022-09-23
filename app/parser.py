@@ -1,310 +1,150 @@
 from os import environ
 environ["PRODUCTION"] = environ["PRODUCTION"] if "PRODUCTION" in environ and environ["PRODUCTION"] else ""
 
-from sys import maxsize as MAXSIZE
-from time import time, sleep
-from copy import deepcopy
-from itertools import chain
 from fastapi import FastAPI, Request
 from uvicorn import Config, Server
-from aiohttp import ClientSession
-from asyncio import new_event_loop, set_event_loop, create_task
-from lark import Token
-from orjson import loads
-from traceback import format_exc
-
+from asyncio import new_event_loop, set_event_loop
 import ccxt
 from ccxt.base import decimal_to_precision as dtp
-from elasticsearch import AsyncElasticsearch
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
-from helpers.constants import QUERY_SORT, STRICT_MATCH, EXCHANGE_SHORTCUTS, EXCHANGE_TO_TRADINGVIEW
-from helpers.lark import Ticker, TickerTree
-from helpers.utils import TokenNotFoundException
+from matching.exchanges import find_exchange
+from matching.instruments import match_ticker, find_listings, find_venues
+from matching.autocomplete import *
+from request import ChartRequestHandler
+from request import HeatmapRequestHandler
+from request import PriceRequestHandler
+from request import DetailRequestHandler
+from request import TradeRequestHandler
 
 
 app = FastAPI()
-elasticsearch = AsyncElasticsearch(
-    cloud_id=environ["ELASTICSEARCH_CLOUD_ID"],
-    api_key=environ["ELASTICSEARCH_API_KEY"],
-)
 logging = ErrorReportingClient(service="parser")
 loop = new_event_loop()
 set_event_loop(loop)
 
 
 # -------------------------
-# Exchange parsing
-# -------------------------
-
-async def find_exchange(raw, platform, bias):
-	if platform in ["CoinGecko"]: return {"success": False, "match": None}
-	elif platform in ["CCXT", "Ichibot", "TradingLite", "Bookmap", "LLD"]: bias = "crypto"
-	elif platform in ["IEXC"]: bias = "traditional"
-
-	query = {
-		"bool": {
-			"must": [{
-				"multi_match": {"query": raw, "fields": ["id", "name", "triggers.name", "triggers.shortcuts"]}
-			}, {
-				"match": {"supports": platform}
-			}]
-		}
-	}
-	response = await elasticsearch.search(index="exchanges", query=query, size=1)
-	if response["hits"]["total"]["value"] > 0:
-		exchange = response["hits"]["hits"][0]["_source"]
-		return {"success": True, "match": exchange}
-	return {"success": False, "match": None}
-
-
-# -------------------------
-# Main functions
-# -------------------------
-
-async def match_ticker(tickerId, exchangeId, platform, bias):
-	if platform in ["CoinGecko", "CCXT", "Ichibot", "TradingLite", "Bookmap", "LLD"]: bias = "crypto"
-	elif platform in ["IEXC"]: bias = "traditional"
-
-	try:
-		ticker = Ticker(tickerId)
-	except:
-		print(tickerId)
-		print(format_exc())
-		return {"response": None, "message": "Requested ticker could not be found."}
-
-	try:
-		await ticker_tree_search(ticker, exchangeId, platform, bias)
-	except TokenNotFoundException as e:
-		return {"response": None, "message": e.message}
-
-	isSimple = isinstance(ticker.children[0], Token) and ticker.children[0].type == "NAME"
-	match = ticker.children[0].value if isSimple else {}
-	if not isSimple and platform not in ["TradingView", "CoinGecko", "CCXT", "IEXC", "LLD"]:
-		return {"response": None, "message": f"Complex tickers aren't available on {platform}"}
-
-	response = {
-		"tree": TickerTree().transform(ticker),
-		"id": match.get("id", "Complex ticker"),
-		"name": match.get("name", "Complex ticker"),
-		"exchange": match.get("exchange", {}),
-		"base": match.get("base"),
-		"quote": match.get("quote"),
-		"tag": match.get("tag"),
-		"symbol": match.get("symbol"),
-		"image": match.get("image"),
-		"metadata": match.get("metadata", {"type": "Unknown", "rank": MAXSIZE}),
-		"isSimple": isSimple
-	}
-	if isSimple and bias == "crypto": response["tradable"] = await find_tradable_market(match, response["exchange"])
-
-	return {"response": response, "message": None}
-
-async def ticker_tree_search(node, exchangeId, platform, bias):
-	for i, child in enumerate(node.children):
-		if not isinstance(child, Token):
-			node.children[i] = await ticker_tree_search(child, exchangeId, platform, bias)
-		elif child.type == "NAME":
-			newValue = await find_instrument(child.value, exchangeId, platform, bias)
-			node.children[i] = child.update(value=newValue)
-	return node
-
-async def prepare_instrument(instrument, exchangeId):
-	if instrument is None: return None
-	if instrument["market"]["source"] == "forex":
-		exchange = {"id": "forex"}
-	elif instrument["market"]["venue"] in ["CCXT", "IEXC"]:
-		if exchangeId is None: exchangeId = instrument["market"]["source"]
-		response = await elasticsearch.get(index="exchanges", id=exchangeId)
-		exchange = response["_source"]
-	else:
-		exchange = {}
-	return {
-		"id": instrument["ticker"],
-		"name": instrument["name"],
-		"base": instrument["base"],
-		"quote": instrument["quote"],
-		"tag": instrument["tag"],
-		"symbol": instrument["market"]["symbol"],
-		"image": instrument.get("image"),
-		"exchange": exchange,
-		"metadata": {
-			"type": instrument["type"],
-			"rank": instrument["rank"]["base"],
-		}
-	}
-
-def generate_query(search, tag, exchangeId, platform):
-	tickerQuery = {
-		"bool": {
-			"must": [{
-				"bool": {
-					"should": [{
-						"match": {"ticker": search} # Ticker should match
-					}, {
-						"match": {"triggers.pair": search} # Any of the pair triggers should match
-					}]
-				}
-			}, {
-				"match": {"supports": platform} # Platform must be supported
-			}]
-		}
-	}
-	nameQuery = {
-		"bool": {
-			"must": [{
-				"bool": {
-					"should": [{
-						"match": {"name": search} # Name should match
-					}, {
-						"match": {"triggers.name": search} # Any of the name triggers should match
-					}]
-				}
-			}, {
-				"match": {"supports": platform} # Platform must be supported
-			}]
-		}
-	}
-
-	if tag is not None:
-		tickerQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
-		nameQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
-	if exchangeId is None:
-		tickerQuery["bool"]["must"].append({"term": {"market.passive": False}})
-		nameQuery["bool"]["must"].append({"term": {"market.passive": False}})
-	else:
-		tickerQuery["bool"]["must"].append({"term": {"market.source": exchangeId}})
-		nameQuery["bool"]["must"].append({"term": {"market.source": exchangeId}})
-
-	return tickerQuery, nameQuery
-
-async def find_instrument(tickerId, exchangeId, platform, bias):
-	search, tag = tickerId.lower().split(":") if ":" in tickerId else (tickerId.lower(), None)
-	if tag is not None and not tag.isnumeric(): search, tag = tickerId.lower(), None
-
-	# Generate queries and search by ticker first
-	query1, query2 = generate_query(search, tag, exchangeId, platform)
-	response = await elasticsearch.search(index="assets", query=query1, sort=QUERY_SORT, size=1)
-
-	# Search by name if no results were found
-	if response["hits"]["total"]["value"] == 0:
-		response = await elasticsearch.search(index="assets", query=query2, sort=QUERY_SORT, size=1)
-
-	if response["hits"]["total"]["value"] == 0:
-		if platform in STRICT_MATCH:
-			raise TokenNotFoundException("Requested ticker could not be found.")
-		else:
-			if exchangeId is not None:
-				response = await elasticsearch.get(index="exchanges", id=exchangeId)
-				exchange = response["_source"]
-			else:
-				exchange = {}
-			instrument = {
-				"id": tickerId,
-				"name": tickerId,
-				"base": None,
-				"quote": None,
-				"tag": 1,
-				"symbol": None,
-				"exchange": exchange,
-				"metadata": {
-					"type": "Unknown",
-					"rank": MAXSIZE,
-				}
-			}
-	else:
-		instrument = await prepare_instrument(response["hits"]["hits"][0]["_source"], exchangeId)
-
-	if platform in ["TradingView", "TradingView Premium"]:
-		async with ClientSession(loop=loop) as session:
-			exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").upper())
-			symbol = instrument["id"]
-			if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
-				symbol += "PERP"
-			if (":" in symbol):
-				exchange, symbol = symbol.split(":", 1)
-			url = f"https://symbol-search.tradingview.com/symbol_search/?text={symbol}&hl=0&exchange={exchange}&lang=en&type=&domain=production"
-			print(url)
-			async with session.get(url) as response:
-				response = await response.json()
-				if len(response) == 0:
-					raise TokenNotFoundException("Requested ticker could not be found.")
-				elif instrument["id"] != response[0]["symbol"]:
-					print(f"Rewrite from {instrument['id']} to {response[0]['symbol']}")
-					instrument["id"] = response[0]["symbol"]
-					instrument["exchange"] = {"id": response[0]["exchange"]}
-
-	return instrument
-
-async def find_tradable_market(match, exchange):
-	if not exchange or exchange["id"] not in ["binance", "binanceusdm", "binancecoinm", "ftx"]: return None
-	query = {
-		"bool": {
-			"must": [{
-				"match": {"market.symbol": match["symbol"]}
-			}, {
-				"match": {"market.source": exchange["id"]}
-			}]
-		}
-	}
-	response = await elasticsearch.search(index="assets", query=query, size=1)
-	if response["hits"]["total"]["value"] > 0:
-		return response["hits"]["hits"][0]["_source"]["market"]["id"]
-	return None
-
-
-# -------------------------
 # Endpoints
 # -------------------------
+
+@app.post("/parser/chart")
+async def process_chart_request(req: Request):
+	request = await req.json()
+	bias, arguments, platforms, tickerId = request["bias"], request["arguments"], request["platforms"], request["tickerId"]
+	requestHandler = ChartRequestHandler(tickerId, platforms.copy(), bias)
+	for argument in arguments:
+		await requestHandler.parse_argument(argument)
+	if tickerId is not None:
+		await requestHandler.process_ticker()
+
+	requestHandler.set_defaults()
+	await requestHandler.find_caveats()
+	responseMessage = requestHandler.get_preferred_platform()
+
+	return {"message": responseMessage, "response": requestHandler.to_dict()}
+
+@app.post("/parser/heatmap")
+async def process_heatmap_request(req: Request):
+	request = await req.json()
+	bias, arguments, platforms = request["bias"], request["arguments"], request["platforms"]
+	requestHandler = HeatmapRequestHandler(platforms.copy(), bias)
+	for argument in arguments:
+		await requestHandler.parse_argument(argument)
+
+	requestHandler.set_defaults()
+	await requestHandler.find_caveats()
+	responseMessage = requestHandler.get_preferred_platform()
+
+	return {"message": responseMessage, "response": requestHandler.to_dict()}
+
+@app.post("/parser/quote")
+async def process_quote_request(req: Request):
+	request = await req.json()
+	bias, arguments, platforms, tickerId = request["bias"], request["arguments"], request["platforms"], request["tickerId"]
+	requestHandler = PriceRequestHandler(tickerId, platforms.copy(), bias)
+	for argument in arguments:
+		await requestHandler.parse_argument(argument)
+	if tickerId is not None:
+		await requestHandler.process_ticker()
+
+	requestHandler.set_defaults()
+	await requestHandler.find_caveats()
+	responseMessage = requestHandler.get_preferred_platform()
+
+	return {"message": responseMessage, "response": requestHandler.to_dict()}
+
+@app.post("/parser/detail")
+async def process_detail_request(req: Request):
+	request = await req.json()
+	bias, arguments, platforms, tickerId = request["bias"], request["arguments"], request["platforms"], request["tickerId"]
+	requestHandler = DetailRequestHandler(tickerId, platforms.copy(), bias)
+	for argument in arguments:
+		await requestHandler.parse_argument(argument)
+	if tickerId is not None:
+		await requestHandler.process_ticker()
+
+	requestHandler.set_defaults()
+	await requestHandler.find_caveats()
+	responseMessage = requestHandler.get_preferred_platform()
+
+	return {"message": responseMessage, "response": requestHandler.to_dict()}
+
+@app.post("/parser/trade")
+async def process_trade_request(req: Request):
+	request = await req.json()
+	bias, arguments, platforms, tickerId = request["bias"], request["arguments"], request["platforms"], request["tickerId"]
+	requestHandler = TradeRequestHandler(tickerId, platforms.copy(), bias)
+	for argument in arguments:
+		await requestHandler.parse_argument(argument)
+	if tickerId is not None:
+		await requestHandler.process_ticker()
+
+	requestHandler.set_defaults()
+	await requestHandler.find_caveats()
+	responseMessage = requestHandler.get_preferred_platform()
+
+	return {"message": responseMessage, "response": requestHandler.to_dict()}
 
 @app.post("/parser/match_ticker")
 async def run(req: Request):
 	request = await req.json()
-	return await match_ticker(request["tickerId"], request["exchangeId"], request["platform"], request["bias"])
+	message, response = await match_ticker(request["tickerId"], request["exchangeId"], request["platform"], request["bias"])
+	return {"response": response, "message": message}
 
 @app.post("/parser/find_exchange")
 async def run(req: Request):
 	request = await req.json()
-	return await find_exchange(request["raw"], request["platform"], request["bias"])
+	success, match = await find_exchange(request["raw"], request["platform"], request["bias"])
+	return {"success": success, "match": match}
+
+@app.post("/parser/autocomplete")
+async def autocomplete(req: Request):
+	request = await req.json()
+	option = request["option"]
+	showStockOptions = request["type"] in ["stocks", ""]
+	showCryptoOptions = request["type"] in ["crypto", ""]
+	if option == "timeframe":
+		response = autocomplete_timeframe(request["timeframe"], showStockOptions, showCryptoOptions)
+	elif option == "market":
+		response = autocomplete_market(request["market"], showStockOptions, showCryptoOptions)
+	elif option == "category":
+		response = autocomplete_category(request["category"], showStockOptions, showCryptoOptions)
+	elif option == "color":
+		response = autocomplete_color(request["color"], showStockOptions, showCryptoOptions)
+	elif option == "size":
+		response = autocomplete_size(request["size"], showStockOptions, showCryptoOptions)
+	elif option == "group":
+		response = autocomplete_group(request["group"], showStockOptions, showCryptoOptions)
+	else:
+		response = []
+	return {"response": response}
 
 @app.post("/parser/get_listings")
 async def get_listings(req: Request):
 	request = await req.json()
-	ticker, platform = request["ticker"], request["platform"]
-
-	query = {
-		"bool": {
-			"must": [{
-				"term": { "base": ticker["base"].lower() }
-			}, {
-				"term": { "tag": int(ticker["tag"]) }
-			}]
-		}
-	}
-	if platform == "IEXC":
-		query["bool"]["must"].append({"match": {"market.venue": "IEXC"}})
-	else:
-		query["bool"]["must"].append({"match": {"market.venue": "CCXT"}})
-
-	instruments = await elasticsearch.search(index="assets", query=query, size=10000)
-	exchanges = await elasticsearch.search(index="exchanges", query={"match_all": {}}, size=10000)
-
-	sources = {}
-	for instrument in instruments["hits"]["hits"]:
-		if instrument["_source"]["quote"] in sources:
-			sources[instrument["_source"]["quote"]].add(instrument["_source"]["market"]["source"])
-		else:
-			sources[instrument["_source"]["quote"]] = {instrument["_source"]["market"]["source"]}
-
-	response, total = [], 0
-	for quote in sources:
-		names = []
-		for source in sources[quote]:
-			names.append(next((exchange["_source"]["name"] for exchange in exchanges["hits"]["hits"] if exchange["_source"]["id"] == source), None))
-		response.append([quote, sorted(names)])
-		total += len(names)
-
-	return {"response": sorted(response, key=lambda x: x[0]), "total": total}	
+	response, total = await find_listings(request["ticker"], request["platform"])
+	return {"response": response, "total": total}	
 
 @app.post("/parser/get_formatted_price_ccxt")
 async def format_price(req: Request):
@@ -327,20 +167,7 @@ async def format_amount(req: Request):
 @app.post("/parser/get_venues")
 async def get_venues(req: Request):
 	request = await req.json()
-	tickerId, platforms = request["tickerId"], request["platforms"]
-
-	exchanges = await elasticsearch.search(index="exchanges", query={"match_all": {}}, size=10000)
-
-	venues = []
-	if platforms == "":
-		venues += ["CoinGecko"]
-		venues += [e["name"] for e in exchanges.values()]
-	else:
-		for platform in platforms.split(","):
-			if platform == "CoinGecko":
-				venues += ["CoinGecko"]
-			else:
-				venues += [e["name"] for e in exchanges.values() if platform in e["supports"]]
+	venues = await find_venues(request["tickerId"], request["platforms"])
 	return {"response": venues}
 
 

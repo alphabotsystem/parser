@@ -170,8 +170,9 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 
 	if platform in ["TradingView", "TradingView Premium"]:
 		async with ClientSession() as session:
-			exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").upper())
 			symbol = instrument["id"]
+			exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").upper())
+			if exchange == "FOREX": exchange = ""
 			if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
 				symbol += "PERP"
 			if (":" in symbol):

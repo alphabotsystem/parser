@@ -183,10 +183,12 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 				response = await response.json()
 				if len(response) == 0:
 					raise TokenNotFoundException("Requested ticker could not be found.")
-				elif instrument["id"] != response[0]["symbol"] or instrument["exchange"].get("id") != response[0]["exchange"]:
-					print(f"Rewrite from {symbol}@{exchange} to {response[0]['symbol']}@{response[0]['exchange']}")
-					instrument["id"] = response[0]["symbol"]
-					instrument["exchange"] = {"id": response[0]["exchange"]}
+				newSymbol = response[0]["symbol"]
+				newExchange = response[0].get("prefix", response[0]["exchange"])
+				if instrument["id"] != newSymbol or instrument["exchange"].get("id") != newExchange:
+					print(f"Rewrite from {symbol}@{exchange} to {newSymbol}@{newExchange}")
+					instrument["id"] = newSymbol
+					instrument["exchange"] = {"id": newExchange}
 
 	return instrument
 

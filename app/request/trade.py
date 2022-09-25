@@ -13,10 +13,10 @@ PARAMETERS = []
 
 
 class TradeRequestHandler(AbstractRequestHandler):
-	def __init__(self, tickerId, platforms, bias="traditional"):
+	def __init__(self, tickerId, platforms):
 		super().__init__(platforms)
 		for platform in platforms:
-			self.requests[platform] = TradeRequest(tickerId, platform, bias)
+			self.requests[platform] = TradeRequest(tickerId, platform)
 
 	async def parse_argument(self, argument):
 		for platform, request in self.requests.items():
@@ -53,7 +53,7 @@ class TradeRequestHandler(AbstractRequestHandler):
 
 			if platform == "Ichibot":
 				if not bool(request.exchange):
-					try: _, request.exchange = await find_exchange("ftx", platform, request.parserBias)
+					try: _, request.exchange = await find_exchange("ftx", platform)
 					except: pass
 				if request.exchange.get("id") == "binanceusdm":
 					request.exchange["id"] = "binancefutures"
@@ -72,8 +72,8 @@ class TradeRequestHandler(AbstractRequestHandler):
 
 
 class TradeRequest(AbstractRequest):
-	def __init__(self, tickerId, platform, bias):
-		super().__init__(platform, bias)
+	def __init__(self, tickerId, platform):
+		super().__init__(platform)
 		self.tickerId = tickerId
 		self.ticker = {}
 		self.exchange = {}
@@ -86,7 +86,7 @@ class TradeRequest(AbstractRequest):
 			if type(tickerPart) is str: continue
 
 		updatedTicker, error = None, None
-		try: updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform, self.parserBias)
+		try: updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform)
 		except: error = "Something went wrong while processing the requested ticker."
 
 		if error is not None:
@@ -123,7 +123,6 @@ class TradeRequest(AbstractRequest):
 	def to_dict(self):
 		d = {
 			"ticker": self.ticker,
-			"exchange": self.exchange,
-			"parserBias": self.parserBias
+			"exchange": self.exchange
 		}
 		return d

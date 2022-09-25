@@ -1,5 +1,6 @@
 from os import environ
 from sys import maxsize as MAXSIZE
+from asyncio import gather
 from aiohttp import ClientSession
 from lark import Token
 from traceback import format_exc
@@ -15,10 +16,7 @@ elasticsearch = AsyncElasticsearch(
 )
 
 
-async def match_ticker(tickerId, exchangeId, platform, bias):
-	if platform in ["CoinGecko", "CCXT", "Ichibot", "TradingLite", "Bookmap", "LLD"]: bias = "crypto"
-	elif platform in ["IEXC"]: bias = "traditional"
-
+async def match_ticker(tickerId, exchangeId, platform):
 	try:
 		ticker = Ticker(tickerId)
 	except:
@@ -27,7 +25,7 @@ async def match_ticker(tickerId, exchangeId, platform, bias):
 		return None, "Requested ticker could not be found."
 
 	try:
-		await ticker_tree_search(ticker, exchangeId, platform, bias)
+		await ticker_tree_search(ticker, exchangeId, platform)
 	except TokenNotFoundException as e:
 		return None, e.message
 
@@ -49,16 +47,16 @@ async def match_ticker(tickerId, exchangeId, platform, bias):
 		"metadata": match.get("metadata", {"type": "Unknown", "rank": MAXSIZE}),
 		"isSimple": isSimple
 	}
-	if isSimple and bias == "crypto": response["tradable"] = await find_tradable_market(match, response["exchange"])
+	if isSimple: response["tradable"] = await find_tradable_market(match, response["exchange"])
 
 	return response, None
 
-async def ticker_tree_search(node, exchangeId, platform, bias):
+async def ticker_tree_search(node, exchangeId, platform):
 	for i, child in enumerate(node.children):
 		if not isinstance(child, Token):
-			node.children[i] = await ticker_tree_search(child, exchangeId, platform, bias)
+			node.children[i] = await ticker_tree_search(child, exchangeId, platform)
 		elif child.type == "NAME":
-			newValue = await find_instrument(child.value, exchangeId, platform, bias)
+			newValue = await find_instrument(child.value, exchangeId, platform)
 			node.children[i] = child.update(value=newValue)
 	return node
 
@@ -131,17 +129,22 @@ def generate_query(search, tag, exchangeId, platform):
 
 	return tickerQuery, nameQuery
 
-async def find_instrument(tickerId, exchangeId, platform, bias):
+async def perform_search(tickerId, exchangeId, platform, limit=1):
 	search, tag = tickerId.lower().split(":") if ":" in tickerId else (tickerId.lower(), None)
 	if tag is not None and not tag.isnumeric(): search, tag = tickerId.lower(), None
 
 	# Generate queries and search by ticker first
 	query1, query2 = generate_query(search, tag, exchangeId, platform)
-	response = await elasticsearch.search(index="assets", query=query1, sort=QUERY_SORT, size=1)
+	response = await elasticsearch.search(index="assets", query=query1, sort=QUERY_SORT, size=limit)
 
 	# Search by name if no results were found
 	if response["hits"]["total"]["value"] == 0:
-		response = await elasticsearch.search(index="assets", query=query2, sort=QUERY_SORT, size=1)
+		response = await elasticsearch.search(index="assets", query=query2, sort=QUERY_SORT, size=limit)
+
+	return response
+
+async def find_instrument(tickerId, exchangeId, platform):
+	response = await perform_search(tickerId, exchangeId, platform)
 
 	if response["hits"]["total"]["value"] == 0:
 		if platform in STRICT_MATCH:
@@ -244,18 +247,25 @@ async def find_listings(ticker, platform):
 	return sorted(response, key=lambda x: x[0]), total
 
 async def find_venues(tickerId, platforms):
-	response = await elasticsearch.search(index="exchanges", query={"match_all": {}}, size=10000)
-	exchanges = response["hits"]["hits"]
+	tasks = []
+	for platform in platforms:
+		tasks.append(perform_search(tickerId, None, platform, limit=10000))
+	tasks.append(elasticsearch.search(index="exchanges", query={"match_all": {}}, size=10000))
+	responses = await gather(*tasks)
+
+	ids = {}
+	exchanges = responses.pop()
+	for exchange in exchanges["hits"]["hits"]:
+		ids[exchange["_source"]["id"]] = exchange["_source"]["name"]
 
 	venues = []
-	if platforms == "":
-		venues += ["CoinGecko"]
-		venues += [e["_source"]["name"] for e in exchanges]
-	else:
-		for platform in platforms.split(","):
-			if platform == "CoinGecko":
-				venues += ["CoinGecko"]
-			else:
-				venues += [e["_source"]["name"] for e in exchanges if platform in e["_source"]["supports"]]
+	for platform, response in zip(platforms, responses):
+		if platform == "CoinGecko" and response["hits"]["total"]["value"] > 0:
+			venues.append("CoinGecko")
+		else:
+			for hit in response["hits"]["hits"]:
+				venue = ids[hit["_source"]["market"]["source"]]
+				if venue not in venues:
+					venues.append(venue)
 
 	return venues

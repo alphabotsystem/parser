@@ -45,10 +45,10 @@ DEFAULTS = {
 
 
 class PriceRequestHandler(AbstractRequestHandler):
-	def __init__(self, tickerId, platforms, bias="traditional"):
+	def __init__(self, tickerId, platforms):
 		super().__init__(platforms)
 		for platform in platforms:
-			self.requests[platform] = PriceRequest(tickerId, platform, bias)
+			self.requests[platform] = PriceRequest(tickerId, platform)
 
 	async def parse_argument(self, argument):
 		for platform, request in self.requests.items():
@@ -127,8 +127,8 @@ class PriceRequestHandler(AbstractRequestHandler):
 
 
 class PriceRequest(AbstractRequest):
-	def __init__(self, tickerId, platform, bias):
-		super().__init__(platform, bias)
+	def __init__(self, tickerId, platform):
+		super().__init__(platform)
 		self.tickerId = tickerId
 		self.ticker = {}
 		self.exchange = {}
@@ -141,15 +141,15 @@ class PriceRequest(AbstractRequest):
 		preferences = [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences]
 		if any([e.get("id") in ["funding", "oi"] for e in preferences]):
 			if not self.hasExchange:
-				try: _, self.exchange = await find_exchange("bitmex", self.platform, self.parserBias)
+				try: _, self.exchange = await find_exchange("bitmex", self.platform)
 				except: pass
 		elif any([e.get("id") in ["ls", "sl"] for e in preferences]):
 			if not self.hasExchange:
-				try: _, self.exchange = await find_exchange("bitfinex", self.platform, self.parserBias)
+				try: _, self.exchange = await find_exchange("bitfinex", self.platform)
 				except: pass
 
 		updatedTicker, error = None, None
-		try: updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform, self.parserBias)
+		try: updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform)
 		except: error = "Something went wrong while processing the requested ticker."
 
 		if error is not None:
@@ -190,7 +190,6 @@ class PriceRequest(AbstractRequest):
 		d = {
 			"ticker": self.ticker,
 			"exchange": self.exchange,
-			"parserBias": self.parserBias,
 			"preferences": [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences]
 		}
 		return d

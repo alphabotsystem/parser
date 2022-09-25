@@ -147,10 +147,10 @@ DEFAULTS = {
 
 
 class HeatmapRequestHandler(AbstractRequestHandler):
-	def __init__(self, platforms, bias="traditional"):
+	def __init__(self, platforms):
 		super().__init__(platforms)
 		for platform in platforms:
-			self.requests[platform] = HeatmapRequest(platform, bias)
+			self.requests[platform] = HeatmapRequest(platform)
 
 	async def parse_argument(self, argument):
 		for platform, request in self.requests.items():
@@ -283,8 +283,8 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 
 
 class HeatmapRequest(AbstractRequest):
-	def __init__(self, platform, bias):
-		super().__init__(platform, bias)
+	def __init__(self, platform):
+		super().__init__(platform)
 
 		self.timeframes = []
 		self.types = []
@@ -339,7 +339,6 @@ class HeatmapRequest(AbstractRequest):
 
 	def to_dict(self):
 		d = {
-			"parserBias": self.parserBias,
 			"timeframes": [e.parsed[self.platform] for e in self.timeframes],
 			"types": "".join([e.parsed[self.platform] for e in self.types]),
 			"styles": [e.parsed[self.platform] for e in self.styles],

@@ -47,8 +47,7 @@ class AbstractRequestHandler(object):
 		return responseMessage
 
 class AbstractRequest(object):
-	def __init__(self, platform, bias):
-		self.parserBias = bias
+	def __init__(self, platform):
 		self.platform = platform
 		self.errors = []
 		self.errorIsFatal = False
@@ -68,7 +67,7 @@ class AbstractRequest(object):
 		if self.hasExchange: return None, None
 		if self.platform in ["Alternative.me", "CNN Business", "Finviz", "CoinGecko"]: return None, None
 		exchangeSupported, parsedExchange = None, None
-		try: exchangeSupported, parsedExchange = await find_exchange(argument, self.platform, self.parserBias)
+		try: exchangeSupported, parsedExchange = await find_exchange(argument, self.platform)
 		except: return "Parser could not process your request. Please try again in a bit.", False
 		if parsedExchange is not None:
 			if not exchangeSupported:

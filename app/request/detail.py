@@ -24,10 +24,10 @@ DEFAULTS = {
 
 
 class DetailRequestHandler(AbstractRequestHandler):
-	def __init__(self, tickerId, platforms, bias="traditional"):
+	def __init__(self, tickerId, platforms):
 		super().__init__(platforms)
 		for platform in platforms:
-			self.requests[platform] = DetailRequest(tickerId, platform, bias)
+			self.requests[platform] = DetailRequest(tickerId, platform)
 
 	async def parse_argument(self, argument):
 		for platform, request in self.requests.items():
@@ -84,8 +84,8 @@ class DetailRequestHandler(AbstractRequestHandler):
 
 
 class DetailRequest(AbstractRequest):
-	def __init__(self, tickerId, platform, bias):
-		super().__init__(platform, bias)
+	def __init__(self, tickerId, platform):
+		super().__init__(platform)
 		self.tickerId = tickerId
 		self.ticker = {}
 
@@ -93,7 +93,7 @@ class DetailRequest(AbstractRequest):
 
 	async def process_ticker(self):
 		updatedTicker, error = None, None
-		try: updatedTicker, error = await match_ticker(self.tickerId, None, self.platform, self.parserBias)
+		try: updatedTicker, error = await match_ticker(self.tickerId, None, self.platform)
 		except: error = "Something went wrong while processing the requested ticker."
 
 		if error is not None:
@@ -132,7 +132,6 @@ class DetailRequest(AbstractRequest):
 	def to_dict(self):
 		d = {
 			"ticker": self.ticker,
-			"parserBias": self.parserBias,
 			"preferences": [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences]
 		}
 		return d

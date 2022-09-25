@@ -8,10 +8,8 @@ elasticsearch = AsyncElasticsearch(
 )
 
 
-async def find_exchange(raw, platform, bias):
+async def find_exchange(raw, platform):
 	if platform in ["CoinGecko"]: return False, None
-	elif platform in ["CCXT", "Ichibot", "TradingLite", "Bookmap", "LLD"]: bias = "crypto"
-	elif platform in ["IEXC"]: bias = "traditional"
 
 	query = {
 		"bool": {

@@ -9,7 +9,7 @@ from ccxt.base import decimal_to_precision as dtp
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
 from matching.exchanges import find_exchange
-from matching.instruments import match_ticker, find_listings, find_venues
+from matching.instruments import match_ticker, find_listings, find_venues, elasticsearch
 from matching.autocomplete import *
 from request import ChartRequestHandler
 from request import HeatmapRequestHandler
@@ -31,8 +31,8 @@ set_event_loop(loop)
 @app.post("/parser/chart")
 async def process_chart_request(req: Request):
 	request = await req.json()
-	bias, arguments, platforms, tickerId = request["bias"], request["arguments"], request["platforms"], request["tickerId"]
-	requestHandler = ChartRequestHandler(tickerId, platforms.copy(), bias)
+	arguments, platforms, tickerId = request["arguments"], request["platforms"], request["tickerId"]
+	requestHandler = ChartRequestHandler(tickerId, platforms.copy())
 	for argument in arguments:
 		await requestHandler.parse_argument(argument)
 	if tickerId is not None:
@@ -47,8 +47,8 @@ async def process_chart_request(req: Request):
 @app.post("/parser/heatmap")
 async def process_heatmap_request(req: Request):
 	request = await req.json()
-	bias, arguments, platforms = request["bias"], request["arguments"], request["platforms"]
-	requestHandler = HeatmapRequestHandler(platforms.copy(), bias)
+	arguments, platforms = request["arguments"], request["platforms"]
+	requestHandler = HeatmapRequestHandler(platforms.copy())
 	for argument in arguments:
 		await requestHandler.parse_argument(argument)
 
@@ -61,8 +61,8 @@ async def process_heatmap_request(req: Request):
 @app.post("/parser/quote")
 async def process_quote_request(req: Request):
 	request = await req.json()
-	bias, arguments, platforms, tickerId = request["bias"], request["arguments"], request["platforms"], request["tickerId"]
-	requestHandler = PriceRequestHandler(tickerId, platforms.copy(), bias)
+	arguments, platforms, tickerId = request["arguments"], request["platforms"], request["tickerId"]
+	requestHandler = PriceRequestHandler(tickerId, platforms.copy())
 	for argument in arguments:
 		await requestHandler.parse_argument(argument)
 	if tickerId is not None:
@@ -77,8 +77,8 @@ async def process_quote_request(req: Request):
 @app.post("/parser/detail")
 async def process_detail_request(req: Request):
 	request = await req.json()
-	bias, arguments, platforms, tickerId = request["bias"], request["arguments"], request["platforms"], request["tickerId"]
-	requestHandler = DetailRequestHandler(tickerId, platforms.copy(), bias)
+	arguments, platforms, tickerId = request["arguments"], request["platforms"], request["tickerId"]
+	requestHandler = DetailRequestHandler(tickerId, platforms.copy())
 	for argument in arguments:
 		await requestHandler.parse_argument(argument)
 	if tickerId is not None:
@@ -93,8 +93,8 @@ async def process_detail_request(req: Request):
 @app.post("/parser/trade")
 async def process_trade_request(req: Request):
 	request = await req.json()
-	bias, arguments, platforms, tickerId = request["bias"], request["arguments"], request["platforms"], request["tickerId"]
-	requestHandler = TradeRequestHandler(tickerId, platforms.copy(), bias)
+	arguments, platforms, tickerId = request["arguments"], request["platforms"], request["tickerId"]
+	requestHandler = TradeRequestHandler(tickerId, platforms.copy())
 	for argument in arguments:
 		await requestHandler.parse_argument(argument)
 	if tickerId is not None:
@@ -109,13 +109,13 @@ async def process_trade_request(req: Request):
 @app.post("/parser/match_ticker")
 async def run(req: Request):
 	request = await req.json()
-	message, response = await match_ticker(request["tickerId"], request["exchangeId"], request["platform"], request["bias"])
+	message, response = await match_ticker(request["tickerId"], request["exchangeId"], request["platform"])
 	return {"response": response, "message": message}
 
 @app.post("/parser/find_exchange")
 async def run(req: Request):
 	request = await req.json()
-	success, match = await find_exchange(request["raw"], request["platform"], request["bias"])
+	success, match = await find_exchange(request["raw"], request["platform"])
 	return {"success": success, "match": match}
 
 @app.post("/parser/autocomplete")
@@ -167,7 +167,7 @@ async def format_amount(req: Request):
 @app.post("/parser/get_venues")
 async def get_venues(req: Request):
 	request = await req.json()
-	venues = await find_venues(request["tickerId"], request["platforms"])
+	venues = await find_venues(request["tickerId"], request["platforms"].split(","))
 	return {"response": venues}
 
 

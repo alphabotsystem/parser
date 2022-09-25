@@ -175,7 +175,7 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 			if exchange == "FOREX": exchange = ""
 			if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
 				symbol += "PERP"
-			if (":" in symbol):
+			if ":" in symbol and exchange == "":
 				exchange, symbol = symbol.split(":", 1)
 			url = f"https://symbol-search.tradingview.com/symbol_search/?text={symbol}&hl=0&exchange={exchange}&lang=en&type=&domain=production"
 			print(url)
@@ -185,7 +185,7 @@ async def find_instrument(tickerId, exchangeId, platform, bias):
 					raise TokenNotFoundException("Requested ticker could not be found.")
 				newSymbol = response[0]["symbol"]
 				newExchange = response[0].get("prefix", response[0]["exchange"])
-				if instrument["id"] != newSymbol or instrument["exchange"].get("id") != newExchange:
+				if instrument["id"] != newSymbol or instrument["exchange"].get("id").upper() != newExchange:
 					print(f"Rewrite from {symbol}@{exchange} to {newSymbol}@{newExchange}")
 					instrument["id"] = newSymbol
 					instrument["exchange"] = {"id": newExchange}

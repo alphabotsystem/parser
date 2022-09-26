@@ -23,8 +23,8 @@ GRAMMAR = """
 	%import common.WS_INLINE
 	%ignore WS_INLINE
 
-	NAME: /(?!.*[+\-\*\/^\()\'\"\‘\’\“\”]).+/
 	CONSTANT: DIGIT ("." DIGIT+)?
+	NAME: /([^\+\-\*\/\^\(\)\'\"\‘\’\“\”]+[a-zA-Z]+)/
 """
 
 larkParser = Lark(GRAMMAR, parser='lalr')

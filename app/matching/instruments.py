@@ -184,6 +184,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 			exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").upper())
 			if exchange == "FOREX": exchange = ""
 			if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
+				instrument["id"] += "PERP"
 				symbol += "PERP"
 			if exchangeId is None and instrument["metadata"]["type"] != "Crypto":
 				symbol = tickerId
@@ -201,7 +202,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 				else:
 					newSymbol = response[0]["symbol"]
 				newExchange = response[0].get("prefix", response[0]["exchange"])
-				if instrument["id"] != newSymbol or exchange != newExchange:
+				if symbol != newSymbol or exchange != newExchange:
 					print(f"Rewrite from {symbol}@{exchange} to {newSymbol}@{newExchange}")
 					instrument["id"] = newSymbol
 					instrument["exchange"] = {"id": newExchange}

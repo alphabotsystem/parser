@@ -28,6 +28,10 @@ async def match_ticker(tickerId, exchangeId, platform):
 		await ticker_tree_search(ticker, exchangeId, platform)
 	except TokenNotFoundException as e:
 		return None, e.message
+	except:
+		print(tickerId)
+		print(format_exc())
+		return None, "Requested ticker could not be found."
 
 	isSimple = isinstance(ticker.children[0], Token) and ticker.children[0].type == "NAME"
 	match = ticker.children[0].value if isSimple else {}
@@ -188,7 +192,7 @@ async def find_instrument(tickerId, exchangeId, platform):
 					raise TokenNotFoundException("Requested ticker could not be found.")
 				newSymbol = response[0]["symbol"]
 				newExchange = response[0].get("prefix", response[0]["exchange"])
-				if instrument["id"] != newSymbol or instrument["exchange"].get("id").upper() != newExchange:
+				if instrument["id"] != newSymbol or instrument["exchange"].get("id", "").upper() != newExchange:
 					print(f"Rewrite from {symbol}@{exchange} to {newSymbol}@{newExchange}")
 					instrument["id"] = newSymbol
 					instrument["exchange"] = {"id": newExchange}

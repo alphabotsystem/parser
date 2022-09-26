@@ -45,7 +45,6 @@ async def autocomplete_color(color, heatmapType):
 	return options
 
 async def autocomplete_size(size, heatmapType):
-	size = " ".join(ctx.options.get("size", "").lower().split())
 	options = []
 	for option in HeatmapParameters["preferences"]:
 		if option.id != "size": continue

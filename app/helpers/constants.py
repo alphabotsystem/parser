@@ -51,10 +51,10 @@ EXCHANGE_TO_TRADINGVIEW = {
 	"xbel": "BELEX", "xber": "BER", "xbog": "BVC", "xbom": "BSE", "xbra": "BSSE", "xbru": "EURONEXTBRU", "xbud": "BET",
 	"xcai": "EGX", "xcnq": "CSE", "xcse": "OMXCOP", "xdfm": "DFM", "xham": "HAM", "xhel": "OMXHEX", "xhkg": "HKEX",
 	"xice": "OMXICE", "xidx": "IDX", "xist": "BIST", "xkrx": "KRX", "xlim": "BVL", "xlis": "EURONEXTLIS",
-	"xlit": "OMXVSE", "xlon": "LSE", "xlux": "LUXSE", "xmad": "BME", "xmex": "BMV", "xnas": "NASDAQ", "xngm": "NGM",
-	"xnsa": "NSENG", "xnse": "NSE", "xose": "OSE", "xpar": "EURONEXTPAR", "xris": "OMXRSE", "xsau": "TADAWUL",
-	"xshe": "SZSE", "xshg": "SSE", "xsto": "OMXSTO", "xstu": "SWB", "xswx": "BX", "xtae": "TASE", "xtai": "TWSE",
-	"xtal": "OMXTSE", "xtse": "TSX", "xwar": "GPW", "bitpanda": "BITPANDAPRO", "cex": "CEXIO", "coinbasepro": "COINBASE",
-	"therock": "THEROCKTRADING", "gate": "GATEIO", "bitfinex2": "BITFINEX", "binanceusdm": "BINANCE",
-	"binancecoinm": "BINANCE"
+	"xlit": "OMXVSE", "xlon": "LSE", "xlux": "LUXSE", "xmad": "BME", "xmex": "BMV", "xngs": "NASDAQ", "xnas": "NASDAQ",
+	"xngm": "NGM", "xnsa": "NSENG", "xnse": "NSE", "xose": "OSE", "xpar": "EURONEXTPAR", "xris": "OMXRSE",
+	"xsau": "TADAWUL", "xshe": "SZSE", "xshg": "SSE", "xsto": "OMXSTO", "xstu": "SWB", "xswx": "BX", "xtae": "TASE",
+	"xtai": "TWSE", "xtal": "OMXTSE", "xtse": "TSX", "xwar": "GPW", "bitpanda": "BITPANDAPRO", "cex": "CEXIO",
+	"coinbasepro": "COINBASE", "therock": "THEROCKTRADING", "gate": "GATEIO", "bitfinex2": "BITFINEX",
+	"binanceusdm": "BINANCE", "binancecoinm": "BINANCE"
 }

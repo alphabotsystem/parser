@@ -1,6 +1,6 @@
 QUERY_SORT = [
-	"rank.base",
 	"rank.exchange",
+	"rank.base",
 	"rank.quote",
 ]
 

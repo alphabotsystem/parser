@@ -16,7 +16,7 @@ elasticsearch = AsyncElasticsearch(
 )
 
 
-async def match_ticker(tickerId, exchangeId, platform):
+async def match_ticker(tickerId, exchangeId, platform, assetClass):
 	try:
 		ticker = Ticker(tickerId)
 	except:
@@ -25,7 +25,7 @@ async def match_ticker(tickerId, exchangeId, platform):
 		return None, "Requested ticker could not be found."
 
 	try:
-		await ticker_tree_search(ticker, exchangeId, platform)
+		await ticker_tree_search(ticker, exchangeId, platform, assetClass)
 	except TokenNotFoundException as e:
 		return None, e.message
 	except:
@@ -55,12 +55,12 @@ async def match_ticker(tickerId, exchangeId, platform):
 
 	return response, None
 
-async def ticker_tree_search(node, exchangeId, platform):
+async def ticker_tree_search(node, exchangeId, platform, assetClass):
 	for i, child in enumerate(node.children):
 		if not isinstance(child, Token):
-			node.children[i] = await ticker_tree_search(child, exchangeId, platform)
+			node.children[i] = await ticker_tree_search(child, exchangeId, platform, assetClass)
 		elif child.type == "NAME":
-			newValue = await find_instrument(child.value, exchangeId, platform)
+			newValue = await find_instrument(child.value, exchangeId, platform, assetClass)
 			node.children[i] = child.update(value=newValue)
 	return node
 
@@ -89,7 +89,7 @@ async def prepare_instrument(instrument, exchangeId):
 		}
 	}
 
-def generate_query(search, tag, exchangeId, platform):
+def generate_query(search, tag, exchangeId, platform, assetClass):
 	tickerQuery = {
 		"bool": {
 			"must": [{
@@ -124,6 +124,9 @@ def generate_query(search, tag, exchangeId, platform):
 	if tag is not None:
 		tickerQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
 		nameQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
+	if assetClass is not None:
+		tickerQuery["bool"]["must"].append({"term": {"type": assetClass}})
+		nameQuery["bool"]["must"].append({"term": {"type": assetClass}})
 	if exchangeId is None:
 		tickerQuery["bool"]["must"].append({"term": {"market.passive": False}})
 		nameQuery["bool"]["must"].append({"term": {"market.passive": False}})
@@ -133,12 +136,12 @@ def generate_query(search, tag, exchangeId, platform):
 
 	return tickerQuery, nameQuery
 
-async def perform_search(tickerId, exchangeId, platform, limit=1):
+async def perform_search(tickerId, exchangeId, platform, assetClass=None, limit=1):
 	search, tag = tickerId.lower().split(":") if ":" in tickerId else (tickerId.lower(), None)
 	if tag is not None and not tag.isnumeric(): search, tag = tickerId.lower(), None
 
 	# Generate queries and search by ticker first
-	query1, query2 = generate_query(search, tag, exchangeId, platform)
+	query1, query2 = generate_query(search, tag, exchangeId, platform, assetClass)
 	response = await elasticsearch.search(index="assets", query=query1, sort=QUERY_SORT, size=limit)
 
 	# Search by name if no results were found
@@ -147,8 +150,8 @@ async def perform_search(tickerId, exchangeId, platform, limit=1):
 
 	return response
 
-async def find_instrument(tickerId, exchangeId, platform):
-	response = await perform_search(tickerId, exchangeId, platform)
+async def find_instrument(tickerId, exchangeId, platform, assetClass):
+	response = await perform_search(tickerId, exchangeId, platform, assetClass=assetClass)
 
 	if response["hits"]["total"]["value"] == 0:
 		if platform in STRICT_MATCH:
@@ -190,9 +193,12 @@ async def find_instrument(tickerId, exchangeId, platform):
 				response = await response.json()
 				if len(response) == 0:
 					raise TokenNotFoundException("Requested ticker could not be found.")
-				newSymbol = response[0]["symbol"]
+				if "contracts" in response[0]:
+					newSymbol = response[0]["contracts"][0]["symbol"]
+				else:
+					newSymbol = response[0]["symbol"]
 				newExchange = response[0].get("prefix", response[0]["exchange"])
-				if instrument["id"] != newSymbol or instrument["exchange"].get("id", "").upper() != newExchange:
+				if instrument["id"] != newSymbol or exchange != newExchange:
 					print(f"Rewrite from {symbol}@{exchange} to {newSymbol}@{newExchange}")
 					instrument["id"] = newSymbol
 					instrument["exchange"] = {"id": newExchange}
@@ -250,7 +256,22 @@ async def find_listings(ticker, platform):
 
 	return sorted(response, key=lambda x: x[0]), total
 
-async def find_venues(tickerId, platforms):
+async def autocomplete_ticker(ticker, platform):
+	tasks = []
+	for platform in platforms:
+		tasks.append(perform_search(tickerId, None, platform, limit=10000))
+	responses = await gather(*tasks)
+	
+	tickers = []
+	for platform, response in zip(platforms, responses):
+		for hit in response["hits"]["hits"]:
+			match = hit["_source"]
+			base = match["base"] if match["tag"] == 1 else match["base"] + ":" + match["tag"]
+			tickers.append(f"{base} | {match['name']} | {match['type']}")
+
+	return tickers
+
+async def autocomplete_venues(tickerId, platforms):
 	tasks = []
 	for platform in platforms:
 		tasks.append(perform_search(tickerId, None, platform, limit=10000))
@@ -268,7 +289,10 @@ async def find_venues(tickerId, platforms):
 			venues.append("CoinGecko")
 		else:
 			for hit in response["hits"]["hits"]:
-				venue = ids[hit["_source"]["market"]["source"]]
+				if hit["_source"]["market"]["source"] == "forex":
+					venue = "Forex"
+				else:
+					venue = ids[hit["_source"]["market"]["source"]]
 				if venue not in venues:
 					venues.append(venue)
 

@@ -3,19 +3,18 @@ environ["PRODUCTION"] = environ["PRODUCTION"] if "PRODUCTION" in environ and env
 
 from fastapi import FastAPI, Request
 from uvicorn import Config, Server
-from asyncio import new_event_loop, set_event_loop
+from asyncio import new_event_loop, set_event_loop, create_task, wait
 import ccxt
 from ccxt.base import decimal_to_precision as dtp
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
 from matching.exchanges import find_exchange
-from matching.instruments import match_ticker, find_listings, find_venues, elasticsearch
+from matching.instruments import match_ticker, find_listings, autocomplete_venues, elasticsearch
 from matching.autocomplete import *
 from request import ChartRequestHandler
 from request import HeatmapRequestHandler
 from request import PriceRequestHandler
 from request import DetailRequestHandler
-from request import TradeRequestHandler
 
 
 app = FastAPI()
@@ -31,12 +30,18 @@ set_event_loop(loop)
 @app.post("/parser/chart")
 async def process_chart_request(req: Request):
 	request = await req.json()
-	arguments, platforms, tickerId = request["arguments"], request["platforms"], request["tickerId"]
+	arguments, platforms = request["arguments"], request["platforms"]
+	tickerParts = request["tickerId"].split("|")
+	tickerId, assetClass = tickerParts[0], tickerParts[-1]
 	requestHandler = ChartRequestHandler(tickerId, platforms.copy())
+
+	tasks = []
 	for argument in arguments:
-		await requestHandler.parse_argument(argument)
+		tasks.append(create_task(requestHandler.parse_argument(argument)))
 	if tickerId is not None:
-		await requestHandler.process_ticker()
+		tasks.append(create_task(requestHandler.process_ticker()))
+	if len(tasks) > 0:
+		await wait(tasks)
 
 	requestHandler.set_defaults()
 	await requestHandler.find_caveats()
@@ -49,8 +54,12 @@ async def process_heatmap_request(req: Request):
 	request = await req.json()
 	arguments, platforms = request["arguments"], request["platforms"]
 	requestHandler = HeatmapRequestHandler(platforms.copy())
+
+	tasks = []
 	for argument in arguments:
-		await requestHandler.parse_argument(argument)
+		tasks.append(create_task(requestHandler.parse_argument(argument)))
+	if len(tasks) > 0:
+		await wait(tasks)
 
 	requestHandler.set_defaults()
 	await requestHandler.find_caveats()
@@ -61,12 +70,18 @@ async def process_heatmap_request(req: Request):
 @app.post("/parser/quote")
 async def process_quote_request(req: Request):
 	request = await req.json()
-	arguments, platforms, tickerId = request["arguments"], request["platforms"], request["tickerId"]
+	arguments, platforms = request["arguments"], request["platforms"]
+	tickerParts = request["tickerId"].split("|")
+	tickerId, assetClass = tickerParts[0], tickerParts[-1]
 	requestHandler = PriceRequestHandler(tickerId, platforms.copy())
+
+	tasks = []
 	for argument in arguments:
-		await requestHandler.parse_argument(argument)
+		tasks.append(create_task(requestHandler.parse_argument(argument)))
 	if tickerId is not None:
-		await requestHandler.process_ticker()
+		tasks.append(create_task(requestHandler.process_ticker()))
+	if len(tasks) > 0:
+		await wait(tasks)
 
 	requestHandler.set_defaults()
 	await requestHandler.find_caveats()
@@ -77,28 +92,18 @@ async def process_quote_request(req: Request):
 @app.post("/parser/detail")
 async def process_detail_request(req: Request):
 	request = await req.json()
-	arguments, platforms, tickerId = request["arguments"], request["platforms"], request["tickerId"]
+	arguments, platforms = request["arguments"], request["platforms"]
+	tickerParts = request["tickerId"].split("|")
+	tickerId, assetClass = tickerParts[0], tickerParts[-1]
 	requestHandler = DetailRequestHandler(tickerId, platforms.copy())
+
+	tasks = []
 	for argument in arguments:
-		await requestHandler.parse_argument(argument)
+		tasks.append(create_task(requestHandler.parse_argument(argument)))
 	if tickerId is not None:
-		await requestHandler.process_ticker()
-
-	requestHandler.set_defaults()
-	await requestHandler.find_caveats()
-	responseMessage = requestHandler.get_preferred_platform()
-
-	return {"message": responseMessage, "response": requestHandler.to_dict()}
-
-@app.post("/parser/trade")
-async def process_trade_request(req: Request):
-	request = await req.json()
-	arguments, platforms, tickerId = request["arguments"], request["platforms"], request["tickerId"]
-	requestHandler = TradeRequestHandler(tickerId, platforms.copy())
-	for argument in arguments:
-		await requestHandler.parse_argument(argument)
-	if tickerId is not None:
-		await requestHandler.process_ticker()
+		tasks.append(create_task(requestHandler.process_ticker()))
+	if len(tasks) > 0:
+		await wait(tasks)
 
 	requestHandler.set_defaults()
 	await requestHandler.find_caveats()
@@ -109,7 +114,7 @@ async def process_trade_request(req: Request):
 @app.post("/parser/match_ticker")
 async def run(req: Request):
 	request = await req.json()
-	message, response = await match_ticker(request["tickerId"], request["exchangeId"], request["platform"])
+	message, response = await match_ticker(request["tickerId"], request["exchangeId"], request["platform"], request["assetClass"])
 	return {"response": response, "message": message}
 
 @app.post("/parser/find_exchange")
@@ -122,20 +127,20 @@ async def run(req: Request):
 async def autocomplete(req: Request):
 	request = await req.json()
 	option = request["option"]
-	showStockOptions = request["type"] in ["stocks", ""]
-	showCryptoOptions = request["type"] in ["crypto", ""]
+	if option == "venues":
+		response = await autocomplete_venues(request["tickerId"], request["platforms"].split(","))
 	if option == "timeframe":
-		response = autocomplete_timeframe(request["timeframe"], showStockOptions, showCryptoOptions)
+		response = await autocomplete_timeframe(request["timeframe"], request["type"])
 	elif option == "market":
-		response = autocomplete_market(request["market"], showStockOptions, showCryptoOptions)
+		response = await autocomplete_market(request["market"], request["type"])
 	elif option == "category":
-		response = autocomplete_category(request["category"], showStockOptions, showCryptoOptions)
+		response = await autocomplete_category(request["category"], request["type"])
 	elif option == "color":
-		response = autocomplete_color(request["color"], showStockOptions, showCryptoOptions)
+		response = await autocomplete_color(request["color"], request["type"])
 	elif option == "size":
-		response = autocomplete_size(request["size"], showStockOptions, showCryptoOptions)
+		response = await autocomplete_size(request["size"], request["type"])
 	elif option == "group":
-		response = autocomplete_group(request["group"], showStockOptions, showCryptoOptions)
+		response = await autocomplete_group(request["group"], request["type"])
 	else:
 		response = []
 	return {"response": response}
@@ -163,12 +168,6 @@ async def format_amount(req: Request):
 	precision = exchange.markets.get(request["symbol"], {}).get("precision", {}).get("amount", 8)
 	text = dtp.decimal_to_precision(request["amount"], rounding_mode=dtp.TRUNCATE, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.NO_PADDING)
 	return {"response": text.rstrip("0").rstrip(".")}
-
-@app.post("/parser/get_venues")
-async def get_venues(req: Request):
-	request = await req.json()
-	venues = await find_venues(request["tickerId"], request["platforms"].split(","))
-	return {"response": venues}
 
 
 # -------------------------

@@ -45,8 +45,8 @@ DEFAULTS = {
 
 
 class PriceRequestHandler(AbstractRequestHandler):
-	def __init__(self, tickerId, platforms):
-		super().__init__(platforms)
+	def __init__(self, tickerId, platforms, assetClass=None):
+		super().__init__(platforms, assetClass)
 		for platform in platforms:
 			self.requests[platform] = PriceRequest(tickerId, platform)
 
@@ -137,7 +137,7 @@ class PriceRequest(AbstractRequest):
 
 		self.hasExchange = False
 
-	async def process_ticker(self):
+	async def process_ticker(self, assetClass):
 		preferences = [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences]
 		if any([e.get("id") in ["funding", "oi"] for e in preferences]):
 			if not self.hasExchange:
@@ -149,7 +149,7 @@ class PriceRequest(AbstractRequest):
 				except: pass
 
 		updatedTicker, error = None, None
-		try: updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform)
+		try: updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform, assetClass)
 		except: error = "Something went wrong while processing the requested ticker."
 
 		if error is not None:

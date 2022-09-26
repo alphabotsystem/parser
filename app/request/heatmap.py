@@ -148,7 +148,7 @@ DEFAULTS = {
 
 class HeatmapRequestHandler(AbstractRequestHandler):
 	def __init__(self, platforms):
-		super().__init__(platforms)
+		super().__init__(platforms, None)
 		for platform in platforms:
 			self.requests[platform] = HeatmapRequest(platform)
 

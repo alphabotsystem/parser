@@ -5,7 +5,8 @@ from traceback import format_exc
 from matching.exchanges import find_exchange
 
 class AbstractRequestHandler(object):
-	def __init__(self, platforms):
+	def __init__(self, platforms, assetClass):
+		self.assetClass = assetClass
 		self.platforms = platforms
 		self.currentPlatform = self.platforms[0]
 		self.requests = {}
@@ -14,7 +15,7 @@ class AbstractRequestHandler(object):
 		tasks = set()
 		for platform, request in self.requests.items():
 			if request.errorIsFatal: continue
-			tasks.add(request.process_ticker())
+			tasks.add(request.process_ticker(self.assetClass))
 		if len(tasks) > 0:
 			await wait(tasks)
 

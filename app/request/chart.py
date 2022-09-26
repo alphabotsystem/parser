@@ -340,8 +340,8 @@ DEFAULTS = {
 
 
 class ChartRequestHandler(AbstractRequestHandler):
-	def __init__(self, tickerId, platforms):
-		super().__init__(platforms)
+	def __init__(self, tickerId, platforms, assetClass=None):
+		super().__init__(platforms, assetClass)
 		for platform in platforms:
 			self.requests[platform] = ChartRequest(tickerId, platform)
 
@@ -488,10 +488,12 @@ class ChartRequest(AbstractRequest):
 		self.currentTimeframe = None
 		self.hasExchange = False
 
-	async def process_ticker(self):
+	async def process_ticker(self, assetClass):
 		updatedTicker, error = None, None
-		try: updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform)
-		except: error = "Something went wrong while processing the requested ticker."
+		try: updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform, assetClass)
+		except:
+			print(format_exc())
+			error = "Something went wrong while processing the requested ticker."
 
 		if error is not None:
 			self.set_error(error, isFatal=True)

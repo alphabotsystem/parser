@@ -9,8 +9,8 @@ from .abstract import AbstractRequestHandler, AbstractRequest
 
 PARAMETERS = {
 	"preferences": [
-		Parameter("forcePlatform", "request quote on CoinGecko", ["cg", "coingecko", "crypto"], coingecko=True),
-		Parameter("forcePlatform", "request quote on a stock exchange", ["ix", "iexc", "stock", "stocks"], iexc=True),
+		Parameter("forcePlatform", "request quote on CoinGecko", ["cg", "coingecko"], coingecko=True),
+		Parameter("forcePlatform", "request quote on a stock exchange", ["ix", "iexc"], iexc=True),
 	]
 }
 DEFAULTS = {
@@ -24,8 +24,8 @@ DEFAULTS = {
 
 
 class DetailRequestHandler(AbstractRequestHandler):
-	def __init__(self, tickerId, platforms):
-		super().__init__(platforms)
+	def __init__(self, tickerId, platforms, assetClass=None):
+		super().__init__(platforms, assetClass)
 		for platform in platforms:
 			self.requests[platform] = DetailRequest(tickerId, platform)
 
@@ -91,9 +91,9 @@ class DetailRequest(AbstractRequest):
 
 		self.preferences = []
 
-	async def process_ticker(self):
+	async def process_ticker(self, assetClass):
 		updatedTicker, error = None, None
-		try: updatedTicker, error = await match_ticker(self.tickerId, None, self.platform)
+		try: updatedTicker, error = await match_ticker(self.tickerId, None, self.platform, assetClass)
 		except: error = "Something went wrong while processing the requested ticker."
 
 		if error is not None:

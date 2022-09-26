@@ -185,6 +185,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 			if exchange == "FOREX": exchange = ""
 			if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
 				symbol += "PERP"
+			if exchangeId is None and instrument["metadata"]["type"] != "Crypto":
+				exchange = ""
 			if ":" in symbol and exchange == "":
 				exchange, symbol = symbol.split(":", 1)
 			url = f"https://symbol-search.tradingview.com/symbol_search/?text={symbol}&hl=0&exchange={exchange}&lang=en&type=&domain=production"

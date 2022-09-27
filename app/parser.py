@@ -118,7 +118,7 @@ async def process_detail_request(req: Request):
 @app.post("/parser/match_ticker")
 async def run(req: Request):
 	request = await req.json()
-	message, response = await match_ticker(request["tickerId"], request["exchangeId"], request["platform"], request["assetClass"])
+	message, response = await match_ticker(request["tickerId"], request["exchangeId"], request["platform"], request.get("assetClass"))
 	return {"response": response, "message": message}
 
 @app.post("/parser/find_exchange")

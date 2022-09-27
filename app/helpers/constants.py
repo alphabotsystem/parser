@@ -1,19 +1,6 @@
-QUERY_SORT = [
-	"rank.exchange",
-	"rank.base",
-	"rank.quote",
-]
-
-STRICT_MATCH = [
-	"TradingLite",
-	"Bookmap",
-	"CoinGecko",
-	"CCXT",
-	"IEXC",
-	"LLD",
-	"Ichibot"
-]
-
+ASSET_CLASSES = ["Common Stock", "Preferred Stock", "Crypto", "Forex", "ETF", "ADR", "Closed End Fund", "Open Ended Fund", "Right", "Structured Product", "Unit", "When Issued", "Warrant", "Other"]
+QUERY_SORT = ["rank.exchange", "rank.base", "rank.quote"]
+STRICT_MATCH = ["TradingLite", "Bookmap", "CoinGecko", "CCXT", "IEXC", "LLD", "Ichibot"]
 EXCHANGE_SHORTCUTS = {
 	"crypto": {
 		# Binance
@@ -44,7 +31,6 @@ EXCHANGE_SHORTCUTS = {
 	},
 	"traditional": {}
 }
-
 EXCHANGE_TO_TRADINGVIEW = {
 	"arcx": "AMEX", "xnys": "NYSE", "otcm": "OTC", "asex": "ATHEX", "bvca": "BVCV", "dsmd": "QSE", "hstc": "HNX",
 	"neoe": "NEO", "roco": "TPEX", "rtsx": "MOEX", "xads": "ADX", "xams": "EURONEXTAMS", "xbah": "BAHRAIN",

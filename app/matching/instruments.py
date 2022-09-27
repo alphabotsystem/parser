@@ -125,8 +125,8 @@ def generate_query(search, tag, exchangeId, platform, assetClass):
 		tickerQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
 		nameQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
 	if assetClass is not None:
-		tickerQuery["bool"]["must"].append({"term": {"type": assetClass}})
-		nameQuery["bool"]["must"].append({"term": {"type": assetClass}})
+		tickerQuery["bool"]["must"].append({"term": {"type": assetClass.lower()}})
+		nameQuery["bool"]["must"].append({"term": {"type": assetClass.lower()}})
 	if exchangeId is None:
 		tickerQuery["bool"]["must"].append({"term": {"market.passive": False}})
 		nameQuery["bool"]["must"].append({"term": {"market.passive": False}})
@@ -260,7 +260,7 @@ async def find_listings(ticker, platform):
 
 	return sorted(response, key=lambda x: x[0]), total
 
-async def autocomplete_ticker(ticker, platform):
+async def autocomplete_ticker(tickerId, platforms):
 	tasks = []
 	for platform in platforms:
 		tasks.append(perform_search(tickerId, None, platform, limit=10000))
@@ -270,8 +270,10 @@ async def autocomplete_ticker(ticker, platform):
 	for platform, response in zip(platforms, responses):
 		for hit in response["hits"]["hits"]:
 			match = hit["_source"]
-			base = match["base"] if match["tag"] == 1 else match["base"] + ":" + match["tag"]
-			tickers.append(f"{base} | {match['name']} | {match['type']}")
+			base = match["base"] if match["tag"] == 1 else f"{match['base']}:{match['tag']}"
+			suggestion = f"{base} | {match['name']} | {match['type']}"
+			if suggestion not in tickers:
+				tickers.append(suggestion)
 
 	return tickers
 

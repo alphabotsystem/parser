@@ -8,8 +8,9 @@ import ccxt
 from ccxt.base import decimal_to_precision as dtp
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
+from helpers.constants import ASSET_CLASSES
 from matching.exchanges import find_exchange
-from matching.instruments import match_ticker, find_listings, autocomplete_venues, elasticsearch
+from matching.instruments import match_ticker, find_listings, autocomplete_ticker, autocomplete_venues, elasticsearch
 from matching.autocomplete import *
 from request import ChartRequestHandler
 from request import HeatmapRequestHandler
@@ -32,8 +33,9 @@ async def process_chart_request(req: Request):
 	request = await req.json()
 	arguments, platforms = request["arguments"], request["platforms"]
 	tickerParts = request["tickerId"].split("|")
-	tickerId, assetClass = tickerParts[0], tickerParts[-1]
-	requestHandler = ChartRequestHandler(tickerId, platforms.copy())
+	tickerId, assetClass = tickerParts[0].strip(), tickerParts[-1].title().strip()
+	if assetClass not in ASSET_CLASSES: assetClass = None
+	requestHandler = ChartRequestHandler(tickerId, platforms, assetClass=assetClass)
 
 	tasks = []
 	for argument in arguments:
@@ -53,7 +55,7 @@ async def process_chart_request(req: Request):
 async def process_heatmap_request(req: Request):
 	request = await req.json()
 	arguments, platforms = request["arguments"], request["platforms"]
-	requestHandler = HeatmapRequestHandler(platforms.copy())
+	requestHandler = HeatmapRequestHandler(platforms)
 
 	tasks = []
 	for argument in arguments:
@@ -72,8 +74,9 @@ async def process_quote_request(req: Request):
 	request = await req.json()
 	arguments, platforms = request["arguments"], request["platforms"]
 	tickerParts = request["tickerId"].split("|")
-	tickerId, assetClass = tickerParts[0], tickerParts[-1]
-	requestHandler = PriceRequestHandler(tickerId, platforms.copy())
+	tickerId, assetClass = tickerParts[0].strip(), tickerParts[-1].title().strip()
+	if assetClass not in ASSET_CLASSES: assetClass = None
+	requestHandler = PriceRequestHandler(tickerId, platforms, assetClass=assetClass)
 
 	tasks = []
 	for argument in arguments:
@@ -94,8 +97,9 @@ async def process_detail_request(req: Request):
 	request = await req.json()
 	arguments, platforms = request["arguments"], request["platforms"]
 	tickerParts = request["tickerId"].split("|")
-	tickerId, assetClass = tickerParts[0], tickerParts[-1]
-	requestHandler = DetailRequestHandler(tickerId, platforms.copy())
+	tickerId, assetClass = tickerParts[0].strip(), tickerParts[-1].title().strip()
+	if assetClass not in ASSET_CLASSES: assetClass = None
+	requestHandler = DetailRequestHandler(tickerId, platforms, assetClass=assetClass)
 
 	tasks = []
 	for argument in arguments:
@@ -127,9 +131,11 @@ async def run(req: Request):
 async def autocomplete(req: Request):
 	request = await req.json()
 	option = request["option"]
-	if option == "venues":
+	if option == "ticker":
+		response = await autocomplete_ticker(request["tickerId"], request["platforms"].split(","))
+	elif option == "venues":
 		response = await autocomplete_venues(request["tickerId"], request["platforms"].split(","))
-	if option == "timeframe":
+	elif option == "timeframe":
 		response = await autocomplete_timeframe(request["timeframe"], request["type"])
 	elif option == "market":
 		response = await autocomplete_market(request["market"], request["type"])

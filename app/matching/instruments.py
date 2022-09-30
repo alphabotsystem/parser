@@ -203,19 +203,47 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 					index = next((e for e in response if response[0]["symbol"] == e["symbol"] and e["exchange"] in FREE_TRADINGVIEW_SOURCES), None)
 
 				if index is not None:
-					newSymbol = index["symbol"]
-					newExchange = "INDEX"
+					instrument["id"] = {
+						"id": index["symbol"],
+						"name": index["description"],
+						"base": None,
+						"quote": None,
+						"tag": 1,
+						"symbol": index["symbol"],
+						"exchange": {"id": "INDEX"},
+						"metadata": {
+							"type": "Unknown",
+							"rank": MAXSIZE,
+						}
+					}
 				elif "contracts" in response[0]:
-					newSymbol = response[0]["contracts"][0]["symbol"]
-					newExchange = response[0].get("prefix", response[0]["exchange"])
+					instrument["id"] = {
+						"id": response[0]["contracts"][0]["symbol"],
+						"name": index["description"],
+						"base": None,
+						"quote": None,
+						"tag": 1,
+						"symbol": response[0]["contracts"][0]["symbol"],
+						"exchange": {"id": response[0].get("prefix", response[0]["exchange"])},
+						"metadata": {
+							"type": "Unknown",
+							"rank": MAXSIZE,
+						}
+					}
 				else:
-					newSymbol = response[0]["symbol"]
-					newExchange = response[0].get("prefix", response[0]["exchange"])
-
-				if symbol != newSymbol or exchange != newExchange:
-					print(f"Rewrite from {symbol}@{exchange} to {newSymbol}@{newExchange}")
-					instrument["id"] = newSymbol
-					instrument["exchange"] = {"id": newExchange}
+					instrument["id"] = {
+						"id": response[0]["symbol"],
+						"name": index["description"],
+						"base": None,
+						"quote": None,
+						"tag": 1,
+						"symbol": response[0]["symbol"],
+						"exchange": {"id": response[0].get("prefix", response[0]["exchange"])},
+						"metadata": {
+							"type": "Unknown",
+							"rank": MAXSIZE,
+						}
+					}
 
 	return instrument
 

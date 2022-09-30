@@ -44,3 +44,4 @@ EXCHANGE_TO_TRADINGVIEW = {
 	"coinbasepro": "COINBASE", "therock": "THEROCKTRADING", "gate": "GATEIO", "bitfinex2": "BITFINEX",
 	"binanceusdm": "BINANCE", "binancecoinm": "BINANCE"
 }
+FREE_TRADINGVIEW_SOURCES = ["INDEX", "OANDA"]

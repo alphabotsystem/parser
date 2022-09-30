@@ -5,7 +5,7 @@ from aiohttp import ClientSession
 from lark import Token
 from traceback import format_exc
 from elasticsearch import AsyncElasticsearch
-from helpers.constants import QUERY_SORT, STRICT_MATCH, EXCHANGE_TO_TRADINGVIEW
+from helpers.constants import QUERY_SORT, STRICT_MATCH, EXCHANGE_TO_TRADINGVIEW, FREE_TRADINGVIEW_SOURCES
 from helpers.lark import Ticker, TickerTree
 from helpers.utils import TokenNotFoundException
 
@@ -200,7 +200,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 					raise TokenNotFoundException("Requested ticker could not be found.")
 				index = None
 				if platform == "TradingView" and exchange == "":
-					index = next((e for e in response if response[0]["symbol"] == e["symbol"] and e["exchange"] == "INDEX"), None)
+					index = next((e for e in response if response[0]["symbol"] == e["symbol"] and e["exchange"] in FREE_TRADINGVIEW_SOURCES), None)
 
 				if index is not None:
 					newSymbol = index["symbol"]

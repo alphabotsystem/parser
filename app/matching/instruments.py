@@ -219,7 +219,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 				elif "contracts" in response[0]:
 					instrument["id"] = {
 						"id": response[0]["contracts"][0]["symbol"],
-						"name": index["description"],
+						"name": response["description"],
 						"base": None,
 						"quote": None,
 						"tag": 1,
@@ -233,7 +233,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 				else:
 					instrument["id"] = {
 						"id": response[0]["symbol"],
-						"name": index["description"],
+						"name": response["description"],
 						"base": None,
 						"quote": None,
 						"tag": 1,

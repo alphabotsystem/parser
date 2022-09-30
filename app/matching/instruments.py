@@ -203,7 +203,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 					index = next((e for e in response if response[0]["symbol"] == e["symbol"] and e["exchange"] in FREE_TRADINGVIEW_SOURCES), None)
 
 				if index is not None:
-					instrument["id"] = {
+					instrument = {
 						"id": index["symbol"],
 						"name": index["description"],
 						"base": None,
@@ -217,7 +217,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 						}
 					}
 				elif "contracts" in response[0]:
-					instrument["id"] = {
+					instrument = {
 						"id": response[0]["contracts"][0]["symbol"],
 						"name": response[0]["description"],
 						"base": None,
@@ -231,7 +231,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 						}
 					}
 				else:
-					instrument["id"] = {
+					instrument = {
 						"id": response[0]["symbol"],
 						"name": response[0]["description"],
 						"base": None,

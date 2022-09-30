@@ -191,17 +191,27 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 				exchange = ""
 			if ":" in symbol and exchange == "":
 				exchange, symbol = symbol.split(":", 1)
+			
 			url = f"https://symbol-search.tradingview.com/symbol_search/?text={symbol}&hl=0&exchange={exchange}&lang=en&type=&domain=production"
 			print(platform, url)
 			async with session.get(url) as response:
 				response = await response.json()
 				if len(response) == 0:
 					raise TokenNotFoundException("Requested ticker could not be found.")
-				if "contracts" in response[0]:
+				index = None
+				if platform == "TradingView" and exchange == "":
+					index = next((e for e in response if e["exchange"] == "INDEX"), None)
+
+				if index is not None:
+					newSymbol = index["symbol"]
+					newExchange = "INDEX"
+				elif "contracts" in response[0]:
 					newSymbol = response[0]["contracts"][0]["symbol"]
+					newExchange = response[0].get("prefix", response[0]["exchange"])
 				else:
 					newSymbol = response[0]["symbol"]
-				newExchange = response[0].get("prefix", response[0]["exchange"])
+					newExchange = response[0].get("prefix", response[0]["exchange"])
+
 				if symbol != newSymbol or exchange != newExchange:
 					print(f"Rewrite from {symbol}@{exchange} to {newSymbol}@{newExchange}")
 					instrument["id"] = newSymbol

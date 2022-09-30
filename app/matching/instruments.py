@@ -200,7 +200,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 					raise TokenNotFoundException("Requested ticker could not be found.")
 				index = None
 				if platform == "TradingView" and exchange == "":
-					index = next((e for e in response if e["exchange"] == "INDEX"), None)
+					index = next((e for e in response if response[0]["symbol"] == e["symbol"] and e["exchange"] == "INDEX"), None)
 
 				if index is not None:
 					newSymbol = index["symbol"]

@@ -207,8 +207,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 					instrument = {
 						"id": index["symbol"],
 						"name": index["description"],
-						"base": None,
-						"quote": None,
+						"base": index["symbol"].removesuffix(index["currency_code"]),
+						"quote": index["currency_code"],
 						"tag": 1,
 						"symbol": index["symbol"],
 						"exchange": {"id": "INDEX"},
@@ -221,8 +221,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 					instrument = {
 						"id": response[0]["contracts"][0]["symbol"],
 						"name": response[0]["description"],
-						"base": None,
-						"quote": None,
+						"base": response[0]["contracts"][0]["symbol"].removesuffix(response["currency_code"]),
+						"quote": response["currency_code"],
 						"tag": 1,
 						"symbol": response[0]["contracts"][0]["symbol"],
 						"exchange": {"id": response[0].get("prefix", response[0]["exchange"])},
@@ -235,8 +235,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 					instrument = {
 						"id": response[0]["symbol"],
 						"name": response[0]["description"],
-						"base": None,
-						"quote": None,
+						"base": response[0]["symbol"].removesuffix(response["currency_code"]),
+						"quote": response["currency_code"],
 						"tag": 1,
 						"symbol": response[0]["symbol"],
 						"exchange": {"id": response[0].get("prefix", response[0]["exchange"])},

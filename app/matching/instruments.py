@@ -6,7 +6,7 @@ from lark import Token
 from traceback import format_exc
 from elasticsearch import AsyncElasticsearch
 from helpers.constants import QUERY_SORT, STRICT_MATCH, EXCHANGE_TO_TRADINGVIEW, FREE_TRADINGVIEW_SOURCES
-from helpers.lark import Ticker, TickerTree
+from helpers.lark import Ticker, TickerTree, reconstructor as Reconstructor
 from helpers.utils import TokenNotFoundException
 
 
@@ -33,6 +33,7 @@ async def match_ticker(tickerId, exchangeId, platform, assetClass):
 		print(format_exc())
 		return None, "Requested ticker could not be found."
 
+	reconstructedId = Reconstructor.reconstruct(ticker)
 	isSimple = isinstance(ticker.children[0], Token) and ticker.children[0].type == "NAME"
 	match = ticker.children[0].value if isSimple else {}
 	if not isSimple and platform not in ["TradingView", "CoinGecko", "CCXT", "IEXC", "LLD"]:
@@ -40,8 +41,8 @@ async def match_ticker(tickerId, exchangeId, platform, assetClass):
 
 	response = {
 		"tree": TickerTree().transform(ticker),
-		"id": match.get("id", "Complex ticker"),
-		"name": match.get("name", "Complex ticker"),
+		"id": match.get("id", reconstructedId),
+		"name": match.get("name", reconstructedId),
 		"exchange": match.get("exchange", {}),
 		"base": match.get("base"),
 		"quote": match.get("quote"),
@@ -181,7 +182,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 	if platform in ["TradingView", "TradingView Premium"]:
 		async with ClientSession() as session:
 			symbol = instrument["id"]
-			exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").upper())
+			exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").replace("2", "").replace("3", "").replace("4", "").replace("5", "").upper())
 			if exchange == "FOREX": exchange = ""
 			if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
 				instrument["id"] += "PERP"
@@ -244,6 +245,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 							"rank": MAXSIZE,
 						}
 					}
+				instrument["id"] = f"{instrument['exchange']['id']}:{instrument['id']}"
 
 	return instrument
 

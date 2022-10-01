@@ -1,4 +1,8 @@
 from lark import Lark, Token, Transformer
+from lark.tree import Tree
+from lark.tree_matcher import TreeMatcher
+from lark.reconstruct import WriteTokensTransformer
+
 
 GRAMMAR = """
 	?start: sum
@@ -48,3 +52,31 @@ class TickerTree(Transformer):
 			if not isinstance(child, Token): l[1].append(child)
 			else: l[1].append([child.type, child.value])
 		return l
+
+class Reconstructor(TreeMatcher):
+	write_tokens: WriteTokensTransformer
+
+	def __init__(self):
+		TreeMatcher.__init__(self, larkParser)
+		self.write_tokens = WriteTokensTransformer({t.name:t for t in self.tokens}, {})
+
+	def _reconstruct(self, tree):
+		unreduced_tree = self.match_tree(tree, tree.data)
+
+		res = self.write_tokens.transform(unreduced_tree)
+		for item in res:
+			if isinstance(item, Tree):
+				yield from self._reconstruct(item)
+			elif hasattr(item, "value"):
+				yield item.value["id"]
+			else:
+				yield item
+
+	def reconstruct(self, tree):
+		x = self._reconstruct(tree)
+		y = []
+		for item in x:
+			y.append(item)
+		return ''.join(y)
+
+reconstructor = Reconstructor()

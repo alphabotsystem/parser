@@ -211,7 +211,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 						"quote": freeSource["currency_code"],
 						"tag": 1,
 						"symbol": freeSource["symbol"],
-						"exchange": {"id": response[0].get("prefix", response[0]["exchange"])},
+						"exchange": {"id": freeSource.get("prefix", freeSource["exchange"])},
 						"metadata": {
 							"type": "Unknown",
 							"rank": MAXSIZE,

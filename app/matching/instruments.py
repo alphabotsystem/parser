@@ -199,19 +199,19 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 				response = await response.json()
 				if len(response) == 0:
 					raise TokenNotFoundException("Requested ticker could not be found.")
-				index = None
+				freeSource = None
 				if platform == "TradingView" and exchange == "":
-					index = next((e for e in response if response[0]["symbol"] == e["symbol"] and e["exchange"] in FREE_TRADINGVIEW_SOURCES), None)
+					freeSource = next((e for e in response if response[0]["symbol"] == e["symbol"] and e["exchange"] in FREE_TRADINGVIEW_SOURCES), None)
 
-				if index is not None:
+				if freeSource is not None:
 					instrument = {
-						"id": index["symbol"],
-						"name": index["description"],
-						"base": index["symbol"].removesuffix(index["currency_code"]),
-						"quote": index["currency_code"],
+						"id": freeSource["symbol"],
+						"name": freeSource["description"],
+						"base": freeSource["symbol"].removesuffix(freeSource["currency_code"]),
+						"quote": freeSource["currency_code"],
 						"tag": 1,
-						"symbol": index["symbol"],
-						"exchange": {"id": "INDEX"},
+						"symbol": freeSource["symbol"],
+						"exchange": {"id": response[0].get("prefix", response[0]["exchange"])},
 						"metadata": {
 							"type": "Unknown",
 							"rank": MAXSIZE,

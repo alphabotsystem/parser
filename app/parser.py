@@ -164,7 +164,7 @@ async def format_price(req: Request):
 	await loop.run_in_executor(None, exchange.load_markets)
 	precision = exchange.markets.get(request["symbol"], {}).get("precision", {}).get("price", 8)
 	text = dtp.decimal_to_precision(request["price"], rounding_mode=dtp.ROUND, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.PAD_WITH_ZERO)
-	return {"response": text.rstrip("0").rstrip(".")}
+	return {"response": text.rstrip("0").rstrip(".") if "." in text else text}
 
 @app.post("/parser/get_formatted_amount_ccxt")
 async def format_amount(req: Request):
@@ -173,7 +173,7 @@ async def format_amount(req: Request):
 	await loop.run_in_executor(None, exchange.load_markets)
 	precision = exchange.markets.get(request["symbol"], {}).get("precision", {}).get("amount", 8)
 	text = dtp.decimal_to_precision(request["amount"], rounding_mode=dtp.TRUNCATE, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.NO_PADDING)
-	return {"response": text.rstrip("0").rstrip(".")}
+	return {"response": text.rstrip("0").rstrip(".") if "." in text else text}
 
 
 # -------------------------

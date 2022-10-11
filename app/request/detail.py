@@ -47,7 +47,7 @@ class DetailRequestHandler(AbstractRequestHandler):
 
 			if finalOutput is None:
 				request.set_error("`{}` is not a valid argument.".format(argument[:229]), isFatal=True)
-			elif finalOutput.startswith("`Force Detail"):
+			elif finalOutput.startswith("`Request Detail"):
 				request.set_error(None, isFatal=True)
 			else:
 				request.set_error(finalOutput)

@@ -72,7 +72,7 @@ class PriceRequestHandler(AbstractRequestHandler):
 
 			if finalOutput is None:
 				request.set_error(f"`{argument[:229]}` is not a valid argument.", isFatal=True)
-			elif finalOutput.startswith("`Force Quote"):
+			elif finalOutput.startswith("`Request Quote"):
 				request.set_error(None, isFatal=True)
 			else:
 				request.set_error(finalOutput)

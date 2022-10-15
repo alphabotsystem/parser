@@ -10,17 +10,21 @@ from parser import match_ticker, loop, elasticsearch
 class TestMatchTicker(TestCase):
 	def test1(self):
 		match1 = loop.run_until_complete(match_ticker("AAPL", None, "IEXC", None))
-		match2 = loop.run_until_complete(match_ticker("AAPL", None, "CCXT", None))
+		match2 = loop.run_until_complete(match_ticker("AAPL", None, "IEXC", "Common Stock"))
+		match3 = loop.run_until_complete(match_ticker("AAPL", None, "CCXT", None))
 		self.assertEqual(match1[0]["id"], "AAPL")
-		self.assertEqual(match2[0], None)
+		self.assertEqual(match3[0], None)
 
 	def test2(self):
 		match1 = loop.run_until_complete(match_ticker("BTCUSD", None, "CCXT", None))
 		match2 = loop.run_until_complete(match_ticker("BTC", None, "CCXT", None))
+		match3 = loop.run_until_complete(match_ticker("BTC", None, "CCXT", "Crypto"))
 		self.assertEqual(match1[0]["id"], "BTCUSDT")
 		self.assertEqual(match1[0]["exchange"]["id"], "binance")
 		self.assertEqual(match2[0]["id"], "BTCUSDT")
 		self.assertEqual(match2[0]["exchange"]["id"], "binance")
+		self.assertEqual(match3[0]["id"], "BTCUSDT")
+		self.assertEqual(match3[0]["exchange"]["id"], "binance")
 
 	def test3(self):
 		match1 = loop.run_until_complete(match_ticker("EURUSD", None, "IEXC", None))
@@ -55,8 +59,10 @@ class TestMatchTicker(TestCase):
 		self.assertEqual(match[0]["id"], "X")
 
 	def test9(self):
-		match = loop.run_until_complete(match_ticker("TESLA", None, "IEXC", None))
-		self.assertEqual(match[0]["id"], "TSLA")
+		match1 = loop.run_until_complete(match_ticker("TESLA", None, "IEXC", None))
+		match2 = loop.run_until_complete(match_ticker("TSLA", None, "IEXC", "Common Stock"))
+		self.assertEqual(match1[0]["id"], "TSLA")
+		self.assertEqual(match2[0]["id"], "TSLA")
 
 	def test10(self):
 		match = loop.run_until_complete(match_ticker("SPX", None, "TradingView", None))

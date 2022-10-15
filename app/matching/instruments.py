@@ -126,8 +126,8 @@ def generate_query(search, tag, exchangeId, platform, assetClass):
 		tickerQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
 		nameQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
 	if assetClass is not None:
-		tickerQuery["bool"]["must"].append({"term": {"type": assetClass.lower()}})
-		nameQuery["bool"]["must"].append({"term": {"type": assetClass.lower()}})
+		tickerQuery["bool"]["must"].append({"match": {"type": assetClass.lower()}})
+		nameQuery["bool"]["must"].append({"match": {"type": assetClass.lower()}})
 	if exchangeId is None:
 		tickerQuery["bool"]["must"].append({"term": {"market.passive": False}})
 		nameQuery["bool"]["must"].append({"term": {"market.passive": False}})
@@ -311,7 +311,8 @@ async def autocomplete_ticker(tickerId, platforms):
 		for hit in response["hits"]["hits"]:
 			match = hit["_source"]
 			base = match["base"] if match["tag"] == 1 else f"{match['base']}:{match['tag']}"
-			suggestion = f"{base} | {match['name']} | {match['type']}"
+			cutoff = 95 - len(base) - len(match["type"])
+			suggestion = f"{base} | {match['name'][:cutoff]} | {match['type']}"
 			if suggestion not in tickers:
 				tickers.append(suggestion)
 

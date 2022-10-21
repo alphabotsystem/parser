@@ -272,13 +272,11 @@ async def find_listings(ticker, platform):
 				"term": { "base": ticker["base"].lower() }
 			}, {
 				"term": { "tag": int(ticker["tag"]) }
+			}, {
+				"match": {"market.venue": platform}
 			}]
 		}
 	}
-	if platform == "IEXC":
-		query["bool"]["must"].append({"match": {"market.venue": "IEXC"}})
-	else:
-		query["bool"]["must"].append({"match": {"market.venue": "CCXT"}})
 
 	instruments = await elasticsearch.search(index="assets", query=query, size=10000)
 	exchanges = await elasticsearch.search(index="exchanges", query={"match_all": {}}, size=10000)
@@ -290,6 +288,18 @@ async def find_listings(ticker, platform):
 		else:
 			sources[instrument["_source"]["quote"]] = {instrument["_source"]["market"]["source"]}
 
+	if ticker["tag"] == 1:
+		async with ClientSession() as session:
+			url = f"https://symbol-search.tradingview.com/symbol_search/?text={ticker['id']}&hl=0&exchange=&lang=en&type=&domain=production"
+			async with session.get(url) as response:
+				response = await response.json()
+				for result in response:
+					if result["symbol"] == ticker["symbol"]:
+						if result["currency_code"] in sources:
+							sources[result["currency_code"]].add(result["exchange"])
+						else:
+							sources[result["currency_code"]] = {result["exchange"]}
+
 	response, total = [], 0
 	for quote in sources:
 		names = []
@@ -298,7 +308,7 @@ async def find_listings(ticker, platform):
 		response.append([quote, sorted(names)])
 		total += len(names)
 
-	return sorted(response, key=lambda x: x[0]), total
+	return sorted(response, key=lambda x: (-len(x[1]), x[0])), total
 
 async def autocomplete_ticker(tickerId, platforms):
 	tasks = []

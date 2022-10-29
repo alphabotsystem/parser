@@ -40,10 +40,10 @@ async def process_chart_request(req: Request):
 	tasks = []
 	for argument in arguments:
 		tasks.append(create_task(requestHandler.parse_argument(argument)))
-	if tickerId is not None:
-		tasks.append(create_task(requestHandler.process_ticker()))
 	if len(tasks) > 0:
 		await wait(tasks)
+	if tickerId is not None:
+		await requestHandler.process_ticker()
 
 	requestHandler.set_defaults()
 	await requestHandler.find_caveats()
@@ -81,10 +81,10 @@ async def process_quote_request(req: Request):
 	tasks = []
 	for argument in arguments:
 		tasks.append(create_task(requestHandler.parse_argument(argument)))
-	if tickerId is not None:
-		tasks.append(create_task(requestHandler.process_ticker()))
 	if len(tasks) > 0:
 		await wait(tasks)
+	if tickerId is not None:
+		await requestHandler.process_ticker()
 
 	requestHandler.set_defaults()
 	await requestHandler.find_caveats()
@@ -104,10 +104,10 @@ async def process_detail_request(req: Request):
 	tasks = []
 	for argument in arguments:
 		tasks.append(create_task(requestHandler.parse_argument(argument)))
-	if tickerId is not None:
-		tasks.append(create_task(requestHandler.process_ticker()))
 	if len(tasks) > 0:
 		await wait(tasks)
+	if tickerId is not None:
+		await requestHandler.process_ticker()
 
 	requestHandler.set_defaults()
 	await requestHandler.find_caveats()

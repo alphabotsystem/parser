@@ -207,8 +207,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 					instrument = {
 						"id": freeSource["symbol"],
 						"name": freeSource["description"],
-						"base": freeSource["symbol"].removesuffix(freeSource["currency_code"]),
-						"quote": freeSource["currency_code"],
+						"base": freeSource["symbol"].removesuffix(freeSource.get("currency_code", "")),
+						"quote": freeSource.get("currency_code", "USD"),
 						"tag": 1,
 						"symbol": freeSource["symbol"],
 						"exchange": {"id": freeSource.get("prefix", freeSource["exchange"])},
@@ -221,8 +221,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 					instrument = {
 						"id": response[0]["contracts"][0]["symbol"],
 						"name": response[0]["description"],
-						"base": response[0]["contracts"][0]["symbol"].removesuffix(response[0]["currency_code"]),
-						"quote": response[0]["currency_code"],
+						"base": response[0]["contracts"][0]["symbol"].removesuffix(response[0].get("currency_code", "")),
+						"quote": response[0].get("currency_code", "USD"),
 						"tag": 1,
 						"symbol": response[0]["contracts"][0]["symbol"],
 						"exchange": {"id": response[0].get("prefix", response[0]["exchange"])},
@@ -235,8 +235,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 					instrument = {
 						"id": response[0]["symbol"],
 						"name": response[0]["description"],
-						"base": response[0]["symbol"].removesuffix(response[0]["currency_code"]),
-						"quote": response[0]["currency_code"],
+						"base": response[0]["symbol"].removesuffix(response[0].get("currency_code", "")),
+						"quote": response[0].get("currency_code", "USD"),
 						"tag": 1,
 						"symbol": response[0]["symbol"],
 						"exchange": {"id": response[0].get("prefix", response[0]["exchange"])},
@@ -295,10 +295,10 @@ async def find_listings(ticker, platform):
 				response = await response.json()
 				for result in response:
 					if result["symbol"] == ticker["symbol"]:
-						if result["currency_code"] in sources:
-							sources[result["currency_code"]].add(result["exchange"])
+						if result.get("currency_code", "USD") in sources:
+							sources[result.get("currency_code", "USD")].add(result["exchange"])
 						else:
-							sources[result["currency_code"]] = {result["exchange"]}
+							sources[result.get("currency_code", "USD")] = {result["exchange"]}
 
 	response, total = [], 0
 	for quote in sources:

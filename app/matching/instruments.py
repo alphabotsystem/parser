@@ -321,8 +321,10 @@ async def autocomplete_ticker(tickerId, platforms):
 		for hit in response["hits"]["hits"]:
 			match = hit["_source"]
 			base = match["base"] if match["tag"] == 1 else f"{match['base']}:{match['tag']}"
-			cutoff = 95 - len(base) - len(match["type"])
-			suggestion = f"{base} | {match['name'][:cutoff]} | {match['type']}"
+			cutoff = 94 - len(base) - len(match["type"])
+			name = match["name"]
+			if len(name) > cutoff: name = name[:cutoff-3] + "..."
+			suggestion = f"{base} | {name} | {match['type']}"
 			if suggestion not in tickers:
 				tickers.append(suggestion)
 

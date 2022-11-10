@@ -42,7 +42,7 @@ PARAMETERS = {
 	],
 	"types": [
 		Parameter("type", "Nasdaq 100", ["nasdaq", "nasdaq100"], tradingViewStockHeatmap="&dataset=NASDAQ100"),
-		Parameter("type", "S&P 500", ["s&p500", "s&p", "sp500", "sap500", "sap", "spx", "spx500", "stocks"], tradingViewStockHeatmap="&dataset=SPX500"),
+		Parameter("type", "S&P 500", ["s&p500", "s&p", "sp500", "sap500", "sap", "spx", "spx500"], tradingViewStockHeatmap="&dataset=SPX500"),
 		Parameter("type", "Dow Jones Composite Average", ["dji", "dowjones", "dowjonescompositeaverage", "djca"], tradingViewStockHeatmap="&dataset=DJCA"),
 		Parameter("type", "All US companies", ["alluscompanies", "us", "usa", "uscompanies", "allusa"], tradingViewStockHeatmap="&dataset=AllUSA"),
 		Parameter("type", "S&P/ASX 200", ["s&p/asx200", "asx200", "asx", "spasx", "sapasx", "sp200", "sap200"], tradingViewStockHeatmap="&dataset=ASX200"),
@@ -212,7 +212,7 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 
 				if "performance" not in heatmap and any([e in heatmap for e in ["?color=premarket_change", "?color=postmarket_change", "?color=relative_volume_10d_calc", "?color=gap", "?color=Volatility.D"]]):
 					if len(request.timeframes) != 0:
-						if request.timeframes[0].id is not None: request.set_error(f"Timeframes are not supported on the {heatmap[:-1]} heatmap."); break
+						if request.timeframes[0].id is not None: request.set_error(f"Timeframes are only supported on the performance heatmap."); break
 					else:
 						request.timeframes = [Parameter(None, None, None, tradingViewStockHeatmap="")]
 				elif len(request.timeframes) == 0:
@@ -242,7 +242,7 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 
 				if "performance" not in heatmap and any([e in heatmap for e in ["?color=gap", "?color=Volatility.D"]]):
 					if len(request.timeframes) != 0:
-						if request.timeframes[0].id is not None: request.set_error(f"Timeframes are not supported on the {heatmap[:-1]} heatmap."); break
+						if request.timeframes[0].id is not None: request.set_error(f"Timeframes are only supported on the performance heatmap."); break
 					else:
 						request.timeframes = [Parameter(None, None, None, tradingViewCryptoHeatmap="")]
 				elif len(request.timeframes) == 0:

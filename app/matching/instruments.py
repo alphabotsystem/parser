@@ -250,7 +250,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 	return instrument
 
 async def find_tradable_market(match, exchange):
-	if not exchange or exchange["id"] not in ["binance", "binanceusdm", "binancecoinm", "ftx"]: return None
+	if not exchange or exchange["id"] not in ["binance", "binanceusdm", "binancecoinm"]: return None
 	query = {
 		"bool": {
 			"must": [{

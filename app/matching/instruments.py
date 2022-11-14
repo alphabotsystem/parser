@@ -245,7 +245,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 							"rank": MAXSIZE,
 						}
 					}
-				instrument["id"] = f"{instrument['exchange']['id']}:{instrument['id']}"
+				instrument["id"] = f"{instrument['exchange']['id'].upper()}:{instrument['id']}"
 
 	return instrument
 

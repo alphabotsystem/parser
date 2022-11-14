@@ -1,7 +1,7 @@
 import os, sys
 from dotenv import load_dotenv
 load_dotenv()
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../app'))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../src'))
 
 from unittest import main, TestCase
 from parser import match_ticker, loop, elasticsearch

@@ -210,8 +210,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 						"base": freeSource["symbol"].removesuffix(freeSource.get("currency_code", "")),
 						"quote": freeSource.get("currency_code", "USD"),
 						"tag": 1,
-						"symbol": freeSource["symbol"],
-						"exchange": {"id": freeSource.get("prefix", freeSource["exchange"])},
+						"symbol": instrument["symbol"],
+						"exchange": {"id": freeSource.get("prefix", freeSource["exchange"]).lower()},
 						"metadata": {
 							"type": "Unknown",
 							"rank": MAXSIZE,
@@ -224,8 +224,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 						"base": response[0]["contracts"][0]["symbol"].removesuffix(response[0].get("currency_code", "")),
 						"quote": response[0].get("currency_code", "USD"),
 						"tag": 1,
-						"symbol": response[0]["contracts"][0]["symbol"],
-						"exchange": {"id": response[0].get("prefix", response[0]["exchange"])},
+						"symbol": instrument["symbol"],
+						"exchange": {"id": response[0].get("prefix", response[0]["exchange"]).lower()},
 						"metadata": {
 							"type": "Unknown",
 							"rank": MAXSIZE,
@@ -238,8 +238,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 						"base": response[0]["symbol"].removesuffix(response[0].get("currency_code", "")),
 						"quote": response[0].get("currency_code", "USD"),
 						"tag": 1,
-						"symbol": response[0]["symbol"],
-						"exchange": {"id": response[0].get("prefix", response[0]["exchange"])},
+						"symbol": instrument["symbol"],
+						"exchange": {"id": response[0].get("prefix", response[0]["exchange"]).lower()},
 						"metadata": {
 							"type": "Unknown",
 							"rank": MAXSIZE,
@@ -250,7 +250,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass):
 	return instrument
 
 async def find_tradable_market(match, exchange):
-	if not exchange or exchange["id"] not in ["binance", "binanceusdm", "binancecoinm"]: return None
+	if match["symbol"] is None or not exchange or exchange["id"] not in ["binance", "binanceusdm", "binancecoinm"]: return None
 	query = {
 		"bool": {
 			"must": [{

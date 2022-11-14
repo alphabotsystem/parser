@@ -41,7 +41,7 @@ PARAMETERS = {
 		Parameter(87658, "2-month", ["2", "2m", "2m", "2mo", "2month", "2-month", "2months"], premium="2M"),
 		Parameter(131487, "3-month", ["3", "3m", "3m", "3mo", "3month", "3-month", "3months"], premium="3M"),
 		Parameter(175316, "4-month", ["4", "4m", "4m", "4mo", "4month", "4-month", "4months"], premium="4M"),
-		Parameter(262974, "6-month", ["6", "6m", "5m", "6mo", "6month", "6-month", "6months"], premium="6M"),
+		Parameter(262974, "6-month", ["6", "6m", "6mo", "6month", "6-month", "6months"], premium="6M"),
 		Parameter(525949, "1-year", ["12", "12m", "12mo", "12month", "12months", "year", "yearly", "1year", "1-year", "1y", "y", "annual", "annually"], premium="12M"),
 	],
 	"indicators": [

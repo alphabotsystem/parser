@@ -8,37 +8,42 @@ from .abstract import AbstractRequestHandler, AbstractRequest
 
 PARAMETERS = {
 	"timeframes": [
-		Parameter(1, "1m", ["1", "1m", "1min", "1mins", "1minute", "1minutes", "min"]),
-		Parameter(2, "2m", ["2", "2m", "2min", "2mins", "2minute", "2minutes"]),
-		Parameter(3, "3m", ["3", "3m", "3min", "3mins", "3minute", "3minutes"]),
-		Parameter(5, "5m", ["5", "5m", "5min", "5mins", "5minute", "5minutes"]),
-		Parameter(10, "10m", ["10", "10m", "10min", "10mins", "10minute", "10minutes"]),
-		Parameter(15, "15m", ["15", "15m", "15min", "15mins", "15minute", "15minutes"]),
-		Parameter(20, "20m", ["20", "20m", "20min", "20mins", "20minute", "20minutes"]),
-		Parameter(30, "30m", ["30", "30m", "30min", "30mins", "30minute", "30minutes"]),
-		Parameter(45, "45m", ["45", "45m", "45min", "45mins", "45minute", "45minutes"]),
-		Parameter(60, "1H", ["60", "60m", "60min", "60mins", "60minute", "60minutes", "1", "1h", "1hr", "1hour", "1hours", "hourly", "hour", "hr", "h"], tradingViewStockHeatmap="?color=change%7C60", tradingViewCryptoHeatmap="?color=change%7C60"),
-		Parameter(120, "2H", ["120", "120m", "120min", "120mins", "120minute", "120minutes", "2", "2h", "2hr", "2hrs", "2hour", "2hours"]),
-		Parameter(180, "3H", ["180", "180m", "180min", "180mins", "180minute", "180minutes", "3", "3h", "3hr", "3hrs", "3hour", "3hours"]),
-		Parameter(240, "4H", ["240", "240m", "240min", "240mins", "240minute", "240minutes", "4", "4h", "4hr", "4hrs", "4hour", "4hours"], tradingViewStockHeatmap="?color=change%7C240", tradingViewCryptoHeatmap="?color=change%7C240"),
-		Parameter(360, "6H", ["360", "360m", "360min", "360mins", "360minute", "360minutes", "6", "6h", "6hr", "6hrs", "6hour", "6hours"]),
-		Parameter(480, "8H", ["480", "480m", "480min", "480mins", "480minute", "480minutes", "8", "8h", "8hr", "8hrs", "8hour", "8hours"]),
-		Parameter(720, "12H", ["720", "720m", "720min", "720mins", "720minute", "720minutes", "12", "12h", "12hr", "12hrs", "12hour", "12hours"]),
-		Parameter(1440, "1D", ["24", "24h", "24hr", "24hrs", "24hour", "24hours", "d", "day", "1", "1d", "1day", "daily", "1440", "1440m", "1440min", "1440mins", "1440minute", "1440minutes"], tradingViewStockHeatmap="?color=change", tradingViewCryptoHeatmap="?color=change"),
-		Parameter(2880, "2D", ["48", "48h", "48hr", "48hrs", "48hour", "48hours", "2", "2d", "2day", "2880", "2880m", "2880min", "2880mins", "2880minute", "2880minutes"]),
-		Parameter(3420, "3D", ["72", "72h", "72hr", "72hrs", "72hour", "72hours", "3", "3d", "3day", "3420", "3420m", "3420min", "3420mins", "3420minute", "3420minutes"]),
-		Parameter(10080, "1W", ["7", "7d", "7day", "7days", "w", "week", "1w", "1week", "weekly"], tradingViewStockHeatmap="?color=Perf.W", tradingViewCryptoHeatmap="?color=Perf.W"),
-		Parameter(20160, "2W", ["14", "14d", "14day", "14days", "2w", "2week"]),
-		Parameter(43829, "1M", ["30d", "30day", "30days", "1", "1m", "m", "mo", "month", "1mo", "1month", "monthly"], tradingViewStockHeatmap="?color=Perf.1M", tradingViewCryptoHeatmap="?color=Perf.1M"),
-		Parameter(87658, "2M", ["2", "2m", "2m", "2mo", "2month", "2months"]),
-		Parameter(131487, "3M", ["3", "3m", "3m", "3mo", "3month", "3months"], tradingViewStockHeatmap="?color=Perf.3M", tradingViewCryptoHeatmap="?color=Perf.3M"),
-		Parameter(175316, "4M", ["4", "4m", "4m", "4mo", "4month", "4months"]),
-		Parameter(262974, "6M", ["6", "6m", "5m", "6mo", "6month", "6months"], tradingViewStockHeatmap="?color=Perf.6M", tradingViewCryptoHeatmap="?color=Perf.6M"),
-		Parameter(525949, "1Y", ["12", "12m", "12mo", "12month", "12months", "year", "yearly", "1year", "1y", "y", "annual", "annually"], tradingViewStockHeatmap="?color=Perf.Y", tradingViewCryptoHeatmap="?color=Perf.Y"),
-		Parameter(1051898, "2Y", ["24", "24m", "24mo", "24month", "24months", "2year", "2y"]),
-		Parameter(1577847, "3Y", ["36", "36m", "36mo", "36month", "36months", "3year", "3y"]),
-		Parameter(2103796, "4Y", ["48", "48m", "48mo", "48month", "48months", "4year", "4y"]),
-		Parameter("ytd", "YTD", ["ytd"], tradingViewStockHeatmap="?color=Perf.Y", tradingViewCryptoHeatmap="?color=Perf.Y"),
+		Parameter(1, "1-minute performance", ["1-minuteperformance", "1", "1m", "1min", "1mins", "1minute", "1minutes", "min"]),
+		Parameter(2, "2-minute performance", ["2-minuteperformance", "2", "2m", "2min", "2mins", "2minute", "2minutes"]),
+		Parameter(3, "3-minute performance", ["3-minuteperformance", "3", "3m", "3min", "3mins", "3minute", "3minutes"]),
+		Parameter(5, "5-minute performance", ["5-minuteperformance", "5", "5m", "5min", "5mins", "5minute", "5minutes"]),
+		Parameter(10, "10-minute performance", ["10-minuteperformance", "10", "10m", "10min", "10mins", "10minute", "10minutes"]),
+		Parameter(15, "15-minute performance", ["15-minuteperformance", "15", "15m", "15min", "15mins", "15minute", "15minutes"]),
+		Parameter(20, "20-minute performance", ["20-minuteperformance", "20", "20m", "20min", "20mins", "20minute", "20minutes"]),
+		Parameter(30, "30-minute performance", ["30-minuteperformance", "30", "30m", "30min", "30mins", "30minute", "30minutes"]),
+		Parameter(45, "45-minute performance", ["45-minuteperformance", "45", "45m", "45min", "45mins", "45minute", "45minutes"]),
+		Parameter(60, "1-hour performance", ["1-hourperformance", "60", "60m", "60min", "60mins", "60minute", "60minutes", "1", "1h", "1hr", "1hour", "1hours", "hourly", "hour", "hr", "h"], tradingViewStockHeatmap="?color=change%7C60", tradingViewCryptoHeatmap="?color=change%7C60"),
+		Parameter(120, "2-hour performance", ["2-hourperformance", "120", "120m", "120min", "120mins", "120minute", "120minutes", "2", "2h", "2hr", "2hrs", "2hour", "2hours"]),
+		Parameter(180, "3-hour performance", ["3-hourperformance", "180", "180m", "180min", "180mins", "180minute", "180minutes", "3", "3h", "3hr", "3hrs", "3hour", "3hours"]),
+		Parameter(240, "4-hour performance", ["4-hourperformance", "240", "240m", "240min", "240mins", "240minute", "240minutes", "4", "4h", "4hr", "4hrs", "4hour", "4hours"], tradingViewStockHeatmap="?color=change%7C240", tradingViewCryptoHeatmap="?color=change%7C240"),
+		Parameter(360, "6-hour performance", ["6-hourperformance", "360", "360m", "360min", "360mins", "360minute", "360minutes", "6", "6h", "6hr", "6hrs", "6hour", "6hours"]),
+		Parameter(480, "8-hour performance", ["8-hourperformance", "480", "480m", "480min", "480mins", "480minute", "480minutes", "8", "8h", "8hr", "8hrs", "8hour", "8hours"]),
+		Parameter(720, "12-hour performance", ["12-hourperformance", "720", "720m", "720min", "720mins", "720minute", "720minutes", "12", "12h", "12hr", "12hrs", "12hour", "12hours"]),
+		Parameter(1440, "1-day performance", ["1-dayperformance", "24", "24h", "24hr", "24hrs", "24hour", "24hours", "d", "day", "1", "1d", "1day", "daily", "1440", "1440m", "1440min", "1440mins", "1440minute", "1440minutes"], tradingViewStockHeatmap="?color=change", tradingViewCryptoHeatmap="?color=change"),
+		Parameter(2880, "2-day performance", ["2-dayperformance", "48", "48h", "48hr", "48hrs", "48hour", "48hours", "2", "2d", "2day", "2880", "2880m", "2880min", "2880mins", "2880minute", "2880minutes"]),
+		Parameter(3420, "3-day performance", ["3-dayperformance", "72", "72h", "72hr", "72hrs", "72hour", "72hours", "3", "3d", "3day", "3420", "3420m", "3420min", "3420mins", "3420minute", "3420minutes"]),
+		Parameter(10080, "1-week performance", ["1-weekperformance", "7", "7d", "7day", "7days", "w", "week", "1w", "1week", "weekly"], tradingViewStockHeatmap="?color=Perf.W", tradingViewCryptoHeatmap="?color=Perf.W"),
+		Parameter(20160, "2-week performance", ["2-weekperformance", "14", "14d", "14day", "14days", "2w", "2week"]),
+		Parameter(43829, "1-month performance", ["1-monthperformance", "30d", "30day", "30days", "1", "1m", "m", "mo", "month", "1mo", "1month", "monthly"], tradingViewStockHeatmap="?color=Perf.1M", tradingViewCryptoHeatmap="?color=Perf.1M"),
+		Parameter(87658, "2-month performance", ["2-monthperformance", "2", "2m", "2m", "2mo", "2month", "2months"]),
+		Parameter(131487, "3-month performance", ["3-monthperformance", "3", "3m", "3m", "3mo", "3month", "3months"], tradingViewStockHeatmap="?color=Perf.3M", tradingViewCryptoHeatmap="?color=Perf.3M"),
+		Parameter(175316, "4-month performance", ["4-monthperformance", "4", "4m", "4m", "4mo", "4month", "4months"]),
+		Parameter(262974, "6-month performance", ["6-monthperformance", "6", "6m", "5m", "6mo", "6month", "6months"], tradingViewStockHeatmap="?color=Perf.6M", tradingViewCryptoHeatmap="?color=Perf.6M"),
+		Parameter(525949, "1-year performance", ["1-yearperformance", "12", "12m", "12mo", "12month", "12months", "year", "yearly", "1year", "1y", "y", "annual", "annually"], tradingViewStockHeatmap="?color=Perf.Y", tradingViewCryptoHeatmap="?color=Perf.Y"),
+		Parameter(1051898, "2-year performance", ["2-yearperformance", "24", "24m", "24mo", "24month", "24months", "2year", "2y"]),
+		Parameter(1577847, "3-year performance", ["3-yearperformance", "36", "36m", "36mo", "36month", "36months", "3year", "3y"]),
+		Parameter(2103796, "4-year performance", ["4-yearperformance", "48", "48m", "48mo", "48month", "48months", "4year", "4y"]),
+		Parameter("ytd", "YTD performance", ["ytdperformance", "ytd"], tradingViewStockHeatmap="?color=Perf.Y", tradingViewCryptoHeatmap="?color=Perf.Y"),
+		Parameter("color", "Pre-market change", ["pre-marketchange", "premarketchange", "premarketperformance"], tradingViewStockHeatmap="?color=premarket_change"),
+		Parameter("color", "Post-market change", ["post-marketchange", "postmarketchange", "postmarketperformance"], tradingViewStockHeatmap="?color=postmarket_change"),
+		Parameter("color", "10-day relative volume", ["10-dayrelativevolume", "relativevolume", "volume"], tradingViewStockHeatmap="?color=relative_volume_10d_calc"),
+		Parameter("color", "Gap", ["gap"], tradingViewStockHeatmap="?color=gap", tradingViewCryptoHeatmap="?color=gap"),
+		Parameter("color", "1-day volatility", ["1-dayvolatility", "volatility", "vol", "v"], tradingViewStockHeatmap="?color=Volatility.D", tradingViewCryptoHeatmap="?color=Volatility.D"),
 	],
 	"types": [
 		Parameter("type", "Nasdaq 100", ["nasdaq", "nasdaq100"], tradingViewStockHeatmap="&dataset=NASDAQ100"),
@@ -90,12 +95,6 @@ PARAMETERS = {
 	],
 	"style": [],
 	"preferences": [
-		Parameter("heatmap", "Performance", ["change", "performance"], tradingViewStockHeatmap="performance", tradingViewCryptoHeatmap="performance"),
-		Parameter("heatmap", "Pre-market change", ["pre-marketchange", "premarketchange", "premarketperformance"], tradingViewStockHeatmap="?color=premarket_change"),
-		Parameter("heatmap", "Post-market change", ["post-marketchange", "postmarketchange", "postmarketperformance"], tradingViewStockHeatmap="?color=postmarket_change"),
-		Parameter("heatmap", "Relative volume", ["relativevolume", "volume"], tradingViewStockHeatmap="?color=relative_volume_10d_calc"),
-		Parameter("heatmap", "Gap", ["gap"], tradingViewStockHeatmap="?color=gap", tradingViewCryptoHeatmap="?color=gap"),
-		Parameter("heatmap", "Volatility", ["volatility", "vol", "v"], tradingViewStockHeatmap="?color=Volatility.D", tradingViewCryptoHeatmap="?color=Volatility.D"),
 		Parameter("size", "Market cap", ["marketcap", "mcap"], tradingViewStockHeatmap="&size=market_cap_basic", tradingViewCryptoHeatmap="&size=market_cap_calc"),
 		Parameter("size", "Traded volume", ["tradedvolume", "volume"], tradingViewCryptoHeatmap="&size=total_value_traded"),
 		Parameter("size", "Number of employees", ["numberofemployees", "employees"], tradingViewStockHeatmap="&size=number_of_employees"),
@@ -203,25 +202,14 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 			preferences = [{"id": e.id, "value": e.parsed[platform]} for e in request.preferences]
 
 			if platform == "TradingView Stock Heatmap":
-				heatmap = [e.get("value") for e in preferences if e.get("id") == "heatmap"]
 				size = [e.get("value") for e in preferences if e.get("id") == "size"]
 				group = [e.get("value") for e in preferences if e.get("id") == "group"]
 
 				theme = [e.get("value") for e in types if e.get("id") == "theme"]
 				_type = [e.get("value") for e in types if e.get("id") == "type"]
 
-				if "performance" not in heatmap and any([e in heatmap for e in ["?color=premarket_change", "?color=postmarket_change", "?color=relative_volume_10d_calc", "?color=gap", "?color=Volatility.D"]]):
-					if len(request.timeframes) != 0:
-						if request.timeframes[0].id is not None: request.set_error(f"Timeframes are only supported on the performance heatmap."); break
-					else:
-						request.timeframes = [Parameter(None, None, None, tradingViewStockHeatmap="")]
-				elif len(request.timeframes) == 0:
+				if len(request.timeframes) == 0:
 					request.timeframes = [AbstractRequest.find_parameter_with_id(1440, type="timeframes", params=PARAMETERS)]
-					if "performance" not in heatmap:
-						request.preferences.append(AbstractRequest.find_parameter_with_id("heatmap", name="Performance", type="preferences", params=PARAMETERS))
-				else:
-					if "performance" not in heatmap:
-						request.preferences.append(AbstractRequest.find_parameter_with_id("heatmap", name="Performance", type="preferences", params=PARAMETERS))
 
 				if len(size) == 0:
 					request.preferences.append(AbstractRequest.find_parameter_with_id("size", name="Market cap", type="preferences", params=PARAMETERS))
@@ -233,25 +221,14 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 				if len(_type) == 0:
 					request.types.append(AbstractRequest.find_parameter_with_id("type", name="S&P 500", type="types", params=PARAMETERS))
 			elif platform == "TradingView Crypto Heatmap":
-				heatmap = [e.get("value") for e in preferences if e.get("id") == "heatmap"]
 				size = [e.get("value") for e in preferences if e.get("id") == "size"]
 				group = [e.get("value") for e in preferences if e.get("id") == "group"]
 
 				theme = [e.get("value") for e in types if e.get("id") == "theme"]
 				_type = [e.get("value") for e in types if e.get("id") == "type"]
 
-				if "performance" not in heatmap and any([e in heatmap for e in ["?color=gap", "?color=Volatility.D"]]):
-					if len(request.timeframes) != 0:
-						if request.timeframes[0].id is not None: request.set_error(f"Timeframes are only supported on the performance heatmap."); break
-					else:
-						request.timeframes = [Parameter(None, None, None, tradingViewCryptoHeatmap="")]
-				elif len(request.timeframes) == 0:
+				if len(request.timeframes) == 0:
 					request.timeframes = [AbstractRequest.find_parameter_with_id(1440, type="timeframes", params=PARAMETERS)]
-					if "performance" not in heatmap:
-						request.preferences.append(AbstractRequest.find_parameter_with_id("heatmap", name="Performance", type="preferences", params=PARAMETERS))
-				else:
-					if "performance" not in heatmap:
-						request.preferences.append(AbstractRequest.find_parameter_with_id("heatmap", name="Performance", type="preferences", params=PARAMETERS))
 
 				if len(size) == 0:
 					request.preferences.append(AbstractRequest.find_parameter_with_id("size", name="Market cap", type="preferences", params=PARAMETERS))

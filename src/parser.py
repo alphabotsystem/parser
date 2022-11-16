@@ -141,8 +141,6 @@ async def autocomplete(req: Request):
 		response = await autocomplete_market(request["market"], request["type"])
 	elif option == "category":
 		response = await autocomplete_category(request["category"], request["type"])
-	elif option == "color":
-		response = await autocomplete_color(request["color"], request["type"])
 	elif option == "size":
 		response = await autocomplete_size(request["size"], request["type"])
 	elif option == "group":

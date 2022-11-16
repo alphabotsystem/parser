@@ -296,15 +296,17 @@ async def find_listings(ticker, platform):
 				for result in response:
 					if result["symbol"] == ticker["symbol"]:
 						if result.get("currency_code", "USD") in sources:
-							sources[result.get("currency_code", "USD")].add(result["exchange"])
+							sources[result.get("currency_code", "USD")].add(result["exchange"].lower())
 						else:
-							sources[result.get("currency_code", "USD")] = {result["exchange"]}
+							sources[result.get("currency_code", "USD")] = {result["exchange"].lower()}
 
 	response, total = [], 0
 	for quote in sources:
 		names = []
 		for source in sources[quote]:
-			names.append(next((exchange["_source"]["name"] for exchange in exchanges["hits"]["hits"] if exchange["_source"]["id"] == source), None))
+			hit = next((exchange["_source"]["name"] for exchange in exchanges["hits"]["hits"] if EXCHANGE_TO_TRADINGVIEW.get(exchange["_source"]["id"], exchange["_source"]["id"]).lower() == source or exchange["_source"]["id"] == source), None)
+			if hit is not None:
+				names.append(hit)
 		response.append([quote, sorted(names)])
 		total += len(names)
 

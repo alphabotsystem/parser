@@ -16,10 +16,10 @@ GRAMMAR = """
 	?atom: "-" atom         -> neg
 		 | CONSTANT         -> number
 		 | NAME             -> var
-		 | "'" NAME "'"     -> literal
-		 | "\\"" NAME "\\"" -> literal
-		 | "‘" NAME "’"     -> literal
-		 | "“" NAME "”"     -> literal
+		 | "'" QUOTED "'"     -> literal
+		 | "\\"" QUOTED "\\"" -> literal
+		 | "‘" QUOTED "’"     -> literal
+		 | "“" QUOTED "”"     -> literal
 		 | "(" sum ")"
 	%import common.LETTER
 	%import common.DIGIT
@@ -29,6 +29,7 @@ GRAMMAR = """
 
 	CONSTANT: DIGIT ("." DIGIT+)?
 	NAME: /([^\+\-\*\/\^\(\)\'\"\‘\’\“\”]+|[a-zA-Z]+)/
+	QUOTED: /([^\+\-\*\/\^\(\)\'\"\‘\’\“\”]+|[a-zA-Z]+)/
 """
 
 larkParser = Lark(GRAMMAR, parser='lalr')

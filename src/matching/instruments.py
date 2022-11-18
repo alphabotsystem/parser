@@ -34,7 +34,7 @@ async def match_ticker(tickerId, exchangeId, platform, assetClass):
 		return None, "Requested ticker could not be found."
 
 	reconstructedId = Reconstructor.reconstruct(ticker)
-	isSimple = isinstance(ticker.children[0], Token) and ticker.children[0].type == "NAME"
+	isSimple = isinstance(ticker.children[0], Token) and (ticker.children[0].type == "NAME" or ticker.children[0].type == "QUOTED")
 	match = ticker.children[0].value if isSimple else {}
 	if not isSimple and platform not in ["TradingView", "CoinGecko", "CCXT", "IEXC", "LLD"]:
 		return None, f"Complex tickers aren't available on {platform}"
@@ -60,8 +60,8 @@ async def ticker_tree_search(node, exchangeId, platform, assetClass):
 	for i, child in enumerate(node.children):
 		if not isinstance(child, Token):
 			node.children[i] = await ticker_tree_search(child, exchangeId, platform, assetClass)
-		elif child.type == "NAME":
-			newValue = await find_instrument(child.value, exchangeId, platform, assetClass)
+		elif child.type == "NAME" or child.type == "QUOTED":
+			newValue = await find_instrument(child.value, exchangeId, platform, assetClass, child.type == "QUOTED")
 			node.children[i] = child.update(value=newValue)
 	return node
 
@@ -90,69 +90,83 @@ async def prepare_instrument(instrument, exchangeId):
 		}
 	}
 
-def generate_query(search, tag, exchangeId, platform, assetClass):
-	tickerQuery = {
-		"bool": {
-			"must": [{
-				"bool": {
-					"should": [{
-						"match": {"ticker": search} # Ticker should match
-					}, {
-						"match": {"triggers.pair": search} # Any of the pair triggers should match
-					}]
-				}
-			}, {
-				"match": {"supports": platform} # Platform must be supported
-			}]
+def generate_query(search, tag, exchangeId, platform, assetClass, strict=False):
+	if strict:
+		tickerQuery = {
+			"bool": {
+				"must": [{
+					"term": {"ticker": search} # Ticker should match
+				}, {
+					"match": {"supports": platform} # Platform must be supported
+				}]
+			}
 		}
-	}
-	nameQuery = {
-		"bool": {
-			"must": [{
-				"bool": {
-					"should": [{
-						"match": {"name": search} # Name should match
-					}, {
-						"match": {"triggers.name": search} # Any of the name triggers should match
-					}]
-				}
-			}, {
-				"match": {"supports": platform} # Platform must be supported
-			}]
-		}
-	}
 
-	if tag is not None:
-		tickerQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
-		nameQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
-	if assetClass is not None:
-		tickerQuery["bool"]["must"].append({"match": {"type": assetClass.lower()}})
-		nameQuery["bool"]["must"].append({"match": {"type": assetClass.lower()}})
-	if exchangeId is None:
-		tickerQuery["bool"]["must"].append({"term": {"market.passive": False}})
-		nameQuery["bool"]["must"].append({"term": {"market.passive": False}})
+		return tickerQuery, None
+
 	else:
-		tickerQuery["bool"]["must"].append({"term": {"market.source": exchangeId}})
-		nameQuery["bool"]["must"].append({"term": {"market.source": exchangeId}})
+		tickerQuery = {
+			"bool": {
+				"must": [{
+					"bool": {
+						"should": [{
+							"match": {"ticker": search} # Ticker should match
+						}, {
+							"match": {"triggers.pair": search} # Any of the pair triggers should match
+						}]
+					}
+				}, {
+					"match": {"supports": platform} # Platform must be supported
+				}]
+			}
+		}
+		nameQuery = {
+			"bool": {
+				"must": [{
+					"bool": {
+						"should": [{
+							"match": {"name": search} # Name should match
+						}, {
+							"match": {"triggers.name": search} # Any of the name triggers should match
+						}]
+					}
+				}, {
+					"match": {"supports": platform} # Platform must be supported
+				}]
+			}
+		}
 
-	return tickerQuery, nameQuery
+		if tag is not None:
+			tickerQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
+			nameQuery["bool"]["must"].append({"term": {"tag": int(tag)}})
+		if assetClass is not None:
+			tickerQuery["bool"]["must"].append({"match": {"type": assetClass.lower()}})
+			nameQuery["bool"]["must"].append({"match": {"type": assetClass.lower()}})
+		if exchangeId is None:
+			tickerQuery["bool"]["must"].append({"term": {"market.passive": False}})
+			nameQuery["bool"]["must"].append({"term": {"market.passive": False}})
+		else:
+			tickerQuery["bool"]["must"].append({"term": {"market.source": exchangeId}})
+			nameQuery["bool"]["must"].append({"term": {"market.source": exchangeId}})
 
-async def perform_search(tickerId, exchangeId, platform, assetClass=None, limit=1):
+		return tickerQuery, nameQuery
+
+async def perform_search(tickerId, exchangeId, platform, assetClass=None, limit=1, strict=False):
 	search, tag = tickerId.lower().split(":") if ":" in tickerId else (tickerId.lower(), None)
 	if tag is not None and not tag.isnumeric(): search, tag = tickerId.lower(), None
 
 	# Generate queries and search by ticker first
-	query1, query2 = generate_query(search, tag, exchangeId, platform, assetClass)
+	query1, query2 = generate_query(search, tag, exchangeId, platform, assetClass, strict=strict)
 	response = await elasticsearch.search(index="assets", query=query1, sort=QUERY_SORT, size=limit)
 
 	# Search by name if no results were found
-	if response["hits"]["total"]["value"] == 0:
+	if response["hits"]["total"]["value"] == 0 and query2 is not None:
 		response = await elasticsearch.search(index="assets", query=query2, sort=QUERY_SORT, size=limit)
 
 	return response
 
-async def find_instrument(tickerId, exchangeId, platform, assetClass):
-	response = await perform_search(tickerId, exchangeId, platform, assetClass=assetClass)
+async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
+	response = await perform_search(tickerId, exchangeId, platform, assetClass=assetClass, strict=strict)
 
 	if response["hits"]["total"]["value"] == 0:
 		if platform in STRICT_MATCH:

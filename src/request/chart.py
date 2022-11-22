@@ -318,7 +318,7 @@ class ChartRequestHandler(AbstractRequestHandler):
 					request.set_error("TradingLite currently only supports cryptocurrency markets on supported exchanges.", isFatal=True)
 				elif request.ticker.get("symbol") is None:
 					request.set_error(f"Requested chart for `{request.ticker.get('id')}` is not available.", isFatal=True)
-				elif request.exchange.get("id") in ["binanceusdm", "binancecoinm", "okex5"]:
+				elif request.exchange.get("id") in ["binanceusdm", "binancecoinm", "okex5", "kucoin"]:
 					request.set_error(f"{request.exchange.get('name')} exchange is not available. ||Yet? Let TradingLite know you want it!||", isFatal=True)
 
 			elif platform == "TradingView":

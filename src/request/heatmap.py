@@ -254,7 +254,7 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 			d[platform] = request
 
 		d["timeframes"] = {p: t for p, t in zip(self.platforms, timeframes)}
-		d["requestCount"] = len(d["timeframes"][d.get("currentPlatform")])
+		d["requestCount"] = len(d["timeframes"].get(d.get("currentPlatform"), []))
 
 		return d
 

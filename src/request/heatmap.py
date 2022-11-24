@@ -202,42 +202,42 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 			preferences = [{"id": e.id, "value": e.parsed[platform]} for e in request.preferences]
 
 			if platform == "TradingView Stock Heatmap":
-				size = [e.get("value") for e in preferences if e.get("id") == "size"]
-				group = [e.get("value") for e in preferences if e.get("id") == "group"]
+				size = next((e.get("value") for e in preferences if e.get("id") == "size"), None)
+				group = next((e.get("value") for e in preferences if e.get("id") == "group"), None)
 
-				theme = [e.get("value") for e in types if e.get("id") == "theme"]
-				_type = [e.get("value") for e in types if e.get("id") == "type"]
+				theme = next((e.get("value") for e in types if e.get("id") == "theme"), None)
+				_type = next((e.get("value") for e in types if e.get("id") == "type"), None)
 
 				if len(request.timeframes) == 0:
 					request.timeframes = [AbstractRequest.find_parameter_with_id(1440, type="timeframes", params=PARAMETERS)]
 
-				if len(size) == 0:
+				if size is None:
 					request.preferences.append(AbstractRequest.find_parameter_with_id("size", name="Market cap", type="preferences", params=PARAMETERS))
-				if len(group) == 0:
+				if group is None:
 					request.preferences.append(AbstractRequest.find_parameter_with_id("group", name="Sector", type="preferences", params=PARAMETERS))
 
-				if len(theme) == 0:
+				if theme is None:
 					request.types.append(AbstractRequest.find_parameter_with_id("theme", name="Dark theme", type="types", params=PARAMETERS))
-				if len(_type) == 0:
+				if _type is None:
 					request.types.append(AbstractRequest.find_parameter_with_id("type", name="S&P 500", type="types", params=PARAMETERS))
 			elif platform == "TradingView Crypto Heatmap":
-				size = [e.get("value") for e in preferences if e.get("id") == "size"]
-				group = [e.get("value") for e in preferences if e.get("id") == "group"]
+				size = next((e.get("value") for e in preferences if e.get("id") == "size"), None)
+				group = next((e.get("value") for e in preferences if e.get("id") == "group"), None)
 
-				theme = [e.get("value") for e in types if e.get("id") == "theme"]
-				_type = [e.get("value") for e in types if e.get("id") == "type"]
+				theme = next((e.get("value") for e in types if e.get("id") == "theme"), None)
+				_type = next((e.get("value") for e in types if e.get("id") == "type"), None)
 
 				if len(request.timeframes) == 0:
 					request.timeframes = [AbstractRequest.find_parameter_with_id(1440, type="timeframes", params=PARAMETERS)]
 
-				if len(size) == 0:
+				if size is None:
 					request.preferences.append(AbstractRequest.find_parameter_with_id("size", name="Market cap", type="preferences", params=PARAMETERS))
-				if len(group) == 0:
+				if group is None:
 					request.preferences.append(AbstractRequest.find_parameter_with_id("group", name="No group", type="preferences", params=PARAMETERS))
 
-				if len(theme) == 0:
+				if theme is None:
 					request.types.append(AbstractRequest.find_parameter_with_id("theme", name="Dark theme", type="types", params=PARAMETERS))
-				if len(_type) == 0:
+				if _type is None:
 					request.types.append(AbstractRequest.find_parameter_with_id("type", name="Crypto in USD", type="types", params=PARAMETERS))
 
 	def to_dict(self):

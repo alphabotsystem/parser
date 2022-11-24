@@ -36,7 +36,7 @@ async def match_ticker(tickerId, exchangeId, platform, assetClass):
 	reconstructedId = Reconstructor.reconstruct(ticker)
 	isSimple = isinstance(ticker.children[0], Token) and (ticker.children[0].type == "NAME" or ticker.children[0].type == "QUOTED")
 	match = ticker.children[0].value if isSimple else {}
-	if not isSimple and platform not in ["TradingView", "CoinGecko", "CCXT", "IEXC", "LLD"]:
+	if not isSimple and platform not in ["TradingView", "CoinGecko", "CCXT", "IEXC"]:
 		return None, f"Complex tickers aren't available on {platform}"
 
 	response = {

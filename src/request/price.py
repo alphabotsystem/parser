@@ -10,11 +10,11 @@ from .abstract import AbstractRequestHandler, AbstractRequest
 
 PARAMETERS = {
 	"preferences": [
-		Parameter("lld", "funding", ["fun", "fund", "funding"], lld="funding"),
-		Parameter("lld", "open interest", ["oi", "openinterest", "ov", "openvalue"], lld="oi"),
-		Parameter("lld", "longs/shorts ratio", ["ls", "l/s", "longs/shorts", "long/short"], lld="ls"),
-		Parameter("lld", "shorts/longs ratio", ["sl", "s/l", "shorts/longs", "short/long"], lld="sl"),
-		Parameter("lld", "dominance", ["dom", "dominance"], lld="dom"),
+		Parameter("lld", "funding", ["fun", "fund", "funding"], ccxt="funding"),
+		Parameter("lld", "open interest", ["oi", "openinterest", "ov", "openvalue"], ccxt="oi"),
+		Parameter("lld", "longs/shorts ratio", ["ls", "l/s", "longs/shorts", "long/short"], ccxt="ls"),
+		Parameter("lld", "shorts/longs ratio", ["sl", "s/l", "shorts/longs", "short/long"], ccxt="sl"),
+		Parameter("lld", "dominance", ["dom", "dominance"], coingecko="dom"),
 		Parameter("forcePlatform", "request quote on CoinGecko", ["cg", "coingecko"], coingecko=True),
 		Parameter("forcePlatform", "request quote on a crypto exchange", ["cx", "ccxt", "crypto", "exchange"], ccxt=True),
 		Parameter("forcePlatform", "request quote on a stock exchange", ["ix", "iexc", "stock", "stocks"], iexc=True),
@@ -36,9 +36,6 @@ DEFAULTS = {
 		"preferences": []
 	},
 	"IEXC": {
-		"preferences": []
-	},
-	"LLD": {
 		"preferences": []
 	}
 }
@@ -108,10 +105,6 @@ class PriceRequestHandler(AbstractRequestHandler):
 			elif platform == "IEXC":
 				if request.couldFail:
 					request.set_error("Requested ticker could not be found.", isFatal=True)
-
-			elif platform == "LLD":
-				if not bool(request.exchange) and request.ticker.get("id") not in ["MCAP"]:
-					request.set_error(None, isFatal=True)
 
 
 	def to_dict(self):

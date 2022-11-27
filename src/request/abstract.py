@@ -100,18 +100,18 @@ class AbstractRequest(object):
 		return None, None
 
 	@staticmethod
-	def find_parameter_by_id(id, name=None, parameterType=None, params={}):
+	def find_parameter_by_id(_id, params, platform, name=None, parameterType=None):
 		for t in (params.keys() if parameterType is None else [parameterType]):
 			for parameter in params[t]:
-				if id == parameter.id and (name is None or parameter.name == name):
+				if parameter.supports(platform) and _id == parameter.id and (name is None or parameter.name == name):
 					return parameter
 		return None
 
 	@staticmethod
-	def find_parameter_by_name(name, parameterType=None, params={}):
+	def find_parameter_by_trigger(trigger, params, platform, parameterType=None):
 		for t in (params.keys() if parameterType is None else [parameterType]):
 			for parameter in params[t]:
-				if parameter.name == name:
+				if parameter.supports(platform) and trigger in parameter.parsablePhrases:
 					return parameter
 		return None
 

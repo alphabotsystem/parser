@@ -195,42 +195,64 @@ PARAMETERS = {
 }
 DEFAULTS = {
 	"Alternative.me": {
-		"timeframes": [AbstractRequest.find_parameter_by_id(1440, parameterType="timeframes", params=PARAMETERS)],
+		"timeframes": [
+			AbstractRequest.find_parameter_by_id(1440, PARAMETERS, "Alternative.me", parameterType="timeframes")
+		],
 		"indicators": [],
 		"types": [],
 		"style": [],
 		"preferences": []
 	},
 	"CNN Business": {
-		"timeframes": [AbstractRequest.find_parameter_by_id(1440, parameterType="timeframes", params=PARAMETERS)],
+		"timeframes": [
+			AbstractRequest.find_parameter_by_id(1440, PARAMETERS, "CNN Business", parameterType="timeframes")
+		],
 		"indicators": [],
 		"types": [],
 		"style": [],
 		"preferences": []
 	},
 	"TradingLite": {
-		"timeframes": [AbstractRequest.find_parameter_by_id(60, parameterType="timeframes", params=PARAMETERS)],
+		"timeframes": [
+			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingLite", parameterType="timeframes")
+		],
 		"indicators": [],
 		"types": [],
-		"style": [AbstractRequest.find_parameter_by_id("theme", name="Dark theme", parameterType="style", params=PARAMETERS)],
-		"preferences": [AbstractRequest.find_parameter_by_id("heatmapIntensity", name="Normal heatmap intensity", parameterType="preferences", params=PARAMETERS)]
+		"style": [
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingLite", name="Dark theme", parameterType="style")
+		],
+		"preferences": [
+			AbstractRequest.find_parameter_by_id("heatmapIntensity", PARAMETERS, "TradingLite", name="Normal heatmap intensity", parameterType="preferences")
+		]
 	},
 	"TradingView Premium": {
-		"timeframes": [AbstractRequest.find_parameter_by_id(60, parameterType="timeframes", params=PARAMETERS)],
+		"timeframes": [
+			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingView Premium", parameterType="timeframes")
+		],
 		"indicators": [],
-		"types": [AbstractRequest.find_parameter_by_id("theme", name="Dark theme", parameterType="types", params=PARAMETERS), AbstractRequest.find_parameter_by_id("candleStyle", name="Candles", parameterType="types", params=PARAMETERS)],
+		"types": [
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Premium", name="Dark theme", parameterType="types"),
+			AbstractRequest.find_parameter_by_id("candleStyle", PARAMETERS, "TradingView Premium", name="Candles", parameterType="types")
+		],
 		"style": [],
 		"preferences": []
 	},
 	"TradingView": {
-		"timeframes": [AbstractRequest.find_parameter_by_id(60, parameterType="timeframes", params=PARAMETERS)],
+		"timeframes": [
+			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingView", parameterType="timeframes")
+		],
 		"indicators": [],
-		"types": [AbstractRequest.find_parameter_by_id("theme", name="Dark theme", parameterType="types", params=PARAMETERS), AbstractRequest.find_parameter_by_id("candleStyle", name="Candles", parameterType="types", params=PARAMETERS)],
+		"types": [
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView", name="Dark theme", parameterType="types"),
+			AbstractRequest.find_parameter_by_id("candleStyle", PARAMETERS, "TradingView", name="Candles", parameterType="types")
+		],
 		"style": [],
 		"preferences": []
 	},
 	"Bookmap": {
-		"timeframes": [AbstractRequest.find_parameter_by_id(60, parameterType="timeframes", params=PARAMETERS)],
+		"timeframes": [
+			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "Bookmap", parameterType="timeframes")
+		],
 		"indicators": [],
 		"types": [],
 		"style": [],
@@ -240,10 +262,10 @@ DEFAULTS = {
 
 
 class ChartRequestHandler(AbstractRequestHandler):
-	def __init__(self, tickerId, platforms, assetClass=None):
+	def __init__(self, tickerId, platforms, assetClass=None, defaults={}):
 		super().__init__(platforms, assetClass)
 		for platform in platforms:
-			self.requests[platform] = ChartRequest(tickerId, platform)
+			self.requests[platform] = ChartRequest(tickerId, platform, defaults)
 
 	async def parse_argument(self, argument):
 		for platform, request in self.requests.items():
@@ -370,7 +392,7 @@ class ChartRequestHandler(AbstractRequestHandler):
 
 
 class ChartRequest(AbstractRequest):
-	def __init__(self, tickerId, platform, defaults={}):
+	def __init__(self, tickerId, platform, defaults):
 		super().__init__(platform)
 		self.tickerId = tickerId
 		self.ticker = {}
@@ -387,19 +409,28 @@ class ChartRequest(AbstractRequest):
 		self.hasExchange = False
 
 		self.defaults = {
-			"timeframes": [defaults.get("timeframe")],
-			"indicators": defaults.get("indicators", []),
-			"types": [],
-			"style": [],
+			"timeframes": [
+				AbstractRequest.find_parameter_by_trigger(defaults.get("timeframe"), PARAMETERS, self.platform, parameterType="timeframes")
+			],
+			"indicators": [
+				AbstractRequest.find_parameter_by_trigger(e, PARAMETERS, self.platform, parameterType="indicators")
+				for e in defaults.get("indicators", [])
+			],
+			"types": [
+				AbstractRequest.find_parameter_by_trigger(e, PARAMETERS, self.platform, parameterType="types")
+				for e in [defaults.get("theme"), defaults.get("chartType")]
+			],
+			"style": [
+				AbstractRequest.find_parameter_by_trigger(e, PARAMETERS, self.platform, parameterType="style")
+				for e in [defaults.get("theme"), defaults.get("chartType")]
+			],
 			"preferences": []
 		}
 
 	async def process_ticker(self, assetClass):
 		updatedTicker, error = None, None
 		try: updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform, assetClass)
-		except:
-			print(format_exc())
-			error = "Something went wrong while processing the requested ticker."
+		except: error = "Something went wrong while processing the requested ticker."
 
 		if error is not None:
 			self.set_error(error, isFatal=True)
@@ -487,7 +518,7 @@ class ChartRequest(AbstractRequest):
 			userDefaults = [e for e in self.defaults.get("indicators") if e is not None]
 			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					self.timeframes.append(parameter)
+					self.indicators.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.indicators): self.indicators.append(parameter)
@@ -495,7 +526,7 @@ class ChartRequest(AbstractRequest):
 			userDefaults = [e for e in self.defaults.get("types") if e is not None]
 			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					self.timeframes.append(parameter)
+					self.types.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.types): self.types.append(parameter)
@@ -503,7 +534,7 @@ class ChartRequest(AbstractRequest):
 			userDefaults = [e for e in self.defaults.get("style") if e is not None]
 			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					self.timeframes.append(parameter)
+					self.styles.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.styles): self.styles.append(parameter)
@@ -511,7 +542,7 @@ class ChartRequest(AbstractRequest):
 			userDefaults = [e for e in self.defaults.get("preferences") if e is not None]
 			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					self.timeframes.append(parameter)
+					self.preferences.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.preferences): self.preferences.append(parameter)

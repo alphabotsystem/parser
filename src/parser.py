@@ -33,9 +33,10 @@ async def process_chart_request(req: Request):
 	request = await req.json()
 	arguments, platforms = request["arguments"], request["platforms"]
 	tickerParts = request["tickerId"].split("|")
+	defaults = request.get("defaults", {})
 	tickerId, assetClass = tickerParts[0].strip(), tickerParts[-1].title().strip()
 	if assetClass not in ASSET_CLASSES: assetClass = None
-	requestHandler = ChartRequestHandler(tickerId, platforms, assetClass=assetClass)
+	requestHandler = ChartRequestHandler(tickerId, platforms, assetClass=assetClass, defaults=defaults)
 
 	tasks = []
 	for argument in arguments:

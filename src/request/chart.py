@@ -388,7 +388,7 @@ class ChartRequest(AbstractRequest):
 
 		self.defaults = {
 			"timeframes": [defaults.get("timeframe")],
-			"indicators": defaults.get("indicators"),
+			"indicators": defaults.get("indicators", []),
 			"types": [],
 			"style": [],
 			"preferences": []

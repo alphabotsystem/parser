@@ -56,7 +56,7 @@ class DetailRequestHandler(AbstractRequestHandler):
 		for platform, request in self.requests.items():
 			if request.errorIsFatal: continue
 			for parameterType in PARAMETERS:
-				request.set_default_for(type)
+				request.set_default_for(parameterType)
 
 	async def find_caveats(self):
 		for platform, request in self.requests.items():

@@ -100,16 +100,24 @@ class AbstractRequest(object):
 		return None, None
 
 	@staticmethod
-	def find_parameter_with_id(id, name=None, type=None, params={}):
-		for t in (params.keys() if type is None else [type]):
+	def find_parameter_by_id(id, name=None, parameterType=None, params={}):
+		for t in (params.keys() if parameterType is None else [parameterType]):
 			for parameter in params[t]:
 				if id == parameter.id and (name is None or parameter.name == name):
 					return parameter
 		return None
 
-	def has_parameter(self, id, list, argument=None):
-		for e in list:
-			if e.id == id and (argument is None or e.parsed[self.platform] == argument): return True
+	@staticmethod
+	def find_parameter_by_name(name, parameterType=None, params={}):
+		for t in (params.keys() if parameterType is None else [parameterType]):
+			for parameter in params[t]:
+				if parameter.name == name:
+					return parameter
+		return None
+
+	def has_parameter(self, _id, _list, argument=None):
+		for e in _list:
+			if e.id == _id and (argument is None or e.parsed[self.platform] == argument): return True
 		return False
 
 	def set_error(self, error, isFatal=False):

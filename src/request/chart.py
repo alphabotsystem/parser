@@ -158,8 +158,8 @@ PARAMETERS = {
 		Parameter("nv", "No volume", ["hv", "nv", "novol"], tradingview="&hidevolume=1", premium="&hidevolume=1"),
 		Parameter("theme", "Light theme", ["light", "white"], tradingview="&theme=light", premium="&theme=Light", alternativeme="&theme=light", cnnbusiness="&theme=light"),
 		Parameter("theme", "Dark theme", ["dark", "black"], tradingview="&theme=dark", premium="&theme=Dark", alternativeme="&theme=dark", cnnbusiness="&theme=dark"),
-		Parameter("candleStyle", "Bars", ["bars", "bar"], tradingview="&style=0", premium="&chartType=0"),
-		Parameter("candleStyle", "Candles", ["candles", "candle"], tradingview="&style=1", premium="&chartType=1"),
+		Parameter("candleStyle", "Bars", ["bars", "bar"], tradingview="&style=0"),
+		Parameter("candleStyle", "Candles", ["candles", "candle", "candlestick"], tradingview="&style=1", premium="&chartType=1"),
 		Parameter("candleStyle", "Line", ["line"], tradingview="&style=2", premium="&chartType=2"),
 		Parameter("candleStyle", "Area", ["area"], tradingview="&style=3", premium="&chartType=3"),
 		Parameter("candleStyle", "Renko", ["renko"], tradingview="&style=4"),
@@ -170,7 +170,6 @@ PARAMETERS = {
 		Parameter("candleStyle", "Hollow candles", ["hollow"], tradingview="&style=9", premium="&chartType=9"),
 		Parameter("candleStyle", "Baseline", ["baseline"], premium="&chartType=10"),
 		Parameter("candleStyle", "HiLo", ["hilo"], premium="&chartType=12"),
-		Parameter("candleStyle", "Column", ["column"], premium="&chartType=13"),
 	],
 	"style": [
 		Parameter("theme", "Light theme", ["light", "white"], tradinglite="light"),
@@ -196,42 +195,42 @@ PARAMETERS = {
 }
 DEFAULTS = {
 	"Alternative.me": {
-		"timeframes": [AbstractRequest.find_parameter_with_id(1440, type="timeframes", params=PARAMETERS)],
+		"timeframes": [AbstractRequest.find_parameter_by_id(1440, parameterType="timeframes", params=PARAMETERS)],
 		"indicators": [],
 		"types": [],
 		"style": [],
 		"preferences": []
 	},
 	"CNN Business": {
-		"timeframes": [AbstractRequest.find_parameter_with_id(1440, type="timeframes", params=PARAMETERS)],
+		"timeframes": [AbstractRequest.find_parameter_by_id(1440, parameterType="timeframes", params=PARAMETERS)],
 		"indicators": [],
 		"types": [],
 		"style": [],
 		"preferences": []
 	},
 	"TradingLite": {
-		"timeframes": [AbstractRequest.find_parameter_with_id(60, type="timeframes", params=PARAMETERS)],
+		"timeframes": [AbstractRequest.find_parameter_by_id(60, parameterType="timeframes", params=PARAMETERS)],
 		"indicators": [],
 		"types": [],
-		"style": [AbstractRequest.find_parameter_with_id("theme", name="Dark theme", type="style", params=PARAMETERS)],
-		"preferences": [AbstractRequest.find_parameter_with_id("heatmapIntensity", name="Normal heatmap intensity", type="preferences", params=PARAMETERS)]
+		"style": [AbstractRequest.find_parameter_by_id("theme", name="Dark theme", parameterType="style", params=PARAMETERS)],
+		"preferences": [AbstractRequest.find_parameter_by_id("heatmapIntensity", name="Normal heatmap intensity", parameterType="preferences", params=PARAMETERS)]
 	},
 	"TradingView Premium": {
-		"timeframes": [AbstractRequest.find_parameter_with_id(60, type="timeframes", params=PARAMETERS)],
+		"timeframes": [AbstractRequest.find_parameter_by_id(60, parameterType="timeframes", params=PARAMETERS)],
 		"indicators": [],
-		"types": [AbstractRequest.find_parameter_with_id("theme", name="Dark theme", type="types", params=PARAMETERS), AbstractRequest.find_parameter_with_id("candleStyle", name="Candles", type="types", params=PARAMETERS)],
+		"types": [AbstractRequest.find_parameter_by_id("theme", name="Dark theme", parameterType="types", params=PARAMETERS), AbstractRequest.find_parameter_by_id("candleStyle", name="Candles", parameterType="types", params=PARAMETERS)],
 		"style": [],
 		"preferences": []
 	},
 	"TradingView": {
-		"timeframes": [AbstractRequest.find_parameter_with_id(60, type="timeframes", params=PARAMETERS)],
+		"timeframes": [AbstractRequest.find_parameter_by_id(60, parameterType="timeframes", params=PARAMETERS)],
 		"indicators": [],
-		"types": [AbstractRequest.find_parameter_with_id("theme", name="Dark theme", type="types", params=PARAMETERS), AbstractRequest.find_parameter_with_id("candleStyle", name="Candles", type="types", params=PARAMETERS)],
+		"types": [AbstractRequest.find_parameter_by_id("theme", name="Dark theme", parameterType="types", params=PARAMETERS), AbstractRequest.find_parameter_by_id("candleStyle", name="Candles", parameterType="types", params=PARAMETERS)],
 		"style": [],
 		"preferences": []
 	},
 	"Bookmap": {
-		"timeframes": [AbstractRequest.find_parameter_with_id(60, type="timeframes", params=PARAMETERS)],
+		"timeframes": [AbstractRequest.find_parameter_by_id(60, parameterType="timeframes", params=PARAMETERS)],
 		"indicators": [],
 		"types": [],
 		"style": [],
@@ -296,8 +295,8 @@ class ChartRequestHandler(AbstractRequestHandler):
 	def set_defaults(self):
 		for platform, request in self.requests.items():
 			if request.errorIsFatal: continue
-			for type in PARAMETERS:
-				request.set_default_for(type)
+			for parameterType in PARAMETERS:
+				request.set_default_for(parameterType)
 
 	async def find_caveats(self):
 		for platform, request in self.requests.items():
@@ -371,7 +370,7 @@ class ChartRequestHandler(AbstractRequestHandler):
 
 
 class ChartRequest(AbstractRequest):
-	def __init__(self, tickerId, platform):
+	def __init__(self, tickerId, platform, defaults={}):
 		super().__init__(platform)
 		self.tickerId = tickerId
 		self.ticker = {}
@@ -386,6 +385,14 @@ class ChartRequest(AbstractRequest):
 
 		self.currentTimeframe = None
 		self.hasExchange = False
+
+		self.defaults = {
+			"timeframes": [defaults.get("timeframe")],
+			"indicators": defaults.get("indicators"),
+			"types": [],
+			"style": [],
+			"preferences": []
+		}
 
 	async def process_ticker(self, assetClass):
 		updatedTicker, error = None, None
@@ -469,20 +476,45 @@ class ChartRequest(AbstractRequest):
 
 	def set_default_for(self, t):
 		if t == "timeframes" and len(self.timeframes) == 0:
-			for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-				if not self.has_parameter(parameter.id, self.timeframes): self.timeframes.append(parameter)
+			userDefaults = self.defaults.get("timeframes")
+			if userDefaults is not None:
+				for parameter in userDefaults:
+					if parameter is not None: self.timeframes.append(parameter)
+			else:
+				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
+					if not self.has_parameter(parameter.id, self.timeframes): self.timeframes.append(parameter)
 		elif t == "indicators":
-			for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-				if not self.has_parameter(parameter.id, self.indicators): self.indicators.append(parameter)
+			userDefaults = self.defaults.get("indicators")
+			if userDefaults is not None:
+				for parameter in userDefaults:
+					if parameter is not None: self.timeframes.append(parameter)
+			else:
+				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
+					if not self.has_parameter(parameter.id, self.indicators): self.indicators.append(parameter)
 		elif t == "types":
-			for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-				if not self.has_parameter(parameter.id, self.types): self.types.append(parameter)
+			userDefaults = self.defaults.get("types")
+			if userDefaults is not None:
+				for parameter in userDefaults:
+					if parameter is not None: self.timeframes.append(parameter)
+			else:
+				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
+					if not self.has_parameter(parameter.id, self.types): self.types.append(parameter)
 		elif t == "style":
-			for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-				if not self.has_parameter(parameter.id, self.styles): self.styles.append(parameter)
+			userDefaults = self.defaults.get("style")
+			if userDefaults is not None:
+				for parameter in userDefaults:
+					if parameter is not None: self.timeframes.append(parameter)
+			else:
+				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
+					if not self.has_parameter(parameter.id, self.styles): self.styles.append(parameter)
 		elif t == "preferences":
-			for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-				if not self.has_parameter(parameter.id, self.preferences): self.preferences.append(parameter)
+			userDefaults = self.defaults.get("preferences")
+			if userDefaults is not None:
+				for parameter in userDefaults:
+					if parameter is not None: self.timeframes.append(parameter)
+			else:
+				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
+					if not self.has_parameter(parameter.id, self.preferences): self.preferences.append(parameter)
 
 	def prepare_indicators(self):
 		indicators = []

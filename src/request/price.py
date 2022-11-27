@@ -77,7 +77,7 @@ class PriceRequestHandler(AbstractRequestHandler):
 	def set_defaults(self):
 		for platform, request in self.requests.items():
 			if request.errorIsFatal: continue
-			for type in PARAMETERS:
+			for parameterType in PARAMETERS:
 				request.set_default_for(type)
 
 	async def find_caveats(self):

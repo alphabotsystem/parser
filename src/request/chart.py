@@ -476,42 +476,42 @@ class ChartRequest(AbstractRequest):
 
 	def set_default_for(self, t):
 		if t == "timeframes" and len(self.timeframes) == 0:
-			userDefaults = self.defaults.get("timeframes")
-			if userDefaults is not None:
+			userDefaults = [e for e in self.defaults.get("timeframes") if e is not None]
+			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					if parameter is not None: self.timeframes.append(parameter)
+					self.timeframes.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.timeframes): self.timeframes.append(parameter)
 		elif t == "indicators":
-			userDefaults = self.defaults.get("indicators")
-			if userDefaults is not None:
+			userDefaults = [e for e in self.defaults.get("indicators") if e is not None]
+			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					if parameter is not None: self.timeframes.append(parameter)
+					self.timeframes.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.indicators): self.indicators.append(parameter)
 		elif t == "types":
-			userDefaults = self.defaults.get("types")
-			if userDefaults is not None:
+			userDefaults = [e for e in self.defaults.get("types") if e is not None]
+			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					if parameter is not None: self.timeframes.append(parameter)
+					self.timeframes.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.types): self.types.append(parameter)
 		elif t == "style":
-			userDefaults = self.defaults.get("style")
-			if userDefaults is not None:
+			userDefaults = [e for e in self.defaults.get("style") if e is not None]
+			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					if parameter is not None: self.timeframes.append(parameter)
+					self.timeframes.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.styles): self.styles.append(parameter)
 		elif t == "preferences":
-			userDefaults = self.defaults.get("preferences")
-			if userDefaults is not None:
+			userDefaults = [e for e in self.defaults.get("preferences") if e is not None]
+			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					if parameter is not None: self.timeframes.append(parameter)
+					self.timeframes.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.preferences): self.preferences.append(parameter)

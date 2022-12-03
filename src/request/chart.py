@@ -10,34 +10,34 @@ from .abstract import AbstractRequestHandler, AbstractRequest
 
 PARAMETERS = {
 	"timeframes": [
-		Parameter(1, "1-minute", ["1", "1m", "1min", "1mins", "1minute", "1-minute", "1minutes", "min", "m"], tradinglite="1", tradingview="1", premium="1"),
+		Parameter(1, "1-minute", ["1", "1m", "1min", "1mins", "1minute", "1-minute", "1minutes", "min", "m"], tradinglite="1", tradingview="1", relay="1", premium="1"),
 		Parameter(2, "2-minute", ["2", "2m", "2min", "2mins", "2minute", "2-minute", "2minutes"], premium="2"),
-		Parameter(3, "3-minute", ["3", "3m", "3min", "3mins", "3minute", "3-minute", "3minutes"], tradinglite="3", tradingview="3", premium="3"),
+		Parameter(3, "3-minute", ["3", "3m", "3min", "3mins", "3minute", "3-minute", "3minutes"], tradinglite="3", tradingview="3", relay="3", premium="3"),
 		Parameter(4, "4-minute", ["4", "4m", "4min", "4mins", "4minute", "4-minute", "4minutes"], premium="4"),
-		Parameter(5, "5-minute", ["5", "5m", "5min", "5mins", "5minute", "5-minute", "5minutes"], tradinglite="5", tradingview="5", premium="5"),
+		Parameter(5, "5-minute", ["5", "5m", "5min", "5mins", "5minute", "5-minute", "5minutes"], tradinglite="5", tradingview="5", relay="5", premium="5"),
 		Parameter(6, "6-minute", ["6", "6m", "6min", "6mins", "6minute", "6-minute", "6minutes"], premium="6"),
 		Parameter(10, "10-minute", ["10", "10m", "10min", "10mins", "10minute", "10-minute", "10minutes"], bookmap="10m", premium="10"),
-		Parameter(15, "15-minute", ["15", "15m", "15min", "15mins", "15minute", "15-minute", "15minutes"], tradinglite="15", tradingview="15", premium="15"),
+		Parameter(15, "15-minute", ["15", "15m", "15min", "15mins", "15minute", "15-minute", "15minutes"], tradinglite="15", tradingview="15", relay="15", premium="15"),
 		Parameter(20, "20-minute", ["20", "20m", "20min", "20mins", "20minute", "20-minute", "20minutes"], premium="20"),
-		Parameter(30, "30-minute", ["30", "30m", "30min", "30mins", "30minute", "30-minute", "30minutes"], tradinglite="30", tradingview="30", premium="30"),
-		Parameter(45, "45-minute", ["45", "45m", "45min", "45mins", "45minute", "45-minute", "45minutes"], tradingview="45", premium="45"),
-		Parameter(60, "1-hour", ["60", "60m", "60min", "60mins", "60minute", "60-minute", "60minutes", "1", "1h", "1hr", "1hour", "1-hour", "1hours", "hourly", "hour", "hr", "h"], tradinglite="60", tradingview="60", premium="1H", bookmap="1h"),
-		Parameter(120, "2-hour", ["120", "120m", "120min", "120mins", "120minute", "120-minute", "120minutes", "2", "2h", "2hr", "2hrs", "2hour", "2-hour", "2hours"], tradinglite="120", tradingview="120", premium="2H"),
-		Parameter(180, "3-hour", ["180", "180m", "180min", "180mins", "180minute", "180-minute", "180minutes", "3", "3h", "3hr", "3hrs", "3hour", "3-hour", "3hours"], tradingview="180", premium="3H"),
-		Parameter(240, "4-hour", ["240", "240m", "240min", "240mins", "240minute", "240-minute", "240minutes", "4", "4h", "4hr", "4hrs", "4hour", "4-hour", "4hours"], tradinglite="240", tradingview="240", premium="4H"),
+		Parameter(30, "30-minute", ["30", "30m", "30min", "30mins", "30minute", "30-minute", "30minutes"], tradinglite="30", tradingview="30", relay="30", premium="30"),
+		Parameter(45, "45-minute", ["45", "45m", "45min", "45mins", "45minute", "45-minute", "45minutes"], tradingview="45", relay="45", premium="45"),
+		Parameter(60, "1-hour", ["60", "60m", "60min", "60mins", "60minute", "60-minute", "60minutes", "1", "1h", "1hr", "1hour", "1-hour", "1hours", "hourly", "hour", "hr", "h"], tradinglite="60", tradingview="60", relay="60", premium="1H", bookmap="1h"),
+		Parameter(120, "2-hour", ["120", "120m", "120min", "120mins", "120minute", "120-minute", "120minutes", "2", "2h", "2hr", "2hrs", "2hour", "2-hour", "2hours"], tradinglite="120", tradingview="120", relay="120", premium="2H"),
+		Parameter(180, "3-hour", ["180", "180m", "180min", "180mins", "180minute", "180-minute", "180minutes", "3", "3h", "3hr", "3hrs", "3hour", "3-hour", "3hours"], tradingview="180", relay="180", premium="3H"),
+		Parameter(240, "4-hour", ["240", "240m", "240min", "240mins", "240minute", "240-minute", "240minutes", "4", "4h", "4hr", "4hrs", "4hour", "4-hour", "4hours"], tradinglite="240", tradingview="240", relay="240", premium="4H"),
 		Parameter(360, "6-hour", ["360", "360m", "360min", "360mins", "360minute", "360-minute", "360minutes", "6", "6h", "6hr", "6hrs", "6hour", "6-hour", "6hours"], tradinglite="360", premium="6H"),
 		Parameter(480, "8-hour", ["480", "480m", "480min", "480mins", "480minute", "480-minute", "480minutes", "8", "8h", "8hr", "8hrs", "8hour", "8-hour", "8hours"], tradinglite="480", premium="8H"),
 		Parameter(720, "12-hour", ["720", "720m", "720min", "720mins", "720minute", "720-minute", "720minutes", "12", "12h", "12hr", "12hrs", "12hour", "12-hour", "12hours"], tradinglite="720", premium="12H"),
-		Parameter(1440, "1-day", ["24", "24h", "24hr", "24hrs", "24hour", "24-hour", "24hours", "d", "day", "1", "1d", "1day", "1-day", "daily", "1440", "1440m", "1440min", "1440mins", "1440minute", "1440-minute", "1440minutes"], tradinglite="1440", tradingview="D", premium="1D", bookmap="1d", alternativeme="1D", cnnbusiness="1D"),
+		Parameter(1440, "1-day", ["24", "24h", "24hr", "24hrs", "24hour", "24-hour", "24hours", "d", "day", "1", "1d", "1day", "1-day", "daily", "1440", "1440m", "1440min", "1440mins", "1440minute", "1440-minute", "1440minutes"], tradinglite="1440", tradingview="D", relay="D", premium="1D", bookmap="1d", alternativeme="1D", cnnbusiness="1D"),
 		Parameter(2880, "2-day", ["48", "48h", "48hr", "48hrs", "48hour", "48-hour", "48hours", "2", "2d", "2day", "2-day", "2880", "2880m", "2880min", "2880mins", "2880minute", "2880-minute", "2880minutes"], premium="2D", alternativeme="2D", cnnbusiness="2D"),
 		Parameter(3420, "3-day", ["72", "72h", "72hr", "72hrs", "72hour", "72-hour", "72hours", "3", "3d", "3day", "3-day", "3420", "3420m", "3420min", "3420mins", "3420minute", "3420-minute", "3420minutes"], premium="3D", alternativeme="3D", cnnbusiness="3D"),
 		Parameter(5760, "4-day", ["96", "96h", "96hr", "96hrs", "96hour", "96-hour", "96hours", "4", "4d", "4day", "4-day", "5760", "5760m", "5760min", "5760mins", "5760minute", "5760-minute", "5760minutes"], premium="4D", alternativeme="4D", cnnbusiness="4D"),
 		Parameter(7200, "5-day", ["120", "120h", "120hr", "120hrs", "120hour", "120-hour", "120hours", "5", "5d", "5day", "5-day", "7200", "7200m", "7200min", "7200mins", "7200minute", "7200-minute", "7200minutes"], premium="5D", alternativeme="5D", cnnbusiness="5D"),
 		Parameter(8640, "6-day", ["144", "144h", "144hr", "144hrs", "144hour", "144-hour", "144hours", "6", "6d", "6day", "6-day", "8640", "8640m", "8640min", "8640mins", "8640minute", "8640-minute", "8640minutes"], premium="6D", alternativeme="6D", cnnbusiness="6D"),
-		Parameter(10080, "1-week", ["7", "7d", "7day", "7-day", "7days", "w", "week", "1w", "1-week", "1week", "weekly"], tradingview="W", premium="1W", bookmap="7d", alternativeme="1W", cnnbusiness="1W"),
+		Parameter(10080, "1-week", ["7", "7d", "7day", "7-day", "7days", "w", "week", "1w", "1-week", "1week", "weekly"], tradingview="W", relay="W", premium="1W", bookmap="7d", alternativeme="1W", cnnbusiness="1W"),
 		Parameter(20160, "2-week", ["14", "14d", "14day", "14-day", "14days", "2w", "2-week", "2week"], premium="2W", alternativeme="2W", cnnbusiness="2W"),
 		Parameter(30240, "3-week", ["21", "21d", "21day", "21-day", "21days", "3w", "3-week", "3week"], premium="3W", alternativeme="3W", cnnbusiness="3W"),
-		Parameter(43829, "1-month", ["30d", "30day", "30-day", "30days", "1", "1m", "m", "mo", "month", "1mo", "1month", "1-month", "monthly"], tradingview="M", premium="1M", bookmap="32d", alternativeme="1M", cnnbusiness="1M"),
+		Parameter(43829, "1-month", ["30d", "30day", "30-day", "30days", "1", "1m", "m", "mo", "month", "1mo", "1month", "1-month", "monthly"], tradingview="M", relay="M", premium="1M", bookmap="32d", alternativeme="1M", cnnbusiness="1M"),
 		Parameter(87658, "2-month", ["2", "2m", "2m", "2mo", "2month", "2-month", "2months"], premium="2M"),
 		Parameter(131487, "3-month", ["3", "3m", "3m", "3mo", "3month", "3-month", "3months"], premium="3M"),
 		Parameter(175316, "4-month", ["4", "4m", "4m", "4mo", "4month", "4-month", "4months"], premium="4M"),
@@ -237,6 +237,15 @@ DEFAULTS = {
 		"style": [],
 		"preferences": []
 	},
+	"TradingView Relay": {
+		"timeframes": [
+			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingView Relay", parameterType="timeframes")
+		],
+		"indicators": [],
+		"types": [],
+		"style": [],
+		"preferences": []
+	},
 	"TradingView": {
 		"timeframes": [
 			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingView", parameterType="timeframes")
@@ -342,10 +351,6 @@ class ChartRequestHandler(AbstractRequestHandler):
 				elif request.exchange.get("id") in ["binanceusdm", "binancecoinm", "okex5", "kucoin"]:
 					request.set_error(f"{request.exchange.get('name')} exchange is not available. ||Yet? Let TradingLite know you want it!||", isFatal=True)
 
-			elif platform == "TradingView":
-				if "&style=6" in types and "log" in styles:
-					request.set_error("Point & Figure chart can't be viewed in log scale.", isFatal=True)
-
 			elif platform == "TradingView Premium":
 				if "&style=6" in types and "log" in styles:
 					request.set_error("Point & Figure chart can't be viewed in log scale.", isFatal=True)
@@ -366,6 +371,13 @@ class ChartRequestHandler(AbstractRequestHandler):
 
 				if len(indicators) == 0 and len(parameters) != 0:
 					request.set_error(f"`{str(parameters[0])[:229]}` is not a valid argument.", isFatal=True)
+
+			elif platform == "TradingView Relay":
+				pass
+
+			elif platform == "TradingView":
+				if "&style=6" in types and "log" in styles:
+					request.set_error("Point & Figure chart can't be viewed in log scale.", isFatal=True)
 
 			elif platform == "Bookmap":
 				if not bool(request.exchange):

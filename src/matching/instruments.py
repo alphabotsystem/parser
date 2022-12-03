@@ -36,7 +36,7 @@ async def match_ticker(tickerId, exchangeId, platform, assetClass):
 	reconstructedId = Reconstructor.reconstruct(ticker)
 	isSimple = isinstance(ticker.children[0], Token) and (ticker.children[0].type == "NAME" or ticker.children[0].type == "QUOTED")
 	match = ticker.children[0].value if isSimple else {}
-	if not isSimple and platform not in ["TradingView", "CoinGecko", "CCXT", "IEXC"]:
+	if not isSimple and platform not in ["TradingView", "TradingView Relay", "CoinGecko", "CCXT", "IEXC"]:
 		return None, f"Complex tickers aren't available on {platform}"
 
 	response = {
@@ -193,7 +193,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 	else:
 		instrument = await prepare_instrument(response["hits"]["hits"][0]["_source"], exchangeId)
 
-	if platform in ["TradingView", "TradingView Premium"]:
+	if platform in ["TradingView", "TradingView Premium", "TradingView Relay"]:
 		async with ClientSession() as session:
 			symbol = instrument["id"]
 			exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").replace("2", "").replace("3", "").replace("4", "").replace("5", "").upper())

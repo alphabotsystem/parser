@@ -47,33 +47,6 @@ class PriceRequestHandler(AbstractRequestHandler):
 		for platform in platforms:
 			self.requests[platform] = PriceRequest(tickerId, platform)
 
-	async def parse_argument(self, argument):
-		for platform, request in self.requests.items():
-			_argument = argument.lower().replace(" ", "")
-			if request.errorIsFatal or argument == "": continue
-
-			# None None - No successeful parse
-			# None True - Successful parse and add
-			# "" False - Successful parse and error
-			# None False - Successful parse and breaking error
-
-			finalOutput = None
-
-			responseMessage, success = await request.add_preferences(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			responseMessage, success = await request.add_exchange(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			if finalOutput is None:
-				request.set_error(f"`{argument[:229]}` is not a valid argument.", isFatal=True)
-			elif finalOutput.startswith("`Request Quote"):
-				request.set_error(None, isFatal=True)
-			else:
-				request.set_error(finalOutput)
-	
 	def set_defaults(self):
 		for platform, request in self.requests.items():
 			if request.errorIsFatal: continue
@@ -129,6 +102,29 @@ class PriceRequest(AbstractRequest):
 		self.preferences = []
 
 		self.hasExchange = False
+
+	async def process_argument(self, argument):
+		# None None - No successful parse
+		# None True - Successful parse and add
+		# "" False - Successful parse and error
+		# None False - Successful parse and breaking error
+
+		finalOutput = None
+
+		responseMessage, success = await self.add_preferences(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		responseMessage, success = await self.add_exchange(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		if finalOutput is None:
+			self.set_error(f"`{argument[:229]}` is not a valid argument.", isFatal=True)
+		elif finalOutput.startswith("`Request Quote"):
+			self.set_error(None, isFatal=True)
+		else:
+			self.set_error(finalOutput)
 
 	async def process_ticker(self, assetClass):
 		preferences = [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences]

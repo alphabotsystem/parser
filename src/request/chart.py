@@ -1,6 +1,7 @@
 from sys import maxsize as MAXSIZE
 from time import time
 from re import search
+from asyncio import wait
 from traceback import format_exc
 
 from matching.instruments import match_ticker
@@ -276,53 +277,6 @@ class ChartRequestHandler(AbstractRequestHandler):
 		for platform in platforms:
 			self.requests[platform] = ChartRequest(tickerId, platform, defaults)
 
-	async def parse_argument(self, argument):
-		for platform, request in self.requests.items():
-			_argument = argument.lower().replace(" ", "")
-			if request.errorIsFatal or argument == "": continue
-
-			# None None - No successeful parse
-			# None True - Successful parse and add
-			# "" False - Successful parse and error
-			# None False - Successful parse and breaking error
-
-			finalOutput = None
-
-			responseMessage, success = await request.add_timeframe(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			responseMessage, success = await request.add_indicator(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			responseMessage, success = await request.add_type(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			responseMessage, success = await request.add_style(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			responseMessage, success = await request.add_preferences(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			responseMessage, success = await request.add_exchange(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			responseMessage, success = await request.add_numerical_parameters(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			if finalOutput is None:
-				request.set_error(f"`{argument[:229]}` is not a valid argument.", isFatal=True)
-			elif finalOutput.startswith("`Request Chart"):
-				request.set_error(None, isFatal=True)
-			else:
-				request.set_error(finalOutput)
-
 	def set_defaults(self):
 		for platform, request in self.requests.items():
 			if request.errorIsFatal: continue
@@ -438,6 +392,49 @@ class ChartRequest(AbstractRequest):
 			],
 			"preferences": []
 		}
+
+	async def process_argument(self, argument):
+		# None None - No successeful parse
+		# None True - Successful parse and add
+		# "" False - Successful parse and error
+		# None False - Successful parse and breaking error
+
+		finalOutput = None
+
+		responseMessage, success = await self.add_timeframe(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		responseMessage, success = await self.add_indicator(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		responseMessage, success = await self.add_type(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		responseMessage, success = await self.add_style(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		responseMessage, success = await self.add_preferences(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		responseMessage, success = await self.add_exchange(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		responseMessage, success = await self.add_numerical_parameters(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		if finalOutput is None:
+			self.set_error(f"`{argument[:229]}` is not a valid argument.", isFatal=True)
+		elif finalOutput.startswith("`Request Chart"):
+			self.set_error(None, isFatal=True)
+		else:
+			self.set_error(finalOutput)
 
 	async def process_ticker(self, assetClass):
 		updatedTicker, error = None, None

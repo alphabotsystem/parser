@@ -11,6 +11,15 @@ class AbstractRequestHandler(object):
 		self.currentPlatform = self.platforms[0]
 		self.requests = {}
 
+	async def parse_argument(self, argument):
+		tasks = set()
+		for platform, request in self.requests.items():
+			_argument = argument.lower().replace(" ", "")
+			if request.errorIsFatal or _argument == "": continue
+			tasks.add(request.process_argument(_argument))
+		if len(tasks) > 0:
+			await wait(tasks)
+
 	async def process_ticker(self):
 		tasks = set()
 		for platform, request in self.requests.items():

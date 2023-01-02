@@ -161,41 +161,6 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 		for platform in platforms:
 			self.requests[platform] = HeatmapRequest(platform)
 
-	async def parse_argument(self, argument):
-		for platform, request in self.requests.items():
-			_argument = argument.lower().replace(" ", "")
-			if request.errorIsFatal or argument == "": continue
-
-			# None None - No successeful parse
-			# None True - Successful parse and add
-			# "" False - Successful parse and error
-			# None False - Successful parse and breaking error
-
-			finalOutput = None
-
-			responseMessage, success = await request.add_timeframe(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			responseMessage, success = await request.add_type(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			responseMessage, success = await request.add_style(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			responseMessage, success = await request.add_preferences(_argument)
-			if responseMessage is not None: finalOutput = responseMessage
-			elif success: continue
-
-			if finalOutput is None:
-				request.set_error(f"`{argument[:229]}` is not a valid argument.", isFatal=True)
-			elif finalOutput.startswith("`Stocks Heatmap") or finalOutput.startswith("`Crypto Heatmap"):
-				request.set_error(None, isFatal=True)
-			else:
-				request.set_error(finalOutput)
-
 	async def process_ticker(self): raise NotImplementedError
 
 	def set_defaults(self):
@@ -273,6 +238,37 @@ class HeatmapRequest(AbstractRequest):
 		self.preferences = []
 
 		self.currentTimeframe = None
+
+	async def process_argument(self, argument):
+		# None None - No successeful parse
+		# None True - Successful parse and add
+		# "" False - Successful parse and error
+		# None False - Successful parse and breaking error
+
+		finalOutput = None
+
+		responseMessage, success = await self.add_timeframe(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		responseMessage, success = await self.add_type(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		responseMessage, success = await self.add_style(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		responseMessage, success = await self.add_preferences(argument)
+		if responseMessage is not None: finalOutput = responseMessage
+		elif success: return
+
+		if finalOutput is None:
+			self.set_error(f"`{argument[:229]}` is not a valid argument.", isFatal=True)
+		elif finalOutput.startswith("`Stocks Heatmap") or finalOutput.startswith("`Crypto Heatmap"):
+			self.set_error(None, isFatal=True)
+		else:
+			self.set_error(finalOutput)
 
 	def add_parameter(self, argument, type):
 		isSupported = None

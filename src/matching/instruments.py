@@ -194,19 +194,19 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 		instrument = await prepare_instrument(response["hits"]["hits"][0]["_source"], exchangeId)
 
 	if platform in ["TradingView", "TradingView Premium", "TradingView Relay"]:
+		symbol = instrument["id"]
+		exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").replace("2", "").replace("3", "").replace("4", "").replace("5", "").upper())
+		if exchange == "FOREX": exchange = ""
+		if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
+			instrument["id"] += "PERP"
+			symbol += "PERP"
+		if exchangeId is None and instrument["metadata"]["type"] != "Crypto":
+			symbol = tickerId
+			exchange = ""
+		if ":" in symbol and exchange == "":
+			exchange, symbol = symbol.split(":", 1)
+
 		async with ClientSession() as session:
-			symbol = instrument["id"]
-			exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").replace("2", "").replace("3", "").replace("4", "").replace("5", "").upper())
-			if exchange == "FOREX": exchange = ""
-			if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
-				instrument["id"] += "PERP"
-				symbol += "PERP"
-			if exchangeId is None and instrument["metadata"]["type"] != "Crypto":
-				symbol = tickerId
-				exchange = ""
-			if ":" in symbol and exchange == "":
-				exchange, symbol = symbol.split(":", 1)
-			
 			url = f"https://symbol-search.tradingview.com/symbol_search/?text={symbol}&hl=0&exchange={exchange}&lang=en&type=&domain=production"
 			print(platform, url)
 			async with session.get(url) as response:

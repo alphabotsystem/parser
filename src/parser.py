@@ -75,7 +75,7 @@ async def process_quote_request(req: Request):
 	request = await req.json()
 	arguments, platforms = request["arguments"], request["platforms"]
 	tickerParts = request["tickerId"].split("|")
-	tickerId, assetClass = tickerParts[0].strip(), tickerParts[-1].title().strip()
+	tickerId, assetClass = tickerParts[0].strip(), tickerParts[-1].lower().strip()
 	if assetClass not in ASSET_CLASSES: assetClass = None
 	requestHandler = PriceRequestHandler(tickerId, platforms, assetClass=assetClass)
 

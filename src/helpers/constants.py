@@ -1,4 +1,4 @@
-ASSET_CLASSES = ["Common Stock", "Preferred Stock", "Crypto", "Forex", "ETF", "ADR", "Closed End Fund", "Open Ended Fund", "Right", "Structured Product", "Unit", "When Issued", "Warrant", "Other"]
+ASSET_CLASSES = ["common stock", "preferred stock", "crypto", "forex", "etf", "adr", "closed end fund", "open ended fund", "right", "structured product", "unit", "when issued", "warrant", "other"]
 QUERY_SORT = ["rank.exchange", "rank.base", "rank.quote", "rank.length"]
 STRICT_MATCH = ["TradingLite", "Bookmap", "CoinGecko", "CCXT", "IEXC", "Ichibot"]
 EXCHANGE_SHORTCUTS = {

@@ -46,6 +46,7 @@ PARAMETERS = {
 		Parameter(525949, "1-year", ["12", "12m", "12mo", "12month", "12months", "year", "yearly", "1year", "1-year", "1y", "y", "annual", "annually"], premium="12M"),
 	],
 	"indicators": [
+		Parameter("none", "No indicators", ["none", "noindicators"], tradingview=None, premium=None),
 		Parameter("accd", "Accumulation/Distribution", ["accd", "ad", "acc", "accumulationdistribution", "accumulation/distribution"], tradingview="ACCD@tv-basicstudies", premium="Accumulation/Distribution"),
 		Parameter("accumulationswingindex", "Accumulation Swing Index", ["accumulationswingindex", "accsi", "asi"], premium="Accumulative+Swing+Index"),
 		Parameter("admi", "Average Directional Movement Index", ["admi", "adx", "averagedirectionalmovementindex", "averagedirectionalindex"], premium="Average+Directional+Index"),
@@ -524,7 +525,7 @@ class ChartRequest(AbstractRequest):
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.timeframes):
 						self.timeframes.append(parameter)
-		elif t == "indicators":
+		elif t == "indicators" and len(self.indicators) == 0:
 			userDefaults = [e for e in self.defaults.get("indicators") if e is not None]
 			if len(userDefaults) > 0:
 				for parameter in userDefaults:
@@ -564,19 +565,17 @@ class ChartRequest(AbstractRequest):
 						self.preferences.append(parameter)
 
 	def prepare_indicators(self):
-		indicators = []
+		parsed = [e.parsed[self.platform] for e in self.indicators]
+		if None in parsed:
+			return ""
 
-		if self.platform == "TradingView":
-			if len(self.indicators) == 0:
-				indicators = ""
-			else:
-				indicators = "&studies=" + "%1F".join([e.parsed[self.platform] for e in self.indicators])
+		indicators = ""
 
-		elif self.platform == "TradingView Premium":
-			if len(self.indicators) == 0:
-				indicators = ""
-			else:
-				indicators = "&studies=" + ",".join([e.parsed[self.platform] for e in self.indicators])
+		if self.platform in "TradingView" and len(self.indicators) != 0:
+			indicators = "&studies=" + "%1F".join(parsed)
+
+		elif self.platform == "TradingView Premium" and len(self.indicators) != 0:
+			indicators = "&studies=" + ",".join(parsed)
 
 		return indicators
 

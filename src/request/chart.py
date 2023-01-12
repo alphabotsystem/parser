@@ -522,15 +522,19 @@ class ChartRequest(AbstractRequest):
 					self.timeframes.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-					if not self.has_parameter(parameter.id, self.timeframes): self.timeframes.append(parameter)
+					if not self.has_parameter(parameter.id, self.timeframes):
+						self.timeframes.append(parameter)
 		elif t == "indicators":
 			userDefaults = [e for e in self.defaults.get("indicators") if e is not None]
 			if len(userDefaults) > 0:
 				for parameter in userDefaults:
 					self.indicators.append(parameter)
+					self.numericalParameters.append(-1)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-					if not self.has_parameter(parameter.id, self.indicators): self.indicators.append(parameter)
+					if not self.has_parameter(parameter.id, self.indicators):
+						self.indicators.append(parameter)
+						self.numericalParameters.append(-1)
 		elif t == "types":
 			userDefaults = [e for e in self.defaults.get("types") if e is not None]
 			if len(userDefaults) > 0:
@@ -538,7 +542,8 @@ class ChartRequest(AbstractRequest):
 					self.types.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-					if not self.has_parameter(parameter.id, self.types): self.types.append(parameter)
+					if not self.has_parameter(parameter.id, self.types):
+						self.types.append(parameter)
 		elif t == "style":
 			userDefaults = [e for e in self.defaults.get("style") if e is not None]
 			if len(userDefaults) > 0:
@@ -546,7 +551,8 @@ class ChartRequest(AbstractRequest):
 					self.styles.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-					if not self.has_parameter(parameter.id, self.styles): self.styles.append(parameter)
+					if not self.has_parameter(parameter.id, self.styles):
+						self.styles.append(parameter)
 		elif t == "preferences":
 			userDefaults = [e for e in self.defaults.get("preferences") if e is not None]
 			if len(userDefaults) > 0:
@@ -554,7 +560,8 @@ class ChartRequest(AbstractRequest):
 					self.preferences.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-					if not self.has_parameter(parameter.id, self.preferences): self.preferences.append(parameter)
+					if not self.has_parameter(parameter.id, self.preferences):
+						self.preferences.append(parameter)
 
 	def prepare_indicators(self):
 		indicators = []

@@ -41,6 +41,7 @@ async def match_ticker(tickerId, exchangeId, platform, assetClass):
 
 	response = {
 		"tree": TickerTree().transform(ticker),
+		"_id": match.get("_id"),
 		"id": match.get("id", reconstructedId),
 		"name": match.get("name", reconstructedId),
 		"exchange": match.get("exchange", {}),
@@ -76,6 +77,7 @@ async def prepare_instrument(instrument, exchangeId):
 	else:
 		exchange = {}
 	return {
+		"_id": instrument["market"]["id"],
 		"id": instrument["ticker"],
 		"name": instrument["name"],
 		"base": instrument["base"],
@@ -178,6 +180,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 			else:
 				exchange = {}
 			instrument = {
+				"_id": tickerId,
 				"id": tickerId,
 				"name": tickerId,
 				"base": None,
@@ -219,6 +222,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 
 				if freeSource is not None:
 					instrument = {
+						"_id": freeSource["symbol"],
 						"id": freeSource["symbol"],
 						"name": freeSource["description"],
 						"base": freeSource["symbol"].removesuffix(freeSource.get("currency_code", "")),
@@ -233,6 +237,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 					}
 				elif "contracts" in response[0]:
 					instrument = {
+						"_id": response[0]["contracts"][0]["symbol"],
 						"id": response[0]["contracts"][0]["symbol"],
 						"name": response[0]["description"],
 						"base": response[0]["contracts"][0]["symbol"].removesuffix(response[0].get("currency_code", "")),
@@ -247,6 +252,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 					}
 				else:
 					instrument = {
+						"_id": response[0]["symbol"],
 						"id": response[0]["symbol"],
 						"name": response[0]["description"],
 						"base": response[0]["symbol"].removesuffix(response[0].get("currency_code", "")),

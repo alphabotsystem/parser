@@ -90,7 +90,7 @@ PARAMETERS = {
 		Parameter("klinger", "Klinger", ["klinger"], premium="Klinger+Oscillator"),
 		Parameter("kst", "Know Sure Thing", ["knowsurething", "kst"], tradingview="KST@tv-basicstudies", premium="Know+Sure+Thing"),
 		Parameter("leastsquaresmovingaverage", "Least Squares Moving Average", ["leastsquaresmovingaverage"], premium="Least+Squares+Moving+Average"),
-		Parameter("regression", "Linear Regression Channel", ["regression", "regressionchannel", "lr", "lrc", "linreg", "linearregression", "linearregressionchannel"], tradingview="LinearRegression@tv-basicstudies"),
+		Parameter("regression", "Linear Regression Channel", ["regression", "regressionchannel", "lr", "lrc", "linreg", "linearregression", "linearregressionchannel"], tradingview="STD%3BLinear_Regression"),
 		Parameter("regressionslope", "Linear Regression Slope", ["regressionslope", "lrs", "linregs", "linearregressionslope"], premium="Linear+Regression+Slope"),
 		Parameter("regressioncurve", "Linear Regression Curve", ["regressioncurve", "lrc", "linregc", "linearregressioncurve"], premium="Linear+Regression+Curve"),
 		Parameter("mawithemacross", "MA with EMA Cross", ["mawithemacross"], premium="MA+with+EMA+Cross"),

@@ -77,7 +77,7 @@ PARAMETERS = {
 		Parameter("donch", "DONCH", ["donch", "donchainchannel"], tradingview="DONCH@tv-basicstudies", premium="Donchian+Channels"),
 		Parameter("dema", "Double EMA", ["dema", "doubleema"], tradingview="DoubleEMA@tv-basicstudies", premium="Double+EMA"),
 		Parameter("efi", "Elder's Force Index", ["efi"], tradingview="EFI@tv-basicstudies", premium="Elder's Force Index"),
-		Parameter("ema", "EMA", ["ema"], tradingview="MAExp@tv-basicstudies", premium="Moving+Average+Exponential"),
+		Parameter("ema", "EMA", ["ema"], tradingview="MAExp@tv-basicstudies", premium="Moving+Average+Exponential", dynamic=[("length:f:", 9)]),
 		Parameter("elliott", "Elliott Wave", ["elliott", "ew", "elliottwave"], tradingview="ElliottWave@tv-basicstudies"),
 		Parameter("env", "Envelopes", ["env"], tradingview="ENV@tv-basicstudies", premium="Envelopes"),
 		Parameter("eom", "Ease of Movement", ["eom", "easeofmovement"], tradingview="EaseOfMovement@tv-basicstudies", premium="Ease+of+Movement"),
@@ -101,7 +101,7 @@ PARAMETERS = {
 		Parameter("mom", "Momentum", ["mom", "momentum"], tradingview="MOM@tv-basicstudies", premium="Momentum"),
 		Parameter("mf", "Money Flow Index", ["mf", "mfi", "moneyflow"], tradingview="MF@tv-basicstudies", premium="Money+Flow+Index"),
 		Parameter("moon", "Moon Phases", ["moon", "moonphases"], tradingview="MoonPhases@tv-basicstudies"),
-		Parameter("ma", "Moving Average", ["ma", "movingaverage"], tradingview="MASimple@tv-basicstudies", premium="Moving+Average"),
+		Parameter("ma", "Moving Average", ["ma", "movingaverage"], tradingview="MASimple@tv-basicstudies", premium="Moving+Average", dynamic=[("length:f:", 9)]),
 		Parameter("macross", "MA Cross", ["macross"], premium="MA+Cross"),
 		Parameter("emacross", "EMA Cross", ["emacross"], premium="EMA+Cross"),
 		Parameter("medianprice", "Median Price", ["medianprice"], premium="Median+Price"),
@@ -110,7 +110,7 @@ PARAMETERS = {
 		Parameter("movingaverageadaptive", "Moving Average Adaptive", ["movingaverageadaptive"], premium="Moving+Average+Adaptive"),
 		Parameter("movingaveragehamming", "Moving Average Hamming", ["movingaveragehamming"], premium="Moving+Average+Hamming"),
 		Parameter("movingaveragemultiple", "Moving Average Multiple", ["movingaveragemultiple"], premium="Moving+Average+Multiple"),
-		Parameter("sma", "Smoothed Moving Average", ["sma", "smoothedmovingaverage"], premium="Smoothed+Moving+Average"),
+		Parameter("sma", "Smoothed Moving Average", ["sma", "smoothedmovingaverage"], premium="Smoothed+Moving+Average", dynamic=[("length:f:", 9)]),
 		Parameter("obv", "On Balance Volume", ["obv", "onbalancevolume"], tradingview="OBV@tv-basicstudies", premium="On+Balance+Volume"),
 		Parameter("parabolic", "Parabolic SAR", ["parabolic", "sar", "psar", "parabolicsar"], tradingview="PSAR@tv-basicstudies", premium="Parabolic+SAR"),
 		Parameter("po", "Price Oscillator", ["po", "priceoscillator"], tradingview="PriceOsc@tv-basicstudies", premium="Price+Oscillator"),
@@ -133,7 +133,7 @@ PARAMETERS = {
 		Parameter("standardrrrorbands", "Standard Error Bands", ["standardrrrorbands"], premium="Standard+Error+Bands"),
 		Parameter("tma", "Triple MA", ["tma", "triplema"], premium="Moving+Average+Triple"),
 		Parameter("tema", "Triple EMA", ["tema", "tripleema"], tradingview="TripleEMA@tv-basicstudies", premium="Triple+EMA"),
-		Parameter("tpo", "Market Profile", ["tpo", "marketprofile"], premium="Volume+Profile+Visible+Range@row+size:i:100"),
+		Parameter("tpo", "Market Profile", ["tpo", "marketprofile"], premium="Volume+Profile+Visible+Range@row+size:f:100"),
 		Parameter("trix", "Triple Exponential Average", ["trix", "txa", "texa", "tripleexponentialaverage"], tradingview="Trix@tv-basicstudies", premium="TRIX"),
 		Parameter("typicalprice", "Typical Price", ["typicalprice", "tp"], premium="Typical+Price"),
 		Parameter("truestrengthindicator", "True Strength Indicator", ["truestrengthindicator"], premium="True+Strength+Indicator"),
@@ -145,7 +145,7 @@ PARAMETERS = {
 		Parameter("volatilityzerotrendclose-to-close", "Volatility Zero Trend Close-to-Close", ["volatilityzerotrendclose-to-close"], premium="Volatility+Zero+Trend+Close-to-Close"),
 		Parameter("volatilityo-h-l-c", "Volatility O-H-L-C", ["volatilityo-h-l-c"], premium="Volatility+O-H-L-C"),
 		Parameter("volumeoscillator", "Volume Oscillator", ["volosc", "volumeoscillator"], premium="Volume+Oscillator"),
-		Parameter("volumeprofile", "Volume Profile", ["volumeprofile", "vpvr"], premium="Volume+Profile+Visible+Range@row+size:i:100"),
+		Parameter("volumeprofile", "Volume Profile", ["volumeprofile", "vpvr"], premium="Volume+Profile+Visible+Range@row+size:f:100"),
 		Parameter("vortex", "Vortex", ["vortex"], premium="Vortex+Indicator"),
 		Parameter("vstop", "VSTOP", ["vstop"], tradingview="VSTOP@tv-basicstudies"),
 		Parameter("vwap", "VWAP", ["vwap"], tradingview="VWAP@tv-basicstudies", premium="VWAP"),
@@ -320,8 +320,8 @@ class ChartRequestHandler(AbstractRequestHandler):
 						cursor -= 1
 					cursor -= 1
 
-					if indicators[i].dynamic is not None and len(lengths[i]) > len(indicators[i].dynamic[platform]):
-						request.set_error(f"{indicators[i].name} indicator takes in `{len(indicators[i].dynamic[platform])}` {'parameters' if len(indicators[i].dynamic[platform]) > 1 else 'parameter'}, but `{len(lengths[i])}` were given.", isFatal=True)
+					if indicators[i].dynamic is not None and len(lengths[i]) > len(indicators[i].dynamic):
+						request.set_error(f"{indicators[i].name} indicator takes in `{len(indicators[i].dynamic)}` {'parameters' if len(indicators[i].dynamic) > 1 else 'parameter'}, but `{len(lengths[i])}` were given.", isFatal=True)
 						break
 
 				if len(indicators) == 0 and len(parameters) != 0:
@@ -566,16 +566,34 @@ class ChartRequest(AbstractRequest):
 
 	def prepare_indicators(self):
 		parsed = [e.parsed[self.platform] for e in self.indicators]
-		if "" in parsed:
+		if "" in parsed or len(self.indicators) == 0:
 			return ""
 
 		indicators = ""
 
-		if self.platform in "TradingView" and len(self.indicators) != 0:
+		if self.platform in "TradingView":
 			indicators = "&studies=" + "%1F".join(parsed)
 
-		elif self.platform == "TradingView Premium" and len(self.indicators) != 0:
-			indicators = "&studies=" + ",".join(parsed)
+		elif self.platform == "TradingView Premium":
+			lengths = {i: [] for i in range(len(self.indicators))}
+			cursor = len(self.numericalParameters) - 1
+
+			_indicators = []
+			for i in reversed(range(len(self.indicators))):
+				while self.numericalParameters[cursor] != -1:
+					lengths[i].insert(0, ["", self.numericalParameters[cursor]])
+					cursor -= 1
+				cursor -= 1
+
+				if self.indicators[i].dynamic is not None and lengths[i] != 0:
+					for j in range(0, len(lengths[i])):
+						lengths[i][j][0] = self.indicators[i].dynamic[j][0]
+					for j in range(len(lengths[i]), len(self.indicators[i].dynamic)):
+						lengths[i].append(list(self.indicators[i].dynamic[j]))
+
+				_indicators.insert(0, f"{parsed[i]}@{';'.join([f'{n}{l}' for n, l in lengths[i]])}")
+
+			indicators = "&studies=" + ",".join(_indicators)
 
 		return indicators
 

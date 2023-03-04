@@ -41,7 +41,7 @@ EXCHANGE_TO_TRADINGVIEW = {
 	"xngm": "NGM", "xnsa": "NSENG", "xnse": "NSE", "xose": "OSE", "xpar": "EURONEXTPAR", "xris": "OMXRSE",
 	"xsau": "TADAWUL", "xshe": "SZSE", "xshg": "SSE", "xsto": "OMXSTO", "xstu": "SWB", "xswx": "BX", "xtae": "TASE",
 	"xtai": "TWSE", "xtal": "OMXTSE", "xtse": "TSX", "xwar": "GPW", "bitpanda": "BITPANDAPRO", "cex": "CEXIO",
-	"coinbasepro": "COINBASE", "therock": "THEROCKTRADING", "gate": "GATEIO", "bitfinex2": "BITFINEX",
+	"coinbasepro": "COINBASE", "gate": "GATEIO", "bitfinex2": "BITFINEX",
 	"binanceusdm": "BINANCE", "binancecoinm": "BINANCE"
 }
 FREE_TRADINGVIEW_SOURCES = ["INDEX", "OANDA"]

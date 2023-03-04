@@ -210,10 +210,10 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 			exchange, symbol = symbol.split(":", 1)
 
 		async with ClientSession() as session:
-			url = f"https://symbol-search.tradingview.com/symbol_search/?text={symbol}&hl=0&exchange={exchange}&lang=en&type=&domain=production"
+			url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={symbol}&hl=0&exchange={exchange}&lang=en&domain=production"
 			print(platform, url)
 			async with session.get(url) as response:
-				response = await response.json()
+				response = (await response.json())["symbols"]
 				if len(response) == 0:
 					raise TokenNotFoundException("Requested ticker could not be found.")
 				freeSource = None
@@ -337,7 +337,7 @@ async def autocomplete_ticker(tickerId, platforms):
 	for platform in platforms:
 		tasks.append(perform_search(tickerId, None, platform, limit=10000))
 	responses = await gather(*tasks)
-	
+
 	tickers = []
 	for platform, response in zip(platforms, responses):
 		for hit in response["hits"]["hits"]:

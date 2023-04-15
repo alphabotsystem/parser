@@ -72,6 +72,14 @@ class TestMatchTicker(TestCase):
 		match = loop.run_until_complete(match_ticker("BTCUSD/SPY", None, "TradingView", None))
 		self.assertEqual(match[0]["id"], "BINANCE:BTCUSDT/AMEX:SPY")
 
+	def test12(self):
+		match = loop.run_until_complete(match_ticker("DIA", None, "TradingView", None))
+		self.assertEqual(match[0]["id"], "AMEX:DIA")
+
+	def test13(self):
+		match = loop.run_until_complete(match_ticker("VIX", None, "TradingView", None))
+		self.assertEqual(match[0]["id"], "TVC:VIX")
+
 
 if __name__ == '__main__':
 	main()

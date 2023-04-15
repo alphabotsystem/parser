@@ -51,7 +51,7 @@ PARAMETERS = {
 		Parameter(525949, "1-year", ["12", "12m", "12mo", "12month", "12months", "year", "yearly", "1year", "1-year", "1y", "y", "annual", "annually"], premium="12M"),
 	],
 	"indicators": [
-		Parameter("none", "No indicators", ["none", "noindicators"], tradingview="", premium=""),
+		Parameter("none", "No indicators", ["none", "noindicators"], tradingview="", premium=""), # Here due to default indicators
 		Parameter("accd", "Accumulation/Distribution", ["accd", "ad", "acc", "accumulationdistribution", "accumulation/distribution"], tradingview="ACCD@tv-basicstudies", premium="Accumulation/Distribution"),
 		Parameter("accumulationswingindex", "Accumulation Swing Index", ["accumulationswingindex", "accsi", "asi"], premium="Accumulative+Swing+Index"),
 		Parameter("admi", "Average Directional Movement Index", ["admi", "adx", "averagedirectionalmovementindex", "averagedirectionalindex"], premium="Average+Directional+Index"),

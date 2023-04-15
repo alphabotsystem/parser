@@ -136,8 +136,8 @@ async def autocomplete(req: Request):
 		response = await autocomplete_ticker(request["tickerId"], request["platforms"].split(","))
 	elif option == "venues":
 		response = await autocomplete_venues(request["tickerId"], request["platforms"].split(","))
-	elif option == "timeframe":
-		response = await autocomplete_timeframe(request["timeframe"], request["type"])
+	elif option == "hmap_timeframe":
+		response = await autocomplete_hmap_timeframe(request["timeframe"], request["type"])
 	elif option == "market":
 		response = await autocomplete_market(request["market"], request["type"])
 	elif option == "category":
@@ -154,7 +154,7 @@ async def autocomplete(req: Request):
 async def get_listings(req: Request):
 	request = await req.json()
 	response, total = await find_listings(request["ticker"], request["platform"])
-	return {"response": response, "total": total}	
+	return {"response": response, "total": total}
 
 @app.post("/parser/get_formatted_price_ccxt")
 async def format_price(req: Request):

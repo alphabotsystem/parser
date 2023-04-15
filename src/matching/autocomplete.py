@@ -1,7 +1,7 @@
 from request import HeatmapParameters
 
 
-async def autocomplete_timeframe(timeframe, heatmapType):
+async def autocomplete_hmap_timeframe(timeframe, heatmapType):
 	options = []
 	for option in HeatmapParameters["timeframes"]:
 		if (heatmapType == "" or heatmapType == "stocks") and option.parsed["TradingView Stock Heatmap"] is not None or (heatmapType == "" or heatmapType == "crypto") and option.parsed["TradingView Crypto Heatmap"] is not None:

@@ -138,6 +138,8 @@ async def autocomplete(req: Request):
 		response = await autocomplete_venues(request["tickerId"], request["platforms"].split(","))
 	elif option == "hmap_timeframe":
 		response = await autocomplete_hmap_timeframe(request["timeframe"], request["type"])
+	elif option == "layout_timeframe":
+		response = await autocomplete_layout_timeframe(request["timeframe"])
 	elif option == "market":
 		response = await autocomplete_market(request["market"], request["type"])
 	elif option == "category":

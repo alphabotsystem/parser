@@ -11,11 +11,11 @@ from .abstract import AbstractRequestHandler, AbstractRequest
 
 PARAMETERS = {
 	"timeframes": [
-		Parameter(1/60, "1-second", ["1", "1s", "1sec", "1secs", "1second", "1-second", "1seconds"], relay="1S", premium="1S"),
-		Parameter(5/60, "5-second", ["5", "5s", "5sec", "5secs", "5second", "5-second", "5seconds"], relay="5S", premium="5S"),
-		Parameter(10/60, "10-second", ["10", "10s", "10sec", "10secs", "10second", "10-second", "10seconds"], relay="10S", premium="10S"),
-		Parameter(15/60, "15-second", ["15", "15s", "15sec", "15secs", "15second", "15-second", "15seconds"], relay="15S", premium="15S"),
-		Parameter(30/60, "30-second", ["30", "30s", "30sec", "30secs", "30second", "30-second", "30seconds"], relay="30S", premium="30S"),
+		Parameter(1/60, "1-second", ["1", "1s", "1sec", "1secs", "1second", "1-second", "1seconds"], premium="1S"),
+		Parameter(5/60, "5-second", ["5", "5s", "5sec", "5secs", "5second", "5-second", "5seconds"], premium="5S"),
+		Parameter(10/60, "10-second", ["10", "10s", "10sec", "10secs", "10second", "10-second", "10seconds"], premium="10S"),
+		Parameter(15/60, "15-second", ["15", "15s", "15sec", "15secs", "15second", "15-second", "15seconds"], premium="15S"),
+		Parameter(30/60, "30-second", ["30", "30s", "30sec", "30secs", "30second", "30-second", "30seconds"], premium="30S"),
 		Parameter(1, "1-minute", ["1", "1m", "1min", "1mins", "1minute", "1-minute", "1minutes", "min", "m"], tradinglite="1", tradingview="1", relay="1", premium="1"),
 		Parameter(2, "2-minute", ["2", "2m", "2min", "2mins", "2minute", "2-minute", "2minutes"], premium="2"),
 		Parameter(3, "3-minute", ["3", "3m", "3min", "3mins", "3minute", "3-minute", "3minutes"], tradinglite="3", tradingview="3", relay="3", premium="3"),

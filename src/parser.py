@@ -162,14 +162,26 @@ async def get_listings(req: Request):
 async def format_price(req: Request):
 	request = await req.json()
 	if request["exchangeId"] == "binance":
-		exchange = ccxt.binance()
-		exchange.proxy = f"http://{environ['PROXY_IP']}/"
+		exchange = ccxt.binance({
+			"proxies": {
+				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+			}
+		})
 	elif request["exchangeId"] == "binanceusdm":
-		exchange = ccxt.binanceusdm()
-		exchange.proxy = f"http://{environ['PROXY_IP']}/"
+		exchange = ccxt.binanceusdm({
+			"proxies": {
+				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+			}
+		})
 	elif request["exchangeId"] == "binancecoinm":
-		exchange = ccxt.binancecoinm()
-		exchange.proxy = f"http://{environ['PROXY_IP']}/"
+		exchange = ccxt.binancecoinm({
+			"proxies": {
+				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+			}
+		})
 	else:
 		exchange = getattr(ccxt, request["exchangeId"])()
 	await loop.run_in_executor(None, exchange.load_markets)
@@ -181,14 +193,26 @@ async def format_price(req: Request):
 async def format_amount(req: Request):
 	request = await req.json()
 	if request["exchangeId"] == "binance":
-		exchange = ccxt.binance()
-		exchange.proxy = f"http://{environ['PROXY_IP']}/"
+		exchange = ccxt.binance({
+			"proxies": {
+				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+			}
+		})
 	elif request["exchangeId"] == "binanceusdm":
-		exchange = ccxt.binanceusdm()
-		exchange.proxy = f"http://{environ['PROXY_IP']}/"
+		exchange = ccxt.binanceusdm({
+			"proxies": {
+				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+			}
+		})
 	elif request["exchangeId"] == "binancecoinm":
-		exchange = ccxt.binancecoinm()
-		exchange.proxy = f"http://{environ['PROXY_IP']}/"
+		exchange = ccxt.binancecoinm({
+			"proxies": {
+				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+			}
+		})
 	else:
 		exchange = getattr(ccxt, request["exchangeId"])()
 	await loop.run_in_executor(None, exchange.load_markets)

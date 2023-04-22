@@ -154,7 +154,7 @@ def generate_query(search, tag, exchangeId, platform, assetClass, strict=False):
 		return tickerQuery, nameQuery
 
 async def perform_search(tickerId, exchangeId, platform, assetClass=None, limit=1, strict=False):
-	search, tag = tickerId.lower().split(":") if ":" in tickerId else (tickerId.lower(), None)
+	search, tag = tickerId.lower().split(":", 1) if tickerId.count(":") == 1 else (tickerId.lower(), None)
 	if tag is not None and not tag.isnumeric(): search, tag = tickerId.lower(), None
 
 	# Generate queries and search by ticker first

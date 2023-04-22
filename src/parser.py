@@ -165,21 +165,21 @@ async def format_price(req: Request):
 		exchange = ccxt.binance({
 			"proxies": {
 				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
 			}
 		})
 	elif request["exchangeId"] == "binanceusdm":
 		exchange = ccxt.binanceusdm({
 			"proxies": {
 				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
 			}
 		})
 	elif request["exchangeId"] == "binancecoinm":
 		exchange = ccxt.binancecoinm({
 			"proxies": {
 				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
 			}
 		})
 	else:
@@ -196,21 +196,21 @@ async def format_amount(req: Request):
 		exchange = ccxt.binance({
 			"proxies": {
 				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
 			}
 		})
 	elif request["exchangeId"] == "binanceusdm":
 		exchange = ccxt.binanceusdm({
 			"proxies": {
 				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
 			}
 		})
 	elif request["exchangeId"] == "binancecoinm":
 		exchange = ccxt.binancecoinm({
 			"proxies": {
 				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"https://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
 			}
 		})
 	else:

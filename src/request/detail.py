@@ -10,14 +10,14 @@ from .abstract import AbstractRequestHandler, AbstractRequest
 PARAMETERS = {
 	"preferences": [
 		Parameter("forcePlatform", "request quote on CoinGecko", ["cg", "coingecko"], coingecko=True),
-		Parameter("forcePlatform", "request quote on a stock exchange", ["ix", "iexc"], iexc=True),
+		Parameter("forcePlatform", "request quote on a stock exchange", ["equities", "forex", "fx", "metal", "metals", "stock", "stocks"], twelvedata=True),
 	]
 }
 DEFAULTS = {
 	"CoinGecko": {
 		"preferences": []
 	},
-	"IEXC": {
+	"Twelvedata": {
 		"preferences": []
 	}
 }
@@ -44,7 +44,7 @@ class DetailRequestHandler(AbstractRequestHandler):
 
 			if platform == "CoinGecko":
 				pass
-			elif platform == "IEXC":
+			elif platform == "Twelvedata":
 				pass
 
 

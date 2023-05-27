@@ -231,3 +231,4 @@ if __name__ == "__main__":
 	config = Config(app=app, port=6900, host="0.0.0.0", loop=loop)
 	server = Server(config)
 	loop.run_until_complete(server.serve())
+	loop.close()

@@ -1,6 +1,8 @@
 from os import environ
 from elasticsearch import AsyncElasticsearch
 
+from helpers.constants import ELASTIC_ASSET_INDEX, ELASTIC_EXCHANGE_INDEX
+
 
 elasticsearch = AsyncElasticsearch(
 	cloud_id=environ["ELASTICSEARCH_CLOUD_ID"],
@@ -20,7 +22,7 @@ async def find_exchange(raw, platform):
 			}]
 		}
 	}
-	response = await elasticsearch.search(index="exchanges", query=query, size=1)
+	response = await elasticsearch.search(index=ELASTIC_EXCHANGE_INDEX, query=query, size=1)
 	if response["hits"]["total"]["value"] > 0:
 		exchange = response["hits"]["hits"][0]["_source"]
 		return True, exchange

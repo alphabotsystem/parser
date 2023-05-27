@@ -1,6 +1,12 @@
+from os import environ
+
+ELASTIC_ASSET_INDEX = "assets_dev" if environ.get("USE_TEST") else "assets"
+ELASTIC_EXCHANGE_INDEX = "exchanges_dev" if environ.get("USE_TEST") else "exchanges"
+
 ASSET_CLASSES = ["common stock", "preferred stock", "crypto", "forex", "etf", "adr", "closed end fund", "open ended fund", "right", "structured product", "unit", "when issued", "warrant", "other"]
 QUERY_SORT = ["rank.exchange", "rank.base", "rank.quote", "rank.length"]
-STRICT_MATCH = ["TradingLite", "Bookmap", "CoinGecko", "CCXT", "IEXC", "Ichibot"]
+STRICT_MATCH = ["TradingLite", "Bookmap", "CoinGecko", "CCXT", "Twelvedata", "Ichibot"]
+
 EXCHANGE_SHORTCUTS = {
 	"crypto": {
 		# Binance

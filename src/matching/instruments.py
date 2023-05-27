@@ -5,6 +5,7 @@ from aiohttp import ClientSession
 from lark import Token
 from traceback import format_exc
 from elasticsearch import AsyncElasticsearch
+from helpers.constants import ELASTIC_ASSET_INDEX, ELASTIC_EXCHANGE_INDEX
 from helpers.constants import QUERY_SORT, STRICT_MATCH, EXCHANGE_TO_TRADINGVIEW, FREE_TRADINGVIEW_SOURCES
 from helpers.lark import Ticker, TickerTree, reconstructor as Reconstructor
 from helpers.utils import TokenNotFoundException
@@ -36,7 +37,7 @@ async def match_ticker(tickerId, exchangeId, platform, assetClass):
 	reconstructedId = Reconstructor.reconstruct(ticker)
 	isSimple = isinstance(ticker.children[0], Token) and (ticker.children[0].type == "NAME" or ticker.children[0].type == "QUOTED")
 	match = ticker.children[0].value if isSimple else {}
-	if not isSimple and platform not in ["TradingView", "TradingView Premium", "TradingView Relay", "CoinGecko", "CCXT", "IEXC"]:
+	if not isSimple and platform not in ["TradingView", "TradingView Premium", "TradingView Relay", "CoinGecko", "CCXT", "Twelvedata"]:
 		return None, f"Complex tickers aren't available on {platform}"
 
 	response = {
@@ -70,9 +71,9 @@ async def prepare_instrument(instrument, exchangeId):
 	if instrument is None: return None
 	if instrument["market"]["source"] == "forex":
 		exchange = {"id": "forex"}
-	elif instrument["market"]["venue"] in ["CCXT", "IEXC"]:
+	elif instrument["market"]["venue"] in ["CCXT", "Twelvedata"]:
 		if exchangeId is None: exchangeId = instrument["market"]["source"]
-		response = await elasticsearch.get(index="exchanges", id=exchangeId)
+		response = await elasticsearch.get(index=ELASTIC_EXCHANGE_INDEX, id=exchangeId)
 		exchange = response["_source"]
 	else:
 		exchange = {}
@@ -159,11 +160,11 @@ async def perform_search(tickerId, exchangeId, platform, assetClass=None, limit=
 
 	# Generate queries and search by ticker first
 	query1, query2 = generate_query(search, tag, exchangeId, platform, assetClass, strict=strict)
-	response = await elasticsearch.search(index="assets", query=query1, sort=QUERY_SORT, size=limit)
+	response = await elasticsearch.search(index=ELASTIC_ASSET_INDEX, query=query1, sort=QUERY_SORT, size=limit)
 
 	# Search by name if no results were found
 	if response["hits"]["total"]["value"] == 0 and query2 is not None:
-		response = await elasticsearch.search(index="assets", query=query2, sort=QUERY_SORT, size=limit)
+		response = await elasticsearch.search(index=ELASTIC_ASSET_INDEX, query=query2, sort=QUERY_SORT, size=limit)
 
 	return response
 
@@ -175,7 +176,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 			raise TokenNotFoundException("Requested ticker could not be found.")
 		else:
 			if exchangeId is not None:
-				response = await elasticsearch.get(index="exchanges", id=exchangeId)
+				response = await elasticsearch.get(index=ELASTIC_EXCHANGE_INDEX, id=exchangeId)
 				exchange = response["_source"]
 			else:
 				exchange = {}
@@ -280,7 +281,7 @@ async def find_tradable_market(match, exchange):
 			}]
 		}
 	}
-	response = await elasticsearch.search(index="assets", query=query, size=1)
+	response = await elasticsearch.search(index=ELASTIC_ASSET_INDEX, query=query, size=1)
 	if response["hits"]["total"]["value"] > 0:
 		return response["hits"]["hits"][0]["_source"]["market"]["id"]
 	return None
@@ -298,8 +299,8 @@ async def find_listings(ticker, platform):
 		}
 	}
 
-	instruments = await elasticsearch.search(index="assets", query=query, size=10000)
-	exchanges = await elasticsearch.search(index="exchanges", query={"match_all": {}}, size=10000)
+	instruments = await elasticsearch.search(index=ELASTIC_ASSET_INDEX, query=query, size=10000)
+	exchanges = await elasticsearch.search(index=ELASTIC_EXCHANGE_INDEX, query={"match_all": {}}, size=10000)
 
 	sources = {}
 	for instrument in instruments["hits"]["hits"]:
@@ -356,7 +357,7 @@ async def autocomplete_venues(tickerId, platforms):
 	tasks = []
 	for platform in platforms:
 		tasks.append(perform_search(tickerId, None, platform, limit=10000))
-	tasks.append(elasticsearch.search(index="exchanges", query={"match_all": {}}, size=10000))
+	tasks.append(elasticsearch.search(index=ELASTIC_EXCHANGE_INDEX, query={"match_all": {}}, size=10000))
 	responses = await gather(*tasks)
 
 	ids = {}

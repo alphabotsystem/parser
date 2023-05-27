@@ -48,22 +48,22 @@ class HeatmapParameter(AbstractParameter):
 		}
 
 class PriceParameter(AbstractParameter):
-	def __init__(self, id, name, parsablePhrases, coingecko=None, ccxt=None, iexc=None, alternativeme=None, cnnbusiness=None):
+	def __init__(self, id, name, parsablePhrases, coingecko=None, ccxt=None, twelvedata=None, alternativeme=None, cnnbusiness=None):
 		super().__init__(id, name, parsablePhrases)
 		self.parsed = {
 			"Alternative.me": alternativeme,
 			"CNN Business": cnnbusiness,
 			"CoinGecko": coingecko,
 			"CCXT": ccxt,
-			"IEXC": iexc
+			"Twelvedata": twelvedata
 		}
 
 class DetailParameter(AbstractParameter):
-	def __init__(self, id, name, parsablePhrases, coingecko=None, iexc=None):
+	def __init__(self, id, name, parsablePhrases, coingecko=None, twelvedata=None):
 		super().__init__(id, name, parsablePhrases)
 		self.parsed = {
 			"CoinGecko": coingecko,
-			"IEXC": iexc
+			"Twelvedata": twelvedata
 		}
 
 class TradeParameter(AbstractParameter):

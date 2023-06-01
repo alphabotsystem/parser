@@ -93,7 +93,7 @@ async def prepare_instrument(instrument, exchangeId):
 		}
 	}
 
-def generate_query(search, tag, exchangeId, platform, assetClass, strict=False):
+def generate_query(search, tag, exchangeId, platform, assetClass, strict=False, showAll=False):
 	if strict:
 		tickerQuery = {
 			"bool": {
@@ -145,21 +145,21 @@ def generate_query(search, tag, exchangeId, platform, assetClass, strict=False):
 		if assetClass is not None:
 			tickerQuery["bool"]["must"].append({"match": {"type": assetClass.lower()}})
 			nameQuery["bool"]["must"].append({"match": {"type": assetClass.lower()}})
-		if exchangeId is None:
+		if exchangeId is None and not showAll:
 			tickerQuery["bool"]["must"].append({"term": {"market.passive": False}})
 			nameQuery["bool"]["must"].append({"term": {"market.passive": False}})
-		else:
+		if exchangeId is not None:
 			tickerQuery["bool"]["must"].append({"term": {"market.source": exchangeId}})
 			nameQuery["bool"]["must"].append({"term": {"market.source": exchangeId}})
 
 		return tickerQuery, nameQuery
 
-async def perform_search(tickerId, exchangeId, platform, assetClass=None, limit=1, strict=False):
+async def perform_search(tickerId, exchangeId, platform, assetClass=None, limit=1, strict=False, showAll=False):
 	search, tag = tickerId.lower().split(":", 1) if tickerId.count(":") == 1 else (tickerId.lower(), None)
 	if tag is not None and not tag.isnumeric(): search, tag = tickerId.lower(), None
 
 	# Generate queries and search by ticker first
-	query1, query2 = generate_query(search, tag, exchangeId, platform, assetClass, strict=strict)
+	query1, query2 = generate_query(search, tag, exchangeId, platform, assetClass, strict=strict, showAll=showAll)
 	response = await elasticsearch.search(index=ELASTIC_ASSET_INDEX, query=query1, sort=QUERY_SORT, size=limit)
 
 	# Search by name if no results were found
@@ -336,7 +336,7 @@ async def find_listings(ticker, platform):
 async def autocomplete_ticker(tickerId, platforms):
 	tasks = []
 	for platform in platforms:
-		tasks.append(perform_search(tickerId, None, platform, limit=10000))
+		tasks.append(perform_search(tickerId, None, platform, limit=10000, showAll=True))
 	responses = await gather(*tasks)
 
 	tickers = []
@@ -356,7 +356,7 @@ async def autocomplete_ticker(tickerId, platforms):
 async def autocomplete_venues(tickerId, platforms):
 	tasks = []
 	for platform in platforms:
-		tasks.append(perform_search(tickerId, None, platform, limit=10000))
+		tasks.append(perform_search(tickerId, None, platform, limit=10000, showAll=True))
 	tasks.append(elasticsearch.search(index=ELASTIC_EXCHANGE_INDEX, query={"match_all": {}}, size=10000))
 	responses = await gather(*tasks)
 

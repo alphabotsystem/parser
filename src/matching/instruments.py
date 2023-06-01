@@ -145,7 +145,7 @@ def generate_query(search, tag, exchangeId, platform, assetClass, strict=False, 
 		if assetClass is not None:
 			tickerQuery["bool"]["must"].append({"match": {"type": assetClass.lower()}})
 			nameQuery["bool"]["must"].append({"match": {"type": assetClass.lower()}})
-		if exchangeId is None and not showAll:
+		if assetClass is None and exchangeId is None and not showAll:
 			tickerQuery["bool"]["must"].append({"term": {"market.passive": False}})
 			nameQuery["bool"]["must"].append({"term": {"market.passive": False}})
 		if exchangeId is not None:

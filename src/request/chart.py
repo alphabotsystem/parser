@@ -525,7 +525,8 @@ class ChartRequest(AbstractRequest):
 			userDefaults = [e for e in self.defaults.get("timeframes") if e is not None]
 			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					self.timeframes.append(parameter)
+					if not self.has_parameter(parameter.id, self.timeframes):
+						self.timeframes.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.timeframes):
@@ -533,6 +534,7 @@ class ChartRequest(AbstractRequest):
 		elif t == "indicators" and len(self.indicators) == 0:
 			userDefaults = [e for e in self.defaults.get("indicators") if e is not None]
 			if len(userDefaults) > 0:
+				if len(indicators) != 0: return
 				for parameter in userDefaults:
 					self.indicators.append(parameter)
 					self.numericalParameters.append(-1)
@@ -545,7 +547,8 @@ class ChartRequest(AbstractRequest):
 			userDefaults = [e for e in self.defaults.get("types") if e is not None]
 			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					self.types.append(parameter)
+					if not self.has_parameter(parameter.id, self.types):
+						self.types.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.types):
@@ -554,7 +557,8 @@ class ChartRequest(AbstractRequest):
 			userDefaults = [e for e in self.defaults.get("style") if e is not None]
 			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					self.styles.append(parameter)
+					if not self.has_parameter(parameter.id, self.styles):
+						self.styles.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.styles):
@@ -563,7 +567,8 @@ class ChartRequest(AbstractRequest):
 			userDefaults = [e for e in self.defaults.get("preferences") if e is not None]
 			if len(userDefaults) > 0:
 				for parameter in userDefaults:
-					self.preferences.append(parameter)
+					if not self.has_parameter(parameter.id, self.preferences):
+						self.preferences.append(parameter)
 			else:
 				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 					if not self.has_parameter(parameter.id, self.preferences):

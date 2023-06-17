@@ -534,7 +534,6 @@ class ChartRequest(AbstractRequest):
 		elif t == "indicators" and len(self.indicators) == 0:
 			userDefaults = [e for e in self.defaults.get("indicators") if e is not None]
 			if len(userDefaults) > 0:
-				if len(indicators) != 0: return
 				for parameter in userDefaults:
 					self.indicators.append(parameter)
 					self.numericalParameters.append(-1)

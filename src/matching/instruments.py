@@ -70,7 +70,7 @@ async def ticker_tree_search(node, exchangeId, platform, assetClass):
 async def prepare_instrument(instrument, exchangeId):
 	if instrument is None: return None
 	if instrument["market"]["source"] == "forex":
-		exchange = {"id": "forex"}
+		exchange = {"id": "forex", "availability": "realtime"}
 	elif instrument["market"]["venue"] in ["CCXT", "Twelvedata"]:
 		if exchangeId is None: exchangeId = instrument["market"]["source"]
 		response = await elasticsearch.get(index=ELASTIC_EXCHANGE_INDEX, id=exchangeId)

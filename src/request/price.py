@@ -17,7 +17,7 @@ PARAMETERS = {
 		Parameter("lld", "dominance", ["dom", "dominance"], coingecko="dom"),
 		Parameter("forcePlatform", "request quote on CoinGecko", ["cg", "coingecko"], coingecko=True),
 		Parameter("forcePlatform", "request quote on a crypto exchange", ["cx", "ccxt", "crypto", "exchange"], ccxt=True),
-		Parameter("forcePlatform", "request quote on a stock exchange", ["equities", "forex", "fx", "metal", "metals", "stock", "stocks"], twelvedata=True),
+		Parameter("forcePlatform", "request quote on a stock exchange", ["equities", "equity", "forex", "fx", "metal", "metals", "stock", "stocks", "index"], twelvedata=True),
 		Parameter("forcePlatform", "request quote on Alternative.me", ["am", "alternativeme"], alternativeme=True),
 		Parameter("forcePlatform", "request quote on CNN Business", ["cnn", "cnnbusiness"], cnnbusiness=True),
 	]

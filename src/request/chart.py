@@ -444,8 +444,11 @@ class ChartRequest(AbstractRequest):
 
 	async def process_ticker(self, assetClass):
 		updatedTicker, error = None, None
-		try: updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform, assetClass)
-		except: error = "Something went wrong while processing the requested ticker."
+		try:
+			updatedTicker, error = await match_ticker(self.tickerId, self.exchange.get("id"), self.platform, assetClass)
+		except:
+			print(format_exc())
+			error = "Something went wrong while processing the requested ticker."
 
 		if error is not None:
 			self.set_error(error, isFatal=True)

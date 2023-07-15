@@ -27,9 +27,9 @@ GRAMMAR = """
 	%import common.WS_INLINE
 	%ignore WS_INLINE
 
-	CONSTANT: DIGIT ("." DIGIT+)?
-	NAME: /([^\+\-\*\/\^\(\)\'\"\‘\’\“\”]+|[a-zA-Z]+)/
-	QUOTED: /([^\+\-\*\/\^\(\)\'\"\‘\’\“\”]+|[a-zA-Z]+)/
+	CONSTANT: DIGIT+ ("." DIGIT+)?
+	NAME: /([^\+\-\*\/\^\(\)\'\"\‘\’\“\”]*[a-zA-Z]+)/
+	QUOTED: /([^\+\-\*\/\^\(\)\'\"\‘\’\“\”]*[a-zA-Z]+)/
 """
 
 larkParser = Lark(GRAMMAR, parser='lalr')
@@ -69,7 +69,7 @@ class Reconstructor(TreeMatcher):
 			if isinstance(item, Tree):
 				yield from self._reconstruct(item)
 			elif hasattr(item, "value"):
-				yield item.value["id"]
+				yield item.value["id"] if isinstance(item.value, dict) else item.value
 			else:
 				yield item
 

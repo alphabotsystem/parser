@@ -28,8 +28,8 @@ GRAMMAR = """
 	%ignore WS_INLINE
 
 	CONSTANT: DIGIT+ ("." DIGIT+)?
-	NAME: /([^\+\-\*\/\^\(\)\'\"\‘\’\“\”]*[a-zA-Z]+)/
-	QUOTED: /([^\+\-\*\/\^\(\)\'\"\‘\’\“\”]*[a-zA-Z]+)/
+	NAME: /([^+\-*\/^\()\'"\‘’\“”]*[a-zA-Z]+[^+\-*\/^\()\'"\‘’\“”]*)/
+	QUOTED: /([^+\-*\/^\()\'"\‘’\“”]*[a-zA-Z]+[^+\-*\/^\()\'"\‘’\“”]*)/
 """
 
 larkParser = Lark(GRAMMAR, parser='lalr')

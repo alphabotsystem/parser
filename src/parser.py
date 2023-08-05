@@ -73,7 +73,6 @@ async def process_heatmap_request(req: Request):
 @app.post("/parser/quote")
 async def process_quote_request(req: Request):
 	request = await req.json()
-	print(request)
 	arguments, platforms = request["arguments"], request["platforms"]
 	tickerParts = request["tickerId"].split("|")
 	tickerId, assetClass = tickerParts[0].strip(), tickerParts[-1].lower().strip()

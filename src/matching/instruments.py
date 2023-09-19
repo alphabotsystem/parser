@@ -245,7 +245,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 						"quote": response[0].get("currency_code", "USD"),
 						"tag": 1,
 						"symbol": instrument["symbol"],
-						"exchange": {"id": response[0].get("prefix", response[0]["exchange"]).lower()},
+						"exchange": {"id": response[0]["contracts"][0].get("prefix", response[0]["exchange"]).lower()},
 						"metadata": {
 							"type": "Unknown",
 							"rank": MAXSIZE,

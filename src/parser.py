@@ -161,29 +161,12 @@ async def get_listings(req: Request):
 @app.post("/parser/get_formatted_price_ccxt")
 async def format_price(req: Request):
 	request = await req.json()
-	if request["exchangeId"] == "binance":
-		exchange = ccxt.binance({
-			"proxies": {
-				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-			}
-		})
-	elif request["exchangeId"] == "binanceusdm":
-		exchange = ccxt.binanceusdm({
-			"proxies": {
-				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-			}
-		})
-	elif request["exchangeId"] == "binancecoinm":
-		exchange = ccxt.binancecoinm({
-			"proxies": {
-				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-			}
-		})
-	else:
-		exchange = getattr(ccxt, request["exchangeId"])()
+	exchange = getattr(ccxt, request["exchangeId"])({
+		"proxies": {
+			"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+			"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+		}
+	})
 	await loop.run_in_executor(None, exchange.load_markets)
 	precision = exchange.markets.get(request["symbol"], {}).get("precision", {}).get("price", 8)
 	text = dtp.decimal_to_precision(request["price"], rounding_mode=dtp.ROUND, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.PAD_WITH_ZERO)
@@ -192,29 +175,12 @@ async def format_price(req: Request):
 @app.post("/parser/get_formatted_amount_ccxt")
 async def format_amount(req: Request):
 	request = await req.json()
-	if request["exchangeId"] == "binance":
-		exchange = ccxt.binance({
-			"proxies": {
-				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-			}
-		})
-	elif request["exchangeId"] == "binanceusdm":
-		exchange = ccxt.binanceusdm({
-			"proxies": {
-				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-			}
-		})
-	elif request["exchangeId"] == "binancecoinm":
-		exchange = ccxt.binancecoinm({
-			"proxies": {
-				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-			}
-		})
-	else:
-		exchange = getattr(ccxt, request["exchangeId"])()
+	exchange = getattr(ccxt, request["exchangeId"])({
+		"proxies": {
+			"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+			"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+		}
+	})
 	await loop.run_in_executor(None, exchange.load_markets)
 	precision = exchange.markets.get(request["symbol"], {}).get("precision", {}).get("amount", 8)
 	text = dtp.decimal_to_precision(request["amount"], rounding_mode=dtp.TRUNCATE, precision=precision, counting_mode=exchange.precisionMode, padding_mode=dtp.NO_PADDING)

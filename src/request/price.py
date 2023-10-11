@@ -10,16 +10,18 @@ from .abstract import AbstractRequestHandler, AbstractRequest
 
 PARAMETERS = {
 	"preferences": [
-		Parameter("lld", "funding", ["fun", "fund", "funding"], ccxt="funding"),
-		Parameter("lld", "open interest", ["oi", "openinterest", "ov", "openvalue"], ccxt="oi"),
-		Parameter("lld", "longs/shorts ratio", ["ls", "l/s", "longs/shorts", "long/short"], ccxt="ls"),
-		Parameter("lld", "shorts/longs ratio", ["sl", "s/l", "shorts/longs", "short/long"], ccxt="sl"),
-		Parameter("lld", "dominance", ["dom", "dominance"], coingecko="dom"),
+		Parameter("prefix", "funding", ["fun", "fund", "funding"], ccxt="FUNDING:"),
+		Parameter("prefix", "open interest", ["oi", "openinterest", "ov", "openvalue"], ccxt="OI:"),
+		Parameter("prefix", "longs/shorts ratio", ["ls", "l/s", "longs/shorts", "long/short"], ccxt="LS:"),
+		Parameter("prefix", "shorts/longs ratio", ["sl", "s/l", "shorts/longs", "short/long"], ccxt="SL:"),
+		Parameter("prefix", "dominance", ["dom", "dominance"], coingecko="DOM:"),
+		Parameter("prefix", "halving", ["halving", "halfing", "halv", "half"], blockchair="HALVING:"),
 		Parameter("forcePlatform", "request quote on CoinGecko", ["cg", "coingecko"], coingecko=True),
 		Parameter("forcePlatform", "request quote on a crypto exchange", ["cx", "ccxt", "crypto", "exchange"], ccxt=True),
 		Parameter("forcePlatform", "request quote on a stock exchange", ["equities", "equity", "forex", "fx", "metal", "metals", "stock", "stocks", "index"], twelvedata=True),
 		Parameter("forcePlatform", "request quote on Alternative.me", ["am", "alternativeme"], alternativeme=True),
 		Parameter("forcePlatform", "request quote on CNN Business", ["cnn", "cnnbusiness"], cnnbusiness=True),
+		Parameter("forcePlatform", "request quote on CNN Business", ["block", "blockchair", "blockchain"], cnnbusiness=True),
 	]
 }
 DEFAULTS = {
@@ -27,6 +29,9 @@ DEFAULTS = {
 		"preferences": []
 	},
 	"CNN Business": {
+		"preferences": []
+	},
+	"Blockchair": {
 		"preferences": []
 	},
 	"CoinGecko": {
@@ -57,13 +62,17 @@ class PriceRequestHandler(AbstractRequestHandler):
 		for platform, request in self.requests.items():
 			if request.errorIsFatal: continue
 
-			preferences = [{"id": e.id, "value": e.parsed[platform]} for e in request.preferences]
-
 			if platform == "Alternative.me":
-				if request.tickerId not in ["FGI"]: request.set_error(None, isFatal=True)
+				if request.tickerId != "FGI":
+					request.set_error(None, isFatal=True)
 
 			elif platform == "CNN Business":
-				if request.tickerId not in ["FGI"]: request.set_error(None, isFatal=True)
+				if request.tickerId != "FGI":
+					request.set_error(None, isFatal=True)
+
+			elif platform == "Blockchair":
+				if not request.tickerId.startswith("HALVING:"):
+					request.set_error(None, isFatal=True)
 
 			elif platform == "CoinGecko":
 				if request.couldFail:
@@ -128,11 +137,13 @@ class PriceRequest(AbstractRequest):
 
 	async def process_ticker(self, assetClass):
 		preferences = [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences]
-		if any([e.get("id") in ["funding", "oi"] for e in preferences]):
+		prefix = next((e["value"] for e in preferences if e["id"] == "prefix"), None)
+
+		if prefix in ["FUNDING:", "OI:"]:
 			if not self.hasExchange:
 				try: _, self.exchange = await find_exchange("bitmex", self.platform)
 				except: pass
-		elif any([e.get("id") in ["ls", "sl"] for e in preferences]):
+		elif prefix in ["LS:", "SL:"]:
 			if not self.hasExchange:
 				try: _, self.exchange = await find_exchange("bitfinex", self.platform)
 				except: pass
@@ -151,6 +162,10 @@ class PriceRequest(AbstractRequest):
 		else:
 			self.ticker = updatedTicker
 			self.tickerId = updatedTicker.get("id")
+			if prefix is not None:
+				self.tickerId = prefix + self.tickerId
+				self.ticker["id"] = prefix + self.ticker["id"]
+				self.ticker["symbol"] = prefix + self.ticker["symbol"]
 			self.exchange = updatedTicker.get("exchange")
 
 	def add_parameter(self, argument, type):

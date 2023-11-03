@@ -313,7 +313,7 @@ class ChartRequestHandler(AbstractRequestHandler):
 					request.set_error(f"{request.exchange.get('name')} exchange is not available. ||Yet? Let TradingLite know you want it!||", isFatal=True)
 
 			elif platform == "TradingView Premium":
-				if styles["style"] == "6" and styles.get("log", False):
+				if styles["chartType"] == "6" and styles.get("log", False):
 					request.set_error("Point & Figure chart can't be viewed in log scale.", isFatal=True)
 
 				indicators = request.indicators

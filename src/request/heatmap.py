@@ -186,9 +186,9 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 					request.preferences.append(AbstractRequest.find_parameter_by_id("group", PARAMETERS, platform, name="Sector", parameterType="preferences"))
 
 				if theme is None:
-					request.styles.append(AbstractRequest.find_parameter_by_id("theme", PARAMETERS, platform, name="Dark theme", parameterType="styles"))
+					request.styles.append(AbstractRequest.find_parameter_by_id("theme", PARAMETERS, platform, name="Dark theme", parameterType="style"))
 				if _type is None:
-					request.styles.append(AbstractRequest.find_parameter_by_id("type", PARAMETERS, platform, name="S&P 500", parameterType="styles"))
+					request.styles.append(AbstractRequest.find_parameter_by_id("type", PARAMETERS, platform, name="S&P 500", parameterType="style"))
 			elif platform == "TradingView Crypto Heatmap":
 				size = preferences.get("size")
 				group = preferences.get("group")
@@ -202,9 +202,9 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 					request.preferences.append(AbstractRequest.find_parameter_by_id("group", PARAMETERS, platform, name="No group", parameterType="preferences"))
 
 				if theme is None:
-					request.styles.append(AbstractRequest.find_parameter_by_id("theme", PARAMETERS, platform, name="Dark theme", parameterType="styles"))
+					request.styles.append(AbstractRequest.find_parameter_by_id("theme", PARAMETERS, platform, name="Dark theme", parameterType="style"))
 				if _type is None:
-					request.styles.append(AbstractRequest.find_parameter_by_id("type", PARAMETERS, platform, name="Crypto in USD", parameterType="styles"))
+					request.styles.append(AbstractRequest.find_parameter_by_id("type", PARAMETERS, platform, name="Crypto in USD", parameterType="style"))
 
 	def to_dict(self):
 		d = {

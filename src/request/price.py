@@ -136,8 +136,8 @@ class PriceRequest(AbstractRequest):
 			self.set_error(finalOutput)
 
 	async def process_ticker(self, assetClass):
-		preferences = [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences]
-		prefix = next((e["value"] for e in preferences if e["id"] == "prefix"), None)
+		preferences = self.prepare_preferences()
+		prefix = preferences.get("prefix")
 
 		if prefix in ["FUNDING:", "OI:"]:
 			if not self.hasExchange:
@@ -197,6 +197,6 @@ class PriceRequest(AbstractRequest):
 		d = {
 			"ticker": self.ticker,
 			"exchange": self.exchange,
-			"preferences": [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences]
+			"preferences": self.prepare_preferences()
 		}
 		return d

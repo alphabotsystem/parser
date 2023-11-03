@@ -45,55 +45,54 @@ PARAMETERS = {
 		Parameter("color", "Gap", ["gap"], tradingViewStockHeatmap="?color=gap", tradingViewCryptoHeatmap="?color=gap"),
 		Parameter("color", "1-day volatility", ["1-dayvolatility", "volatility", "vol", "v"], tradingViewStockHeatmap="?color=Volatility.D", tradingViewCryptoHeatmap="?color=Volatility.D"),
 	],
-	"types": [
-		Parameter("type", "Nasdaq 100", ["nasdaq", "nasdaq100"], tradingViewStockHeatmap="&dataset=NASDAQ100"),
-		Parameter("type", "S&P 500", ["s&p500", "s&p", "sp500", "sap500", "sap", "spx", "spx500"], tradingViewStockHeatmap="&dataset=SPX500"),
-		Parameter("type", "Dow Jones Composite Average", ["dji", "dowjones", "dowjonescompositeaverage", "djca"], tradingViewStockHeatmap="&dataset=DJCA"),
-		Parameter("type", "All US companies", ["alluscompanies", "us", "usa", "uscompanies", "allusa"], tradingViewStockHeatmap="&dataset=AllUSA"),
-		Parameter("type", "S&P/ASX 200", ["s&p/asx200", "asx200", "asx", "spasx", "sapasx", "sp200", "sap200"], tradingViewStockHeatmap="&dataset=ASX200"),
-		Parameter("type", "All Australian companies", ["allaustraliancompanies", "australiancompanies", "au", "allau"], tradingViewStockHeatmap="&dataset=AllAU"),
-		Parameter("type", "BEL 20", ["bel20"], tradingViewStockHeatmap="&dataset=BEL20"),
-		Parameter("type", "All Belgian companies", ["allbelgiancompanies", "belgiancompanies", "be", "allbe"], tradingViewStockHeatmap="&dataset=AllBE"),
-		Parameter("type", "Shenzhen Component Index", ["shenzhencomponentindex", "sci", "szse399001", "szse"], tradingViewStockHeatmap="&dataset=SZSE399001"),
-		Parameter("type", "All Chinese companies", ["allchinesecompanies", "chinesecompanies", "cn", "allcn"], tradingViewStockHeatmap="&dataset=AllCN"),
-		Parameter("type", "STOXX 50", ["stoxx50", "sx5e"], tradingViewStockHeatmap="&dataset=SX5E"),
-		Parameter("type", "STOXX 600", ["stoxx600", "sxxp"], tradingViewStockHeatmap="&dataset=SXXP"),
-		Parameter("type", "All European companies", ["alleuropeancompanies", "europeancompanies", "eu", "alleu"], tradingViewStockHeatmap="&dataset=AllEU"),
-		Parameter("type", "OMX HELSINKI 25", ["omxhelsinki25", "omx", "helsinki", "helsinki25"], tradingViewStockHeatmap="&dataset=HELSINKI25"),
-		Parameter("type", "All Finnish companies", ["allfinnishcompanies", "fi", "allfi", "finnishcompanies"], tradingViewStockHeatmap="&dataset=AllFI"),
-		Parameter("type", "CAC 40", ["cac40", "cac"], tradingViewStockHeatmap="&dataset=CAC40"),
-		Parameter("type", "All French companies", ["allfrenchcompanies", "fr", "allfr", "frenchcompanies"], tradingViewStockHeatmap="&dataset=AllFR"),
-		Parameter("type", "DAX", ["dax"], tradingViewStockHeatmap="&dataset=DAX"),
-		Parameter("type", "MDAX Performance", ["mdax", "mdaxperformance"], tradingViewStockHeatmap="&dataset=MDAX"),
-		Parameter("type", "SDAX Performance", ["sdax", "sdaxperformance"], tradingViewStockHeatmap="&dataset=SDAX"),
-		Parameter("type", "TECDAX TR", ["tecdax", "tecdaxtr"], tradingViewStockHeatmap="&dataset=TECDAX"),
-		Parameter("type", "All German companies", ["allgermancompanies", "de", "allde", "germancompanies"], tradingViewStockHeatmap="&dataset=AllDE"),
-		Parameter("type", "NIFTY 50", ["nifty50", "nifty"], tradingViewStockHeatmap="&dataset=NIFTY50"),
-		Parameter("type", "S&P BSE SENSEX", ["s&pbsesensex", "sensex"], tradingViewStockHeatmap="&dataset=SENSEX"),
-		Parameter("type", "All Indian companies", ["allindiancompanies", "in", "allin", "indiancompanies"], tradingViewStockHeatmap="&dataset=AllIN"),
-		Parameter("type", "FTSE MIB INDEX", ["ftsemib", "ftsemibindex", "ftse"], tradingViewStockHeatmap="&dataset=FTSEMIB"),
-		Parameter("type", "All Italian companies", ["allitaliancompanies", "it", "allit", "italiancompanies"], tradingViewStockHeatmap="&dataset=AllIT"),
-		Parameter("type", "All Malaysian companies", ["allmalaysiancompanies", "my", "allmy", "malaysiancompanies"], tradingViewStockHeatmap="&dataset=AllMY"),
-		Parameter("type", "MOEX RUSSIA", ["moex", "moexrussia"], tradingViewStockHeatmap="&dataset=MOEXRUSSIA"),
-		Parameter("type", "MOEX BROAD MARKET (RUB)", ["moexrub", "moexbroad"], tradingViewStockHeatmap="&dataset=MOEXBROAD"),
-		Parameter("type", "MOEX SMID", ["moexsmid"], tradingViewStockHeatmap="&dataset=MOEXSMID"),
-		Parameter("type", "RTS", ["rts"], tradingViewStockHeatmap="&dataset=RTS"),
-		Parameter("type", "RTS BROAD MARKET", ["rtsbroad"], tradingViewStockHeatmap="&dataset=RTSBROAD"),
-		Parameter("type", "All Russian companies", ["allrussiancompanies", "ru", "allru", "russiancompanies"], tradingViewStockHeatmap="&dataset=AllRU"),
-		Parameter("type", "All Spanish companies", ["allspanishcompanies", "es", "alles", "spanishcompanies"], tradingViewStockHeatmap="&dataset=AllES"),
-		Parameter("type", "BIST 100", ["bist100"], tradingViewStockHeatmap="&dataset=BIST100"),
-		Parameter("type", "BIST TUM", ["bisttum"], tradingViewStockHeatmap="&dataset=BISTTUM"),
-		Parameter("type", "All Turkish companies", ["allturkishcompanies", "tr", "alltr", "turkishcompanies"], tradingViewStockHeatmap="&dataset=ALLTR"),
-		Parameter("type", "UK 100 Index", ["uk100"], tradingViewStockHeatmap="&dataset=UK100"),
-		Parameter("type", "All UK companies", ["allukcompanies", "uk", "alluk", "ukcompanies"], tradingViewStockHeatmap="&dataset=AllUK"),
-		Parameter("type", "Crypto in USD (excluding Bitcoin)", ["cryptoinusd(excludingbitcoin)"], tradingViewCryptoHeatmap="&dataset=CryptoWithoutBTC"),
-		Parameter("type", "Crypto in BTC", ["cryptoinbtc"], tradingViewCryptoHeatmap="&dataset=CryptoInBTC"),
-		Parameter("type", "Crypto DeFi", ["cryptodefi"], tradingViewCryptoHeatmap="&dataset=CryptoDeFi"),
-		Parameter("type", "Crypto in USD", ["full", "all", "every", "everything", "cryptoinusd"], tradingViewCryptoHeatmap="&dataset=Crypto"),
-		Parameter("theme", "Light theme", ["light", "white"], tradingViewStockHeatmap="&theme=light", tradingViewCryptoHeatmap="&theme=light"),
-		Parameter("theme", "Dark theme", ["dark", "black"], tradingViewStockHeatmap="&theme=dark", tradingViewCryptoHeatmap="&theme=dark"),
+	"style": [
+		Parameter("dataset", "Nasdaq 100", ["nasdaq", "nasdaq100"], tradingViewStockHeatmap={"dataset": "NASDAQ100"}),
+		Parameter("dataset", "S&P 500", ["s&p500", "s&p", "sp500", "sap500", "sap", "spx", "spx500"], tradingViewStockHeatmap={"dataset": "SPX500"}),
+		Parameter("dataset", "Dow Jones Composite Average", ["dji", "dowjones", "dowjonescompositeaverage", "djca"], tradingViewStockHeatmap={"dataset": "DJCA"}),
+		Parameter("dataset", "All US companies", ["alluscompanies", "us", "usa", "uscompanies", "allusa"], tradingViewStockHeatmap={"dataset": "AllUSA"}),
+		Parameter("dataset", "S&P/ASX 200", ["s&p/asx200", "asx200", "asx", "spasx", "sapasx", "sp200", "sap200"], tradingViewStockHeatmap={"dataset": "ASX200"}),
+		Parameter("dataset", "All Australian companies", ["allaustraliancompanies", "australiancompanies", "au", "allau"], tradingViewStockHeatmap={"dataset": "AllAU"}),
+		Parameter("dataset", "BEL 20", ["bel20"], tradingViewStockHeatmap={"dataset": "BEL20"}),
+		Parameter("dataset", "All Belgian companies", ["allbelgiancompanies", "belgiancompanies", "be", "allbe"], tradingViewStockHeatmap={"dataset": "AllBE"}),
+		Parameter("dataset", "Shenzhen Component Index", ["shenzhencomponentindex", "sci", "szse399001", "szse"], tradingViewStockHeatmap={"dataset": "SZSE399001"}),
+		Parameter("dataset", "All Chinese companies", ["allchinesecompanies", "chinesecompanies", "cn", "allcn"], tradingViewStockHeatmap={"dataset": "AllCN"}),
+		Parameter("dataset", "STOXX 50", ["stoxx50", "sx5e"], tradingViewStockHeatmap={"dataset": "SX5E"}),
+		Parameter("dataset", "STOXX 600", ["stoxx600", "sxxp"], tradingViewStockHeatmap={"dataset": "SXXP"}),
+		Parameter("dataset", "All European companies", ["alleuropeancompanies", "europeancompanies", "eu", "alleu"], tradingViewStockHeatmap={"dataset": "AllEU"}),
+		Parameter("dataset", "OMX HELSINKI 25", ["omxhelsinki25", "omx", "helsinki", "helsinki25"], tradingViewStockHeatmap={"dataset": "HELSINKI25"}),
+		Parameter("dataset", "All Finnish companies", ["allfinnishcompanies", "fi", "allfi", "finnishcompanies"], tradingViewStockHeatmap={"dataset": "AllFI"}),
+		Parameter("dataset", "CAC 40", ["cac40", "cac"], tradingViewStockHeatmap={"dataset": "CAC40"}),
+		Parameter("dataset", "All French companies", ["allfrenchcompanies", "fr", "allfr", "frenchcompanies"], tradingViewStockHeatmap={"dataset": "AllFR"}),
+		Parameter("dataset", "DAX", ["dax"], tradingViewStockHeatmap={"dataset": "DAX"}),
+		Parameter("dataset", "MDAX Performance", ["mdax", "mdaxperformance"], tradingViewStockHeatmap={"dataset": "MDAX"}),
+		Parameter("dataset", "SDAX Performance", ["sdax", "sdaxperformance"], tradingViewStockHeatmap={"dataset": "SDAX"}),
+		Parameter("dataset", "TECDAX TR", ["tecdax", "tecdaxtr"], tradingViewStockHeatmap={"dataset": "TECDAX"}),
+		Parameter("dataset", "All German companies", ["allgermancompanies", "de", "allde", "germancompanies"], tradingViewStockHeatmap={"dataset": "AllDE"}),
+		Parameter("dataset", "NIFTY 50", ["nifty50", "nifty"], tradingViewStockHeatmap={"dataset": "NIFTY50"}),
+		Parameter("dataset", "S&P BSE SENSEX", ["s&pbsesensex", "sensex"], tradingViewStockHeatmap={"dataset": "SENSEX"}),
+		Parameter("dataset", "All Indian companies", ["allindiancompanies", "in", "allin", "indiancompanies"], tradingViewStockHeatmap={"dataset": "AllIN"}),
+		Parameter("dataset", "FTSE MIB INDEX", ["ftsemib", "ftsemibindex", "ftse"], tradingViewStockHeatmap={"dataset": "FTSEMIB"}),
+		Parameter("dataset", "All Italian companies", ["allitaliancompanies", "it", "allit", "italiancompanies"], tradingViewStockHeatmap={"dataset": "AllIT"}),
+		Parameter("dataset", "All Malaysian companies", ["allmalaysiancompanies", "my", "allmy", "malaysiancompanies"], tradingViewStockHeatmap={"dataset": "AllMY"}),
+		Parameter("dataset", "MOEX RUSSIA", ["moex", "moexrussia"], tradingViewStockHeatmap={"dataset": "MOEXRUSSIA"}),
+		Parameter("dataset", "MOEX BROAD MARKET (RUB)", ["moexrub", "moexbroad"], tradingViewStockHeatmap={"dataset": "MOEXBROAD"}),
+		Parameter("dataset", "MOEX SMID", ["moexsmid"], tradingViewStockHeatmap={"dataset": "MOEXSMID"}),
+		Parameter("dataset", "RTS", ["rts"], tradingViewStockHeatmap={"dataset": "RTS"}),
+		Parameter("dataset", "RTS BROAD MARKET", ["rtsbroad"], tradingViewStockHeatmap={"dataset": "RTSBROAD"}),
+		Parameter("dataset", "All Russian companies", ["allrussiancompanies", "ru", "allru", "russiancompanies"], tradingViewStockHeatmap={"dataset": "AllRU"}),
+		Parameter("dataset", "All Spanish companies", ["allspanishcompanies", "es", "alles", "spanishcompanies"], tradingViewStockHeatmap={"dataset": "AllES"}),
+		Parameter("dataset", "BIST 100", ["bist100"], tradingViewStockHeatmap={"dataset": "BIST100"}),
+		Parameter("dataset", "BIST TUM", ["bisttum"], tradingViewStockHeatmap={"dataset": "BISTTUM"}),
+		Parameter("dataset", "All Turkish companies", ["allturkishcompanies", "tr", "alltr", "turkishcompanies"], tradingViewStockHeatmap={"dataset": "ALLTR"}),
+		Parameter("dataset", "UK 100 Index", ["uk100"], tradingViewStockHeatmap={"dataset": "UK100"}),
+		Parameter("dataset", "All UK companies", ["allukcompanies", "uk", "alluk", "ukcompanies"], tradingViewStockHeatmap={"dataset": "AllUK"}),
+		Parameter("dataset", "Crypto in USD (excluding Bitcoin)", ["cryptoinusd(excludingbitcoin)"], tradingViewCryptoHeatmap={"dataset": "CryptoWithoutBTC"}),
+		Parameter("dataset", "Crypto in BTC", ["cryptoinbtc"], tradingViewCryptoHeatmap={"dataset": "CryptoInBTC"}),
+		Parameter("dataset", "Crypto DeFi", ["cryptodefi"], tradingViewCryptoHeatmap={"dataset": "CryptoDeFi"}),
+		Parameter("dataset", "Crypto in USD", ["full", "all", "every", "everything", "cryptoinusd"], tradingViewCryptoHeatmap={"dataset": "Crypto"}),
+		Parameter("theme", "Light theme", ["light", "white"], tradingViewStockHeatmap={"theme": "light"}, tradingViewCryptoHeatmap={"theme": "light"}),
+		Parameter("theme", "Dark theme", ["dark", "black"], tradingViewStockHeatmap={"theme": "dark"}, tradingViewCryptoHeatmap={"theme": "dark"}),
 	],
-	"style": [],
 	"preferences": [
 		Parameter("size", "Market cap", ["marketcap", "mcap"], tradingViewStockHeatmap="&size=market_cap_basic", tradingViewCryptoHeatmap="&size=market_cap_calc"),
 		Parameter("size", "Traded volume", ["tradedvolume", "volume"], tradingViewCryptoHeatmap="&size=total_value_traded"),
@@ -134,22 +133,20 @@ DEFAULTS = {
 		"timeframes": [
 			AbstractRequest.find_parameter_by_id(1440, PARAMETERS, "TradingView Stock Heatmap", parameterType="timeframes")
 		],
-		"types": [
-			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Stock Heatmap", name="Dark theme", parameterType="types"),
-			AbstractRequest.find_parameter_by_id("type", PARAMETERS, "TradingView Stock Heatmap", name="S&P 500", parameterType="types")
+		"style": [
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Stock Heatmap", name="Dark theme", parameterType="style"),
+			AbstractRequest.find_parameter_by_id("dataset", PARAMETERS, "TradingView Stock Heatmap", name="S&P 500", parameterType="style")
 		],
-		"style": [],
 		"preferences": []
 	},
 	"TradingView Crypto Heatmap": {
 		"timeframes": [
 			AbstractRequest.find_parameter_by_id(1440, PARAMETERS, "TradingView Crypto Heatmap", parameterType="timeframes")
 		],
-		"types": [
-			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Crypto Heatmap", name="Dark theme", parameterType="types"),
-			AbstractRequest.find_parameter_by_id("type", PARAMETERS, "TradingView Crypto Heatmap", name="Crypto in USD", parameterType="types")
+		"style": [
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Crypto Heatmap", name="Dark theme", parameterType="style"),
+			AbstractRequest.find_parameter_by_id("dataset", PARAMETERS, "TradingView Crypto Heatmap", name="Crypto in USD", parameterType="style")
 		],
-		"style": [],
 		"preferences": []
 	}
 }
@@ -173,15 +170,15 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 		for platform, request in self.requests.items():
 			if request.errorIsFatal: continue
 
-			types = [{"id": e.id, "value": e.parsed[platform]} for e in request.types]
-			preferences = [{"id": e.id, "value": e.parsed[platform]} for e in request.preferences]
+			styles = request.prepare_styles()
+			preferences = request.prepare_preferences()
 
 			if platform == "TradingView Stock Heatmap":
-				size = next((e.get("value") for e in preferences if e.get("id") == "size"), None)
-				group = next((e.get("value") for e in preferences if e.get("id") == "group"), None)
+				size = preferences.get("size")
+				group = preferences.get("group")
 
-				theme = next((e.get("value") for e in types if e.get("id") == "theme"), None)
-				_type = next((e.get("value") for e in types if e.get("id") == "type"), None)
+				theme = styles.get("theme")
+				_type = styles.get("type")
 
 				if size is None:
 					request.preferences.append(AbstractRequest.find_parameter_by_id("size", PARAMETERS, platform, name="Market cap", parameterType="preferences"))
@@ -189,15 +186,15 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 					request.preferences.append(AbstractRequest.find_parameter_by_id("group", PARAMETERS, platform, name="Sector", parameterType="preferences"))
 
 				if theme is None:
-					request.types.append(AbstractRequest.find_parameter_by_id("theme", PARAMETERS, platform, name="Dark theme", parameterType="types"))
+					request.styles.append(AbstractRequest.find_parameter_by_id("theme", PARAMETERS, platform, name="Dark theme", parameterType="styles"))
 				if _type is None:
-					request.types.append(AbstractRequest.find_parameter_by_id("type", PARAMETERS, platform, name="S&P 500", parameterType="types"))
+					request.styles.append(AbstractRequest.find_parameter_by_id("type", PARAMETERS, platform, name="S&P 500", parameterType="styles"))
 			elif platform == "TradingView Crypto Heatmap":
-				size = next((e.get("value") for e in preferences if e.get("id") == "size"), None)
-				group = next((e.get("value") for e in preferences if e.get("id") == "group"), None)
+				size = preferences.get("size")
+				group = preferences.get("group")
 
-				theme = next((e.get("value") for e in types if e.get("id") == "theme"), None)
-				_type = next((e.get("value") for e in types if e.get("id") == "type"), None)
+				theme = styles.get("theme")
+				_type = styles.get("type")
 
 				if size is None:
 					request.preferences.append(AbstractRequest.find_parameter_by_id("size", PARAMETERS, platform, name="Market cap", parameterType="preferences"))
@@ -205,9 +202,9 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 					request.preferences.append(AbstractRequest.find_parameter_by_id("group", PARAMETERS, platform, name="No group", parameterType="preferences"))
 
 				if theme is None:
-					request.types.append(AbstractRequest.find_parameter_by_id("theme", PARAMETERS, platform, name="Dark theme", parameterType="types"))
+					request.styles.append(AbstractRequest.find_parameter_by_id("theme", PARAMETERS, platform, name="Dark theme", parameterType="styles"))
 				if _type is None:
-					request.types.append(AbstractRequest.find_parameter_by_id("type", PARAMETERS, platform, name="Crypto in USD", parameterType="types"))
+					request.styles.append(AbstractRequest.find_parameter_by_id("type", PARAMETERS, platform, name="Crypto in USD", parameterType="styles"))
 
 	def to_dict(self):
 		d = {
@@ -233,7 +230,6 @@ class HeatmapRequest(AbstractRequest):
 		super().__init__(platform)
 
 		self.timeframes = []
-		self.types = []
 		self.styles = []
 		self.preferences = []
 
@@ -248,10 +244,6 @@ class HeatmapRequest(AbstractRequest):
 		finalOutput = None
 
 		responseMessage, success = await self.add_timeframe(argument)
-		if responseMessage is not None: finalOutput = responseMessage
-		elif success: return
-
-		responseMessage, success = await self.add_type(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
@@ -285,16 +277,6 @@ class HeatmapRequest(AbstractRequest):
 
 	async def add_exchange(self, argument): raise NotImplementedError
 
-	async def add_type(self, argument):
-		heatmapStyleSupported, parsedHeatmapStyle, requiresPro = self.add_parameter(argument, "types")
-		if parsedHeatmapStyle is not None and not self.has_parameter(parsedHeatmapStyle.id, self.types):
-			if not heatmapStyleSupported:
-				responseMessage = f"`{parsedHeatmapStyle.name.title()}` heatmap style is " + (f"only available with the {requiresPro} add-on." if requiresPro else f"not supported on {self.platform}.")
-				return responseMessage, False
-			self.types.append(parsedHeatmapStyle)
-			return None, True
-		return None, None
-
 	# async def add_style(self, argument) -- inherited
 
 	# async def add_preferences(self, argument) -- inherited
@@ -303,9 +285,6 @@ class HeatmapRequest(AbstractRequest):
 		if t == "timeframes" and len(self.timeframes) == 0:
 			for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 				if not self.has_parameter(parameter.id, self.timeframes): self.timeframes.append(parameter)
-		elif t == "types":
-			for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-				if not self.has_parameter(parameter.id, self.types): self.types.append(parameter)
 		elif t == "style":
 			for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
 				if not self.has_parameter(parameter.id, self.styles): self.styles.append(parameter)
@@ -317,9 +296,8 @@ class HeatmapRequest(AbstractRequest):
 	def to_dict(self):
 		d = {
 			"timeframes": [e.parsed[self.platform] for e in self.timeframes],
-			"types": "".join([e.parsed[self.platform] for e in self.types]),
-			"styles": [e.parsed[self.platform] for e in self.styles],
-			"preferences": [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences],
+			"styles": self.prepare_styles(),
+			"preferences": self.prepare_preferences(),
 			"currentTimeframe": self.currentTimeframe
 		}
 		return d

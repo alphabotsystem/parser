@@ -133,3 +133,17 @@ class AbstractRequest(object):
 		if len(self.errors) > 0 and self.errors[0] is None: return
 		self.errorIsFatal = isFatal
 		self.errors.insert(0, error)
+
+	def prepare_styles(self):
+		parsed = [e.parsed[self.platform] for e in self.styles]
+		styles = {}
+		for e in parsed:
+			styles.update(e)
+		return styles
+
+	def prepare_preferences(self):
+		parsed = [(e.id, e.parsed[self.platform]) for e in self.preferences]
+		preferences = {}
+		for i, e in parsed:
+			preferences[i] = e
+		return preferences

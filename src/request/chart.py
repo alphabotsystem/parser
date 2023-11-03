@@ -52,138 +52,147 @@ PARAMETERS = {
 	],
 	"indicators": [
 		Parameter("none", "No indicators", ["none", "noindicators"], tradingview="", premium=""), # Here due to default indicators
-		Parameter("accd", "Accumulation/Distribution", ["accd", "ad", "acc", "accumulationdistribution", "accumulation/distribution"], tradingview="ACCD@tv-basicstudies", premium="Accumulation/Distribution"),
+		Parameter("accd", "Accumulation/Distribution", ["accd", "ad", "acc", "accumulationdistribution", "accumulation/distribution"], tradingview="STD;Accumulation_Distribution", premium="Accumulation/Distribution"),
 		Parameter("accumulationswingindex", "Accumulation Swing Index", ["accumulationswingindex", "accsi", "asi"], premium="Accumulative+Swing+Index"),
-		Parameter("admi", "Average Directional Movement Index", ["admi", "adx", "averagedirectionalmovementindex", "averagedirectionalindex"], premium="Average+Directional+Index"),
-		Parameter("adr", "Advance/Decline Ratio", ["adr", "advance/declineratio"], tradingview="studyADR@tv-basicstudies", premium="Advance/Decline"),
-		Parameter("arnaudlegouxmovingaverage", "Arnaud Legoux Moving Average", ["alma", "arnaudlegouxmovingaverage"], premium="Arnaud+Legoux+Moving+Average"),
-		Parameter("aroon", "Aroon", ["aroon"], tradingview="AROON@tv-basicstudies", premium="Aroon"),
-		Parameter("atr", "ATR", ["atr"], tradingview="ATR@tv-basicstudies", premium="Average+True+Range"),
-		Parameter("average", "Average Price", ["averageprice", "ap", "average"], premium="Average+Price"),
-		Parameter("awesome", "Awesome Oscillator", ["awesome", "ao", "awesomeoscillator"], tradingview="AwesomeOscillator@tv-basicstudies", premium="Awesome+Oscillator"),
-		Parameter("balanceofpower", "Balance of Power", ["balanceofpower", "bop"], premium="Balance+of+Power"),
-		Parameter("bollinger", "Bollinger Bands", ["bollinger", "bbands", "bb", "bollingerbands"], tradingview="BB@tv-basicstudies", premium="Bollinger+Bands"),
-		Parameter("bbb", "Bollinger Bands %B", ["%b", "bollingerbandsb", "bollingerbands%b", "bbb"], tradingview="BollingerBandsR@tv-basicstudies", premium="Bollinger+Bands+%B"),
-		Parameter("width", "Bollinger Bands Width", ["width", "bbw", "bollingerbandswidth"], tradingview="BollingerBandsWidth@tv-basicstudies", premium="Bollinger+Bands+Width"),
-		Parameter("cmf", "Chaikin Money Flow Index", ["cmf", "chaikinmoneyflow", "chaikinmoneyflowindex"], tradingview="CMF@tv-basicstudies", premium="Chaikin+Money+Flow"),
-		Parameter("chaikin", "Chaikin Oscillator", ["chaikin", "co", "chaikinoscillator"], tradingview="ChaikinOscillator@tv-basicstudies", premium="Chaikin+Oscillator"),
-		Parameter("cv", "Chaikin Volatility", ["cv", "chaikinvolatility"], tradingview="Chaikin Volatility"),
-		Parameter("chande", "Chande Momentum Oscillator", ["chande", "cmo", "chandemomentumoscillator"], tradingview="chandeMO@tv-basicstudies", premium="Chande+Momentum+Oscillator"),
-		Parameter("choppiness", "Choppiness Index", ["choppiness", "ci", "choppinessindex"], tradingview="ChoppinessIndex@tv-basicstudies", premium="Choppiness+Index"),
-		Parameter("chandekrollstop", "Chande Kroll Stop", ["chandekrollstop"], premium="Chande+Kroll+Stop"),
-		Parameter("chopzone", "Chop Zone", ["chopzone"], premium="Chop+Zone"),
-		Parameter("coppockcurve", "Coppock Curve", ["coppockcurve"], premium="Coppock+Curve"),
-		Parameter("cci", "Commodity Channel Index", ["cci"], tradingview="CCI@tv-basicstudies", premium="Commodity+Channel+Index"),
-		Parameter("crsi", "Connors RSI", ["crsi"], tradingview="CRSI@tv-basicstudies", premium="Connors+RSI"),
-		Parameter("correlation", "Correlation Coefficient", ["correlation", "cc", "correlationcoefficient"], tradingview="CorrelationCoefficient@tv-basicstudies", premium="Correlation+Coefficient"),
+		Parameter("adl", "Advance/Decline Line", ["adl", "advance/declineline"], tradingview="STD;Advance%1Decline%1Line"),
+		Parameter("adr", "Advance/Decline Ratio", ["adr", "advance/declineratio"], tradingview="STD;Advance%1Decline%1Ratio", premium="Advance/Decline"),
+		Parameter("adb", "Advance/Decline Ratio (Bars)", ["adb", "advance/declinebars", "advance/declineratio(bars)"], tradingview="STD;Advance_Decline_Ratio_Bars"),
+		Parameter("arnaudlegouxmovingaverage", "Arnaud Legoux Moving Average", ["alma", "arnaudlegouxmovingaverage"], tradingview="STD;Arnaud%1Legoux%1Moving%1Average", premium="Arnaud+Legoux+Moving+Average"),
+		Parameter("aroon", "Aroon", ["aroon"], tradingview="STD;Aroon", premium="Aroon"),
+		Parameter("admi", "Average Directional Movement Index", ["admi", "adx", "averagedirectionalmovementindex", "averagedirectionalindex"], tradingview="STD;Average%1Directional%1Index", premium="Average+Directional+Index"),
+		Parameter("adr", "Average Day Range", ["adr", "averagedayrange"], tradingview="STD;Average%Day%Range"),
+		Parameter("atr", "Average True Range", ["atr", "averagetruerange"], tradingview="STD;Average_True_Range", premium="Average+True+Range"),
+		Parameter("average", "Average Price", ["averageprice", "ap", "average"], tradingview="STD;Time%1Weighted%1Average%1Price", premium="Average+Price"),
+		Parameter("awesome", "Awesome Oscillator", ["awesome", "ao", "awesomeoscillator"], tradingview="STD;Awesome_Oscillator", premium="Awesome+Oscillator"),
+		Parameter("balanceofpower", "Balance of Power", ["balanceofpower", "bop"], tradingview="STD;Balance%1of%1Power", premium="Balance+of+Power"),
+		Parameter("bollinger", "Bollinger Bands", ["bollinger", "bbands", "bb", "bollingerbands"], tradingview="STD;Bollinger_Bands", premium="Bollinger+Bands"),
+		Parameter("bbb", "Bollinger Bands %B", ["%b", "bollingerbandsb", "bollingerbands%b", "bbb"], tradingview="STD;Bollinger_Bands_B", premium="Bollinger+Bands+%B"),
+		Parameter("width", "Bollinger Bands Width", ["width", "bbw", "bollingerbandswidth"], tradingview="STD;Bollinger_Bands_Width", premium="Bollinger+Bands+Width"),
+		Parameter("bbp", "Bull Bear Power", ["bbp", "bullbearpower"], tradingview="STD;Bull%Bear%Power"),
+		Parameter("cmf", "Chaikin Money Flow Index", ["cmf", "chaikinmoneyflow", "chaikinmoneyflowindex"], tradingview="STD;Chaikin_Money_Flow", premium="Chaikin+Money+Flow"),
+		Parameter("chaikin", "Chaikin Oscillator", ["chaikin", "co", "chaikinoscillator"], tradingview="STD;Chaikin_Oscillator", premium="Chaikin+Oscillator"),
+		Parameter("chandekrollstop", "Chande Kroll Stop", ["chandekrollstop"], premium="STD;Chande%1Kroll%1Stop"),
+		Parameter("chande", "Chande Momentum Oscillator", ["chande", "cmo", "chandemomentumoscillator"], tradingview="STD;Chande_Momentum_Oscillator", premium="Chande+Momentum+Oscillator"),
+		Parameter("chopzone", "Chop Zone", ["chopzone"], tradingview="STD;Chop%1Zone", premium="Chop+Zone"),
+		Parameter("choppiness", "Choppiness Index", ["choppiness", "ci", "choppinessindex"], tradingview="STD;Choppiness_Index", premium="Choppiness+Index"),
+		Parameter("cci", "Commodity Channel Index", ["cci"], tradingview="STD;CCI", premium="Commodity+Channel+Index"),
+		Parameter("crsi", "Connors RSI", ["crsi"], tradingview="STD;Connors_RSI", premium="Connors+RSI"),
+		Parameter("coppockcurve", "Coppock Curve", ["coppockcurve"], tradingview="STD;Coppock%1Curve", premium="Coppock+Curve"),
+		Parameter("correlation", "Correlation Coefficient", ["correlation", "cc", "correlationcoefficient"], tradingview="STD;Correlation_Coeff", premium="Correlation+Coefficient"),
 		Parameter("correlationlog", "Correlation - Log", ["correlationlog", "correlation-log", "correlationcoefficientlog", "cclog"], premium="Correlation+-+Log"),
-		Parameter("detrended", "Detrended Price Oscillator", ["detrended", "dpo", "detrendedpriceoscillator"], tradingview="DetrendedPriceOscillator@tv-basicstudies", premium="Detrended+Price+Oscillator"),
-		Parameter("dm", "Directional Movement", ["dm", "directionalmovement"], tradingview="DM@tv-basicstudies", premium="Directional+Movement"),
-		Parameter("donch", "DONCH", ["donch", "donchainchannel"], tradingview="DONCH@tv-basicstudies", premium="Donchian+Channels"),
-		Parameter("dema", "Double EMA", ["dema", "doubleema"], tradingview="DoubleEMA@tv-basicstudies", premium="Double+EMA"),
-		Parameter("efi", "Elder's Force Index", ["efi"], tradingview="EFI@tv-basicstudies", premium="Elder's Force Index"),
-		Parameter("ema", "EMA", ["ema"], tradingview="MAExp@tv-basicstudies", premium="Moving+Average+Exponential", dynamic=[("length:f:", 9)]),
-		Parameter("elliott", "Elliott Wave", ["elliott", "ew", "elliottwave"], tradingview="ElliottWave@tv-basicstudies"),
-		Parameter("env", "Envelopes", ["env"], tradingview="ENV@tv-basicstudies", premium="Envelopes"),
-		Parameter("eom", "Ease of Movement", ["eom", "easeofmovement"], tradingview="EaseOfMovement@tv-basicstudies", premium="Ease+of+Movement"),
-		Parameter("fisher", "Fisher Transform", ["fisher", "ft", "fishertransform"], tradingview="FisherTransform@tv-basicstudies", premium="Fisher+Transform"),
+		Parameter("cvi", "Cumulative Volume Index", ["cvi", "cumulativevolumeindex"], tradingview="STD;Cumulative%1Volume%1Index"),
+		Parameter("detrended", "Detrended Price Oscillator", ["detrended", "dpo", "detrendedpriceoscillator"], tradingview="STD;DPO", premium="Detrended+Price+Oscillator"),
+		Parameter("dm", "Directional Movement", ["dm", "directionalmovement"], tradingview="STD;DMI", premium="Directional+Movement"),
+		Parameter("donch", "DONCH", ["donch", "donchainchannel"], tradingview="STD;Donchian_Channels", premium="Donchian+Channels"),
+		Parameter("dema", "Double EMA", ["dema", "doubleema"], tradingview="STD;DEMA", premium="Double+EMA"),
+		Parameter("eom", "Ease of Movement", ["eom", "easeofmovement"], tradingview="STD;EOM", premium="Ease+of+Movement"),
+		Parameter("efi", "Elder's Force Index", ["efi"], tradingview="STD;EFI", premium="Elder's Force Index"),
+		Parameter("ema", "EMA", ["ema"], tradingview="STD;EMA", premium="Moving+Average+Exponential", dynamic=[("length:f:", 9)]),
+		Parameter("env", "Envelope", ["env"], tradingview="STD;ENV", premium="Envelopes"),
+		Parameter("fisher", "Fisher Transform", ["fisher", "ft", "fishertransform"], tradingview="STD;Fisher_Transform", premium="Fisher+Transform"),
+		Parameter("gaps", "Gaps", ["gaps"], tradingview="STD;Gaps"),
 		Parameter("guppy", "Guppy Moving Average", ["guppy", "gma", "rainbow", "rma", "guppymovingaverage"], premium="Guppy+Multiple+Moving+Average"),
-		Parameter("hv", "Historical Volatility", ["historicalvolatility", "hv"], tradingview="HV@tv-basicstudies", premium="Historical+Volatility"),
-		Parameter("hull", "Hull MA", ["hull", "hma", "hullma"], tradingview="hullMA@tv-basicstudies", premium="Hull+Moving+Average"),
-		Parameter("ichimoku", "Ichimoku Cloud", ["ichimoku", "cloud", "ichi", "ic", "ichimokucloud"], tradingview="IchimokuCloud@tv-basicstudies", premium="Ichimoku+Cloud"),
-		Parameter("keltner", "Keltner Channel", ["keltner", "kltnr", "keltnerchannel"], tradingview="KLTNR@tv-basicstudies", premium="Keltner+Channels"),
-		Parameter("klinger", "Klinger", ["klinger"], premium="Klinger+Oscillator"),
-		Parameter("kst", "Know Sure Thing", ["knowsurething", "kst"], tradingview="KST@tv-basicstudies", premium="Know+Sure+Thing"),
-		Parameter("leastsquaresmovingaverage", "Least Squares Moving Average", ["leastsquaresmovingaverage"], premium="Least+Squares+Moving+Average"),
-		Parameter("regression", "Linear Regression Channel", ["regression", "regressionchannel", "lr", "lrc", "linreg", "linearregression", "linearregressionchannel"], tradingview="STD%3BLinear_Regression"),
+		Parameter("hv", "Historical Volatility", ["historicalvolatility", "hv"], tradingview="STD;Historical_Volatility", premium="Historical+Volatility"),
+		Parameter("hull", "Hull MA", ["hull", "hma", "hullma"], tradingview="STD;Hull%1MA", premium="Hull+Moving+Average"),
+		Parameter("ichimoku", "Ichimoku Cloud", ["ichimoku", "cloud", "ichi", "ic", "ichimokucloud"], tradingview="STD;Ichimoku%1Cloud", premium="Ichimoku+Cloud"),
+		Parameter("keltner", "Keltner Channels", ["keltner", "kltnr", "keltnerchannel"], tradingview="STD;Keltner_Channels", premium="Keltner+Channels"),
+		Parameter("klinger", "Klinger Oscillator", ["ko", "klinger", "klingeroscillator"], tradingview="STD;Klinger%1Oscillator", premium="Klinger+Oscillator"),
+		Parameter("kst", "Know Sure Thing", ["knowsurething", "kst"], tradingview="STD;Know_Sure_Thing", premium="Know+Sure+Thing"),
+		Parameter("leastsquaresmovingaverage", "Least Squares Moving Average", ["leastsquaresmovingaverage"], tradingview="STD;Least%1Squares%1Moving%1Average", premium="Least+Squares+Moving+Average"),
+		Parameter("regression", "Linear Regression Channel", ["regression", "regressionchannel", "lr", "lrc", "linreg", "linearregression", "linearregressionchannel"], tradingview="STD;Linear_Regression"),
 		Parameter("regressionslope", "Linear Regression Slope", ["regressionslope", "lrs", "linregs", "linearregressionslope"], premium="Linear+Regression+Slope"),
 		Parameter("regressioncurve", "Linear Regression Curve", ["regressioncurve", "lrc", "linregc", "linearregressioncurve"], premium="Linear+Regression+Curve"),
+		Parameter("macd", "MACD", ["macd"], tradingview="STD;MACD", premium="MACD"),
 		Parameter("mawithemacross", "MA with EMA Cross", ["mawithemacross"], premium="MA+with+EMA+Cross"),
-		Parameter("mcginleydynamic", "McGinley Dynamic", ["mcginleydynamic"], premium="McGinley+Dynamic"),
+		Parameter("massindex", "Mass Index", ["massindex", "mi"], tradingview="STD;Mass%1Index", premium="Mass+Index"),
+		Parameter("mcginleydynamic", "McGinley Dynamic", ["mcginleydynamic"], tradingview="STD;McGinley%1Dynamic", premium="McGinley+Dynamic"),
+		Parameter("medianprice", "Median Price", ["medianprice"], tradingview="STD;Median", premium="Median+Price"),
 		Parameter("majorityrule", "Majority Rule", ["majorityrule"], premium="Majority+Rule"),
-		Parameter("macd", "MACD", ["macd"], tradingview="MACD@tv-basicstudies", premium="MACD"),
-		Parameter("massindex", "Mass Index", ["massindex", "mi"], premium="Mass+Index"),
-		Parameter("mom", "Momentum", ["mom", "momentum"], tradingview="MOM@tv-basicstudies", premium="Momentum"),
-		Parameter("mf", "Money Flow Index", ["mf", "mfi", "moneyflow"], tradingview="MF@tv-basicstudies", premium="Money+Flow+Index"),
-		Parameter("moon", "Moon Phases", ["moon", "moonphases"], tradingview="MoonPhases@tv-basicstudies"),
-		Parameter("ma", "Moving Average", ["ma", "movingaverage"], tradingview="MASimple@tv-basicstudies", premium="Moving+Average", dynamic=[("length:f:", 9)]),
-		Parameter("macross", "MA Cross", ["macross"], premium="MA+Cross"),
+		Parameter("mom", "Momentum", ["mom", "momentum"], tradingview="STD;Momentum", premium="Momentum"),
+		Parameter("mf", "Money Flow Index", ["mf", "mfi", "moneyflow"], tradingview="STD;Money_Flow", premium="Money+Flow+Index"),
+		Parameter("moon", "Moon Phases", ["moon", "moonphases"], tradingview="STD;Moon%1Phases"),
+		Parameter("ma", "Moving Average", ["ma", "movingaverage"], tradingview="STD;SMA", premium="Moving+Average", dynamic=[("length:f:", 9)]),
+		Parameter("macross", "MA Cross", ["macross"], tradingview="STD;MA%1Cross", premium="MA+Cross"),
+		Parameter("maribbon", "MA Ribbon", ["maribbon"], tradingview="STD;MA%Ribbon"),
 		Parameter("emacross", "EMA Cross", ["emacross"], premium="EMA+Cross"),
-		Parameter("medianprice", "Median Price", ["medianprice"], premium="Median+Price"),
 		Parameter("movingaveragechannel", "Moving Average Channel", ["movingaveragechannel"], premium="Moving+Average+Channel"),
 		Parameter("movingaveragedouble", "Moving Average Double", ["movingaveragedouble"], premium="Moving+Average+Double"),
 		Parameter("movingaverageadaptive", "Moving Average Adaptive", ["movingaverageadaptive"], premium="Moving+Average+Adaptive"),
 		Parameter("movingaveragehamming", "Moving Average Hamming", ["movingaveragehamming"], premium="Moving+Average+Hamming"),
 		Parameter("movingaveragemultiple", "Moving Average Multiple", ["movingaveragemultiple"], premium="Moving+Average+Multiple"),
-		Parameter("sma", "Smoothed Moving Average", ["sma", "smoothedmovingaverage"], premium="Smoothed+Moving+Average", dynamic=[("length:f:", 9)]),
-		Parameter("obv", "On Balance Volume", ["obv", "onbalancevolume"], tradingview="OBV@tv-basicstudies", premium="On+Balance+Volume"),
-		Parameter("parabolic", "Parabolic SAR", ["parabolic", "sar", "psar", "parabolicsar"], tradingview="PSAR@tv-basicstudies", premium="Parabolic+SAR"),
-		Parameter("po", "Price Oscillator", ["po", "priceoscillator"], tradingview="PriceOsc@tv-basicstudies", premium="Price+Oscillator"),
-		Parameter("pphl", "Pivot Points High Low", ["pphl", "pivotpointshighlow"], tradingview="PivotPointsHighLow@tv-basicstudies"),
-		Parameter("pps", "Pivot Points Standard", ["pps", "pivot", "pivotpointsstandard"], tradingview="PivotPointsStandard@tv-basicstudies", premium="Pivot+Points+Standard"),
+		Parameter("obv", "On Balance Volume", ["obv", "onbalancevolume"], tradingview="STD;On_Balance_Volume", premium="On+Balance+Volume"),
+		Parameter("oi", "Open Interest", ["oi", "openinterest"], tradingview="STD;Open%Interest"),
+		Parameter("parabolic", "Parabolic SAR", ["parabolic", "sar", "psar", "parabolicsar"], tradingview="STD;PSAR", premium="Parabolic+SAR"),
+		Parameter("pphl", "Pivot Points High Low", ["pphl", "pivotpointshighlow"], tradingview="STD;Pivot%1Points%1High%1Low"),
+		Parameter("pps", "Pivot Points Standard", ["pps", "pivot", "pivotpointsstandard"], tradingview="STD;Pivot%1Points%1Standard", premium="Pivot+Points+Standard"),
+		Parameter("po", "Price Oscillator", ["po", "priceoscillator"], tradingview="STD;Price_Oscillator", premium="Price+Oscillator"),
 		Parameter("pricechannel", "Price Channel", ["pricechannel"], premium="Price+Channel"),
-		Parameter("pvt", "Price Volume Trend", ["pvt", "pricevolumetrend"], tradingview="PriceVolumeTrend@tv-basicstudies", premium="Price+Volume+Trend"),
+		Parameter("pvt", "Price Volume Trend", ["pvt", "pricevolumetrend"], tradingview="STD;Price_Volume_Trend", premium="Price+Volume+Trend"),
 		Parameter("ratio", "Ratio", ["ratio"], premium="Ratio"),
+		Parameter("roc", "Price ROC", ["roc", "priceroc", "proc"], tradingview="STD;ROC", premium="Rate+Of+Change"),
+		Parameter("rbzgp", "Rob Booker - Ziv Ghost Pivots", ["rbzgp", "robbooker-zivghostpivots", "robbookerzivghostpivots", "robbooker", "zivghostpivots"], tradingview="STD;Rob%1Booker%1Ghost%1Pivots%1v2"),
 		Parameter("rvi", "Relative Volatility", ["rvi", "relativevolatility"], premium="Relative+Volatility+Index"),
-		Parameter("roc", "Price ROC", ["roc", "priceroc", "proc"], tradingview="ROC@tv-basicstudies", premium="Rate+Of+Change"),
-		Parameter("rsi", "RSI", ["rsi", "relativestrength", "relativestrengthindex", "relativestrengthidx"], tradingview="RSI@tv-basicstudies", premium="Relative+Strength+Index"),
-		Parameter("smiei", "SMI Ergodic Indicator", ["smiei", "smiergodicindicator"], tradingview="SMIErgodicIndicator@tv-basicstudies", premium="SMI+Ergodic+Indicator/Oscillator"),
-		Parameter("smieo", "SMI Ergodic Oscillator", ["smieo", "smiergodicoscillator"], tradingview="SMIErgodicOscillator@tv-basicstudies", premium="SMI+Ergodic+Indicator/Oscillator"),
+		Parameter("rsi", "RSI", ["rsi", "relativestrength", "relativestrengthindex", "relativestrengthidx"], tradingview="STD;RSI", premium="Relative+Strength+Index"),
+		Parameter("rsidiv", "RSI Divergence Indicator", ["rsidiv", "rsidivergenceindicator", "rsidivergence"], tradingview="STD;Divergence%1Indicator"),
+		Parameter("rvigor", "Relative Vigor Index", ["vigor", "vigorindex"], tradingview="STD;Relative_Vigor_Index", premium="Relative+Vigor+Index"),
+		Parameter("rvat", "Relative Volume at Time", ["rvat", "relativevolumeattime"], tradingview="STD;Relative%1Volume%1at%1Time"),
+		Parameter("sma", "Smoothed Moving Average", ["sma", "smoothedmovingaverage"], tradingview="STD;Smoothed%1Moving%1Average", premium="Smoothed+Moving+Average", dynamic=[("length:f:", 9)]),
+		Parameter("smi", "Stochastic Momentum Index", ["smi", "stochmi", "stochasticmi", "stochasticmomentumindex"], tradingview="STD;SMI"),
+		Parameter("smiei", "SMI Ergodic Indicator", ["smiei", "smiergodicindicator"], tradingview="STD;SMI_Ergodic_Indicator_Oscillator", premium="SMI+Ergodic+Indicator/Oscillator"),
+		Parameter("smieo", "SMI Ergodic Oscillator", ["smieo", "smiergodicoscillator"], tradingview="STD;SMI_Ergodic_Oscillator", premium="SMI+Ergodic+Indicator/Oscillator"),
 		Parameter("spread", "Spread", ["spread"], premium="Spread"),
-		Parameter("srsi", "Stochastic RSI", ["srsi", "stochrsi", "stochasticrsi"], tradingview="StochasticRSI@tv-basicstudies", premium="Stochastic+RSI"),
+		Parameter("srsi", "Stochastic RSI", ["srsi", "stochrsi", "stochasticrsi"], tradingview="STD;Stochastic_RSI", premium="Stochastic+RSI"),
+		Parameter("stochastic", "Stochastic", ["stochastic", "stoch"], tradingview="STD;Stochastic", premium="Stochastic"),
 		Parameter("standarderror", "Standard Error", ["standarderror"], premium="Standard+Error"),
 		Parameter("stdev", "Standard Deviation", ["stdev", "stddev", "standarddeviation"], premium="Standard+Deviation"),
-		Parameter("stochastic", "Stochastic", ["stochastic", "stoch"], tradingview="Stochastic@tv-basicstudies", premium="Stochastic"),
-		Parameter("supertrend", "Supertrend", ["supertrend"], premium="SuperTrend"),
+		Parameter("supertrend", "Supertrend", ["supertrend"], tradingview="STD;Supertrend", premium="SuperTrend"),
 		Parameter("standardrrrorbands", "Standard Error Bands", ["standardrrrorbands"], premium="Standard+Error+Bands"),
+		Parameter("tema", "Triple EMA", ["tema", "tripleema"], tradingview="STD;TEMA", premium="Triple+EMA"),
+		Parameter("technicalratings", "Technical Ratings", ["tr", "technicalratings"], tradingview="STD;Technical%1Ratings"),
 		Parameter("tma", "Triple MA", ["tma", "triplema"], premium="Moving+Average+Triple"),
-		Parameter("tema", "Triple EMA", ["tema", "tripleema"], tradingview="TripleEMA@tv-basicstudies", premium="Triple+EMA"),
-		Parameter("tpo", "Market Profile", ["tpo", "marketprofile"], premium="Volume+Profile+Visible+Range@row+size:f:100"),
-		Parameter("trix", "Triple Exponential Average", ["trix", "txa", "texa", "tripleexponentialaverage"], tradingview="Trix@tv-basicstudies", premium="TRIX"),
+		Parameter("trix", "Triple Exponential Average", ["trix", "txa", "texa", "tripleexponentialaverage"], tradingview="STD;TRIX", premium="TRIX"),
 		Parameter("typicalprice", "Typical Price", ["typicalprice", "tp"], premium="Typical+Price"),
-		Parameter("truestrengthindicator", "True Strength Indicator", ["truestrengthindicator"], premium="True+Strength+Indicator"),
+		Parameter("truestrengthindicator", "True Strength Index", ["tsi", "truestrengthindex", "truestrengthindicator"], tradingview="STD;True%1Strength%1Indicator", premium="True+Strength+Indicator"),
 		Parameter("trendstrengthindex", "Trend Strength Index", ["trendstrengthindex"], premium="Trend+Strength+Index"),
-		Parameter("ultimate", "Ultimate Oscillator", ["ultimate", "uo", "ultimateoscillator"], tradingview="UltimateOsc@tv-basicstudies", premium="Ultimate+Oscillator"),
-		Parameter("vigor", "Vigor Index", ["vigor", "vigorindex"], tradingview="VigorIndex@tv-basicstudies", premium="Relative+Vigor+Index"),
-		Parameter("volatility", "Volatility Index", ["volatility", "vi", "volatilityindex"], tradingview="VolatilityIndex@tv-basicstudies", premium="Volatility+Index"),
+		Parameter("ultimate", "Ultimate Oscillator", ["ultimate", "uo", "ultimateoscillator"], tradingview="STD;Ultimate_Oscillator", premium="Ultimate+Oscillator"),
+		Parameter("updownvolume", "Up/Down Volume", ["up/downvolume", "updown", "udv", "updownvolume"], tradingview="STD;UP_DOWN_Volume"),
+		Parameter("vap", "Visible Average Price", ["vap", "visibleaverageprice"], tradingview="STD;Visible%1Average%1Price"),
+		Parameter("volatility", "Volatility Index", ["volatility", "vi", "volatilityindex"], tradingview="STD;Relative_Volatility_Index", premium="Volatility+Index"),
 		Parameter("volatilityclose-to-close", "Volatility Close-to-Close", ["volatilityclose-to-close"], premium="Volatility+Close-to-Close"),
 		Parameter("volatilityzerotrendclose-to-close", "Volatility Zero Trend Close-to-Close", ["volatilityzerotrendclose-to-close"], premium="Volatility+Zero+Trend+Close-to-Close"),
 		Parameter("volatilityo-h-l-c", "Volatility O-H-L-C", ["volatilityo-h-l-c"], premium="Volatility+O-H-L-C"),
-		Parameter("volumeoscillator", "Volume Oscillator", ["volosc", "volumeoscillator"], premium="Volume+Oscillator"),
-		Parameter("volumeprofile", "Volume Profile", ["volumeprofile", "vpvr"], premium="Volume+Profile+Visible+Range@row+size:f:100"),
-		Parameter("vortex", "Vortex", ["vortex"], premium="Vortex+Indicator"),
-		Parameter("vstop", "VSTOP", ["vstop"], tradingview="VSTOP@tv-basicstudies"),
-		Parameter("vwap", "VWAP", ["vwap"], tradingview="VWAP@tv-basicstudies", premium="VWAP"),
-		Parameter("vwma", "VWMA", ["mavw", "vw", "vwma"], tradingview="MAVolumeWeighted@tv-basicstudies", premium="VWMA"),
-		Parameter("williamsr", "Williams %R", ["williamsr", "wr", "williams%r"], tradingview="WilliamR@tv-basicstudies", premium="Williams+%R"),
-		Parameter("williamsa", "Williams Alligator", ["williamsa", "williamsalligator", "wa"], tradingview="WilliamsAlligator@tv-basicstudies", premium="Williams+Alligator"),
-		Parameter("williamsf", "Williams Fractal", ["williamsf", "williamsfractal", "wf"], tradingview="WilliamsFractal@tv-basicstudies", premium="Williams+Fractal"),
-		Parameter("wma", "Weighted Moving Average", ["wma", "weightedmovingaverage"], tradingview="MAWeighted@tv-basicstudies", premium="Moving+Average+Weighted"),
-		Parameter("zz", "Zig Zag", ["zz", "zigzag"], tradingview="ZigZag@tv-basicstudies", premium="ZigZag")
-	],
-	"types": [
-		Parameter("nv", "No volume", ["hv", "nv", "novol"], tradingview="&hidevolume=1", premium="&hidevolume=1"),
-		Parameter("theme", "Light theme", ["light", "white"], tradingview="&theme=light", premium="&theme=light", alternativeme="&theme=light", cnnbusiness="&theme=light"),
-		Parameter("theme", "Dark theme", ["dark", "black"], tradingview="&theme=dark", premium="&theme=dark", alternativeme="&theme=dark", cnnbusiness="&theme=dark"),
-		Parameter("candleStyle", "Bars", ["bars", "bar"], tradingview="&style=0"),
-		Parameter("candleStyle", "Candles", ["candles", "candle", "candlestick"], tradingview="&style=1", premium="&chartType=1"),
-		Parameter("candleStyle", "Line", ["line"], tradingview="&style=2", premium="&chartType=2"),
-		Parameter("candleStyle", "Area", ["area"], tradingview="&style=3", premium="&chartType=3"),
-		Parameter("candleStyle", "Renko", ["renko"], tradingview="&style=4"),
-		Parameter("candleStyle", "Kagi", ["kagi"], tradingview="&style=5"),
-		Parameter("candleStyle", "Point&Figure", ["point", "figure", "pf", "paf", "point&figure"], tradingview="&style=6"),
-		Parameter("candleStyle", "Line break", ["break", "linebreak", "lb"], tradingview="&style=7"),
-		Parameter("candleStyle", "Heikin ashi", ["heikin", "heiken", "heikinashi", "heikenashi", "ashi", "ha"], tradingview="&style=8", premium="&chartType=8"),
-		Parameter("candleStyle", "Hollow candles", ["hollow"], tradingview="&style=9", premium="&chartType=9"),
-		Parameter("candleStyle", "Baseline", ["baseline"], premium="&chartType=10"),
-		Parameter("candleStyle", "HiLo", ["hilo"], premium="&chartType=12"),
+		Parameter("volatilitystop", "Volatility Stop", ["vstop", "volatilitystop"], tradingview="STD;Volatility_Stop"),
+		Parameter("volumeoscillator", "Volume Oscillator", ["volosc", "volumeoscillator"], tradingview="STD;Volume%1Oscillator", premium="Volume+Oscillator"),
+		Parameter("volumeprofile", "Volume Profile", ["volumeprofile", "vpvr", "tpo", "marketprofile"], premium="Volume+Profile+Visible+Range@row+size:f:100"),
+		Parameter("vortex", "Vortex", ["vortex"], tradingview="STD;Vortex%1Indicator", premium="Vortex+Indicator"),
+		Parameter("vwap", "VWAP", ["vwap"], tradingview="STD;VWAP", premium="VWAP"),
+		Parameter("vwma", "VWMA", ["mavw", "vw", "vwma"], tradingview="STD;VWMA", premium="VWMA"),
+		Parameter("williamsa", "Williams Alligator", ["williamsa", "williamsalligator", "wa"], tradingview="STD;Williams_Alligator", premium="Williams+Alligator"),
+		Parameter("williamsf", "Williams Fractal", ["williamsf", "williamsfractal", "wf"], tradingview="STD;Whilliams_Fractals", premium="Williams+Fractal"),
+		Parameter("williamsr", "Williams %R", ["williamsr", "wr", "williams%r"], tradingview="STD;Willams_R", premium="Williams+%R"),
+		Parameter("wma", "Weighted Moving Average", ["wma", "weightedmovingaverage"], tradingview="STD;WMA", premium="Moving+Average+Weighted"),
+		Parameter("wcci", "Woodies CCI", ["wcci", "woodiescci"], tradingview="STD;Woodies%1CCI"),
+		Parameter("zz", "Zig Zag", ["zz", "zigzag"], tradingview="STD;Zig_Zag", premium="ZigZag")
 	],
 	"style": [
-		Parameter("theme", "Light theme", ["light", "white"], tradinglite="light"),
-		Parameter("theme", "Dark theme", ["dark", "black"], tradinglite="dark"),
-		Parameter("log", "Log chart", ["log", "logarithmic"], tradingview="log", premium="log", alternativeme="log", cnnbusiness="log"),
-		Parameter("extended", "Extended hours", ["extended", "post", "pre", "extendedhours"], premium="extended"),
-		Parameter("wide", "Wide chart", ["wide"], tradinglite="wide", tradingview="wide", premium="wide", bookmap="wide", alternativeme="wide", cnnbusiness="wide"),
+		Parameter("nv", "No volume", ["hv", "nv", "novol"], tradingview={"hidevolume": "1"}, premium={"hidevolume": "1"}),
+		Parameter("theme", "Light theme", ["light", "white"], tradingview={"theme": "light"}, premium={"theme": "light"}, alternativeme={"theme": "light"}, cnnbusiness={"theme": "light"}, tradinglite={"theme": "light"}),
+		Parameter("theme", "Dark theme", ["dark", "black"], tradingview={"theme": "dark"}, premium={"theme": "dark"}, alternativeme={"theme": "dark"}, cnnbusiness={"theme": "dark"}, tradinglite={"theme": "dark"}),
+		Parameter("candleStyle", "Bars", ["bars", "bar"], tradingview={"style": "0"}),
+		Parameter("candleStyle", "Candles", ["candles", "candle", "candlestick"], tradingview={"style": "1"}, premium={"chartType": "1"}),
+		Parameter("candleStyle", "Line", ["line"], tradingview={"style": "2"}, premium={"chartType": "2"}),
+		Parameter("candleStyle", "Area", ["area"], tradingview={"style": "3"}, premium={"chartType": "3"}),
+		Parameter("candleStyle", "Renko", ["renko"], tradingview={"style": "4"}),
+		Parameter("candleStyle", "Kagi", ["kagi"], tradingview={"style": "5"}),
+		Parameter("candleStyle", "Point&Figure", ["point", "figure", "pf", "paf", "point&figure"], tradingview={"style": "6"}),
+		Parameter("candleStyle", "Line break", ["break", "linebreak", "lb"], tradingview={"style": "7"}),
+		Parameter("candleStyle", "Heikin ashi", ["heikin", "heiken", "heikinashi", "heikenashi", "ashi", "ha"], tradingview={"style": "8"}, premium={"chartType": "8"}),
+		Parameter("candleStyle", "Hollow candles", ["hollow"], tradingview={"style": "9"}, premium={"chartType": "9"}),
+		Parameter("candleStyle", "Baseline", ["baseline"], premium={"chartType": "10"}),
+		Parameter("candleStyle", "HiLo", ["hilo"], premium={"chartType": "12"}),
+		Parameter("log", "Log chart", ["log", "logarithmic"], tradingview={"log": True}, premium={"log": True}, alternativeme={"log": True}, cnnbusiness={"log": True}),
+		Parameter("extended", "Extended hours", ["extended", "post", "pre", "extendedhours"], premium={"extended": True}),
+		Parameter("wide", "Wide chart", ["wide"], tradinglite={"wide": True}, tradingview={"wide": True}, premium={"wide": True}, bookmap={"wide": True}, alternativeme={"wide": True}, cnnbusiness={"wide": True}),
 	],
 	"preferences": [
 		Parameter("heatmapIntensity", "Whales heatmap intensity", ["whale", "whales"], tradinglite=(50,100)),
@@ -206,7 +215,6 @@ DEFAULTS = {
 			AbstractRequest.find_parameter_by_id(1440, PARAMETERS, "Alternative.me", parameterType="timeframes")
 		],
 		"indicators": [],
-		"types": [],
 		"style": [],
 		"preferences": []
 	},
@@ -215,7 +223,6 @@ DEFAULTS = {
 			AbstractRequest.find_parameter_by_id(1440, PARAMETERS, "CNN Business", parameterType="timeframes")
 		],
 		"indicators": [],
-		"types": [],
 		"style": [],
 		"preferences": []
 	},
@@ -224,7 +231,6 @@ DEFAULTS = {
 			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingLite", parameterType="timeframes")
 		],
 		"indicators": [],
-		"types": [],
 		"style": [
 			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingLite", name="Dark theme", parameterType="style")
 		],
@@ -237,11 +243,10 @@ DEFAULTS = {
 			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingView Premium", parameterType="timeframes")
 		],
 		"indicators": [],
-		"types": [
-			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Premium", name="Dark theme", parameterType="types"),
-			AbstractRequest.find_parameter_by_id("candleStyle", PARAMETERS, "TradingView Premium", name="Candles", parameterType="types")
+		"style": [
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Premium", name="Dark theme", parameterType="style"),
+			AbstractRequest.find_parameter_by_id("candleStyle", PARAMETERS, "TradingView Premium", name="Candles", parameterType="style")
 		],
-		"style": [],
 		"preferences": []
 	},
 	"TradingView Relay": {
@@ -249,7 +254,6 @@ DEFAULTS = {
 			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingView Relay", parameterType="timeframes")
 		],
 		"indicators": [],
-		"types": [],
 		"style": [],
 		"preferences": []
 	},
@@ -258,11 +262,10 @@ DEFAULTS = {
 			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingView", parameterType="timeframes")
 		],
 		"indicators": [],
-		"types": [
-			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView", name="Dark theme", parameterType="types"),
-			AbstractRequest.find_parameter_by_id("candleStyle", PARAMETERS, "TradingView", name="Candles", parameterType="types")
+		"style": [
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView", name="Dark theme", parameterType="style"),
+			AbstractRequest.find_parameter_by_id("candleStyle", PARAMETERS, "TradingView", name="Candles", parameterType="style")
 		],
-		"style": [],
 		"preferences": []
 	},
 	"Bookmap": {
@@ -270,7 +273,6 @@ DEFAULTS = {
 			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "Bookmap", parameterType="timeframes")
 		],
 		"indicators": [],
-		"types": [],
 		"style": [],
 		"preferences": []
 	}
@@ -293,9 +295,8 @@ class ChartRequestHandler(AbstractRequestHandler):
 		for platform, request in self.requests.items():
 			if request.errorIsFatal: continue
 
-			types = "".join([e.parsed[platform] for e in request.types])
-			styles = [e.parsed[platform] for e in request.styles]
-			preferences = [{"id": e.id, "value": e.parsed[platform]} for e in request.preferences]
+			styles = request.prepare_styles()
+			preferences = request.prepare_preferences()
 
 			if platform == "Alternative.me":
 				if request.ticker.get("id") not in ["FGI"]: request.set_error(None, isFatal=True)
@@ -312,7 +313,7 @@ class ChartRequestHandler(AbstractRequestHandler):
 					request.set_error(f"{request.exchange.get('name')} exchange is not available. ||Yet? Let TradingLite know you want it!||", isFatal=True)
 
 			elif platform == "TradingView Premium":
-				if "&style=6" in types and "log" in styles:
+				if styles["style"] == "6" and styles.get("log", False):
 					request.set_error("Point & Figure chart can't be viewed in log scale.", isFatal=True)
 
 				indicators = request.indicators
@@ -336,7 +337,7 @@ class ChartRequestHandler(AbstractRequestHandler):
 				pass
 
 			elif platform == "TradingView":
-				if "&style=6" in types and "log" in styles:
+				if styles["style"] == "6" and styles.get("log", False):
 					request.set_error("Point & Figure chart can't be viewed in log scale.", isFatal=True)
 
 			elif platform == "Bookmap":
@@ -372,7 +373,6 @@ class ChartRequest(AbstractRequest):
 
 		self.timeframes = []
 		self.indicators = []
-		self.types = []
 		self.styles = []
 		self.preferences = []
 		self.numericalParameters = []
@@ -387,10 +387,6 @@ class ChartRequest(AbstractRequest):
 			"indicators": [
 				AbstractRequest.find_parameter_by_trigger(e, PARAMETERS, self.platform, parameterType="indicators")
 				for e in defaults.get("indicators", [])
-			],
-			"types": [
-				AbstractRequest.find_parameter_by_trigger(e, PARAMETERS, self.platform, parameterType="types")
-				for e in [defaults.get("theme"), defaults.get("chartType")]
 			],
 			"style": [
 				AbstractRequest.find_parameter_by_trigger(e, PARAMETERS, self.platform, parameterType="style")
@@ -412,10 +408,6 @@ class ChartRequest(AbstractRequest):
 		elif success: return
 
 		responseMessage, success = await self.add_indicator(argument)
-		if responseMessage is not None: finalOutput = responseMessage
-		elif success: return
-
-		responseMessage, success = await self.add_type(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
@@ -496,16 +488,6 @@ class ChartRequest(AbstractRequest):
 			return None, True
 		return None, None
 
-	async def add_type(self, argument):
-		typeSupported, parsedType, requiresPro = self.add_parameter(argument, "types")
-		if parsedType is not None and not self.has_parameter(parsedType.id, self.types):
-			if not typeSupported:
-				responseMessage = f"`{parsedType.name.title()}` chart style is " + (f"only available with the {requiresPro} add-on." if requiresPro else f"not supported on {self.platform}.")
-				return responseMessage, False
-			self.types.append(parsedType)
-			return None, True
-		return None, None
-
 	# async def add_style(self, argument) -- inherited
 
 	# async def add_preferences(self, argument) -- inherited
@@ -545,16 +527,6 @@ class ChartRequest(AbstractRequest):
 					if not self.has_parameter(parameter.id, self.indicators):
 						self.indicators.append(parameter)
 						self.numericalParameters.append(-1)
-		elif t == "types":
-			userDefaults = [e for e in self.defaults.get("types") if e is not None]
-			if len(userDefaults) > 0:
-				for parameter in userDefaults:
-					if not self.has_parameter(parameter.id, self.types):
-						self.types.append(parameter)
-			else:
-				for parameter in DEFAULTS.get(self.platform, {}).get(t, []):
-					if not self.has_parameter(parameter.id, self.types):
-						self.types.append(parameter)
 		elif t == "style":
 			userDefaults = [e for e in self.defaults.get("style") if e is not None]
 			if len(userDefaults) > 0:
@@ -584,7 +556,7 @@ class ChartRequest(AbstractRequest):
 		indicators = ""
 
 		if self.platform in "TradingView":
-			indicators = "&studies=" + "%1F".join(parsed)
+			indicators = "\\\\u001f".join(parsed)
 
 		elif self.platform == "TradingView Premium":
 			lengths = {i: [] for i in range(len(self.indicators))}
@@ -616,9 +588,8 @@ class ChartRequest(AbstractRequest):
 			"exchange": self.exchange,
 			"timeframes": [e.parsed[self.platform] for e in self.timeframes],
 			"indicators": self.prepare_indicators(),
-			"types": "".join([e.parsed[self.platform] for e in self.types]),
-			"styles": [e.parsed[self.platform] for e in self.styles],
-			"preferences": [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences],
+			"styles": self.prepare_styles(),
+			"preferences": self.prepare_preferences(),
 			"numericalParameters": self.numericalParameters,
 			"currentTimeframe": self.currentTimeframe
 		}

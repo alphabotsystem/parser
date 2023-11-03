@@ -131,6 +131,6 @@ class DetailRequest(AbstractRequest):
 	def to_dict(self):
 		d = {
 			"ticker": self.ticker,
-			"preferences": [{"id": e.id, "value": e.parsed[self.platform]} for e in self.preferences]
+			"preferences": self.prepare_preferences()
 		}
 		return d

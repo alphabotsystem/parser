@@ -25,7 +25,7 @@ async def autocomplete_layout_timeframe(timeframe):
 async def autocomplete_market(market, heatmapType):
 	options = []
 	for option in HeatmapParameters["style"]:
-		if option.id != "type": continue
+		if option.id != "dataset": continue
 		if (heatmapType == "" or heatmapType == "stocks") and option.parsed["TradingView Stock Heatmap"] is not None or (heatmapType == "" or heatmapType == "crypto") and option.parsed["TradingView Crypto Heatmap"] is not None:
 			for ph in option.parsablePhrases:
 				if market in ph:

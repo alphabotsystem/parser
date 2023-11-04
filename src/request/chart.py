@@ -176,8 +176,8 @@ PARAMETERS = {
 	],
 	"style": [
 		Parameter("nv", "No volume", ["hv", "nv", "novol"], tradingview={"hidevolume": "1"}, premium={"hidevolume": "1"}),
-		Parameter("theme", "Light theme", ["light", "white"], tradingview={"theme": "light"}, premium={"theme": "light"}, alternativeme={"theme": "light"}, cnnbusiness={"theme": "light"}, tradinglite={"theme": "light"}),
-		Parameter("theme", "Dark theme", ["dark", "black"], tradingview={"theme": "dark"}, premium={"theme": "dark"}, alternativeme={"theme": "dark"}, cnnbusiness={"theme": "dark"}, tradinglite={"theme": "dark"}),
+		Parameter("theme", "Light theme", ["light", "white"], tradingview={"theme": "light"}, premium={"theme": "light"}, relay={"theme": "light"}, alternativeme={"theme": "light"}, cnnbusiness={"theme": "light"}, tradinglite={"theme": "light"}),
+		Parameter("theme", "Dark theme", ["dark", "black"], tradingview={"theme": "dark"}, premium={"theme": "dark"}, relay={"theme": "light"}, alternativeme={"theme": "dark"}, cnnbusiness={"theme": "dark"}, tradinglite={"theme": "dark"}),
 		Parameter("candleStyle", "Bars", ["bars", "bar"], tradingview={"style": "0"}),
 		Parameter("candleStyle", "Candles", ["candles", "candle", "candlestick"], tradingview={"style": "1"}, premium={"chartType": "1"}),
 		Parameter("candleStyle", "Line", ["line"], tradingview={"style": "2"}, premium={"chartType": "2"}),
@@ -254,7 +254,9 @@ DEFAULTS = {
 			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingView Relay", parameterType="timeframes")
 		],
 		"indicators": [],
-		"style": [],
+		"style": [
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingLite", name="Dark theme", parameterType="style")
+		],
 		"preferences": []
 	},
 	"TradingView": {

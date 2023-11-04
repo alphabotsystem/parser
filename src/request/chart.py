@@ -255,7 +255,7 @@ DEFAULTS = {
 		],
 		"indicators": [],
 		"style": [
-			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingLite", name="Dark theme", parameterType="style")
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Relay", name="Dark theme", parameterType="style")
 		],
 		"preferences": []
 	},

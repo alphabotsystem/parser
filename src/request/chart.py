@@ -87,7 +87,6 @@ PARAMETERS = {
 		Parameter("dema", "Double EMA", ["dema", "doubleema"], tradingview="STD;DEMA", premium="Double+EMA"),
 		Parameter("eom", "Ease of Movement", ["eom", "easeofmovement"], tradingview="STD;EOM", premium="Ease+of+Movement"),
 		Parameter("efi", "Elder's Force Index", ["efi"], tradingview="STD;EFI", premium="Elder's Force Index"),
-		Parameter("elliott", "Elliott Wave", ["elliott", "ew", "elliottwave"], tradingview="ElliottWave@tv-basicstudies"),
 		Parameter("ema", "EMA", ["ema"], tradingview="STD;EMA", premium="Moving+Average+Exponential", dynamic=[("length:f:", 9)]),
 		Parameter("env", "Envelope", ["env"], tradingview="STD;ENV", premium="Envelopes"),
 		Parameter("fisher", "Fisher Transform", ["fisher", "ft", "fishertransform"], tradingview="STD;Fisher_Transform", premium="Fisher+Transform"),

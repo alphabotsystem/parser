@@ -178,18 +178,18 @@ PARAMETERS = {
 		Parameter("nv", "No volume", ["hv", "nv", "novol"], tradingview={"hidevolume": "1"}, premium={"hidevolume": "1"}),
 		Parameter("theme", "Light theme", ["light", "white"], tradingview={"theme": "light"}, premium={"theme": "light"}, relay={"theme": "light"}, alternativeme={"theme": "light"}, cnnbusiness={"theme": "light"}, tradinglite={"theme": "light"}),
 		Parameter("theme", "Dark theme", ["dark", "black"], tradingview={"theme": "dark"}, premium={"theme": "dark"}, relay={"theme": "dark"}, alternativeme={"theme": "dark"}, cnnbusiness={"theme": "dark"}, tradinglite={"theme": "dark"}),
-		Parameter("candleStyle", "Bars", ["bars", "bar"], tradingview={"style": "0"}),
-		Parameter("candleStyle", "Candles", ["candles", "candle", "candlestick"], tradingview={"style": "1"}, premium={"chartType": "1"}),
-		Parameter("candleStyle", "Line", ["line"], tradingview={"style": "2"}, premium={"chartType": "2"}),
-		Parameter("candleStyle", "Area", ["area"], tradingview={"style": "3"}, premium={"chartType": "3"}),
-		Parameter("candleStyle", "Renko", ["renko"], tradingview={"style": "4"}),
-		Parameter("candleStyle", "Kagi", ["kagi"], tradingview={"style": "5"}),
-		Parameter("candleStyle", "Point&Figure", ["point", "figure", "pf", "paf", "point&figure"], tradingview={"style": "6"}),
-		Parameter("candleStyle", "Line break", ["break", "linebreak", "lb"], tradingview={"style": "7"}),
-		Parameter("candleStyle", "Heikin ashi", ["heikin", "heiken", "heikinashi", "heikenashi", "ashi", "ha"], tradingview={"style": "8"}, premium={"chartType": "8"}),
-		Parameter("candleStyle", "Hollow candles", ["hollow"], tradingview={"style": "9"}, premium={"chartType": "9"}),
-		Parameter("candleStyle", "Baseline", ["baseline"], premium={"chartType": "10"}),
-		Parameter("candleStyle", "HiLo", ["hilo"], premium={"chartType": "12"}),
+		Parameter("chartType", "Bars", ["bars", "bar"], tradingview={"style": "0"}),
+		Parameter("chartType", "Candles", ["candles", "candle", "candlestick"], tradingview={"style": "1"}, premium={"chartType": "1"}),
+		Parameter("chartType", "Line", ["line"], tradingview={"style": "2"}, premium={"chartType": "2"}),
+		Parameter("chartType", "Area", ["area"], tradingview={"style": "3"}, premium={"chartType": "3"}),
+		Parameter("chartType", "Renko", ["renko"], tradingview={"style": "4"}),
+		Parameter("chartType", "Kagi", ["kagi"], tradingview={"style": "5"}),
+		Parameter("chartType", "Point&Figure", ["point", "figure", "pf", "paf", "point&figure"], tradingview={"style": "6"}),
+		Parameter("chartType", "Line break", ["break", "linebreak", "lb"], tradingview={"style": "7"}),
+		Parameter("chartType", "Heikin ashi", ["heikin", "heiken", "heikinashi", "heikenashi", "ashi", "ha"], tradingview={"style": "8"}, premium={"chartType": "8"}),
+		Parameter("chartType", "Hollow candles", ["hollow"], tradingview={"style": "9"}, premium={"chartType": "9"}),
+		Parameter("chartType", "Baseline", ["baseline"], premium={"chartType": "10"}),
+		Parameter("chartType", "HiLo", ["hilo"], premium={"chartType": "12"}),
 		Parameter("log", "Log chart", ["log", "logarithmic"], tradingview={"log": True}, premium={"log": True}, alternativeme={"log": True}, cnnbusiness={"log": True}),
 		Parameter("extended", "Extended hours", ["extended", "post", "pre", "extendedhours"], premium={"extended": True}),
 		Parameter("wide", "Wide chart", ["wide"], tradinglite={"wide": True}, tradingview={"wide": True}, premium={"wide": True}, bookmap={"wide": True}, alternativeme={"wide": True}, cnnbusiness={"wide": True}),
@@ -245,7 +245,7 @@ DEFAULTS = {
 		"indicators": [],
 		"style": [
 			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Premium", name="Dark theme", parameterType="style"),
-			AbstractRequest.find_parameter_by_id("candleStyle", PARAMETERS, "TradingView Premium", name="Candles", parameterType="style")
+			AbstractRequest.find_parameter_by_id("chartType", PARAMETERS, "TradingView Premium", name="Candles", parameterType="style")
 		],
 		"preferences": []
 	},
@@ -266,7 +266,7 @@ DEFAULTS = {
 		"indicators": [],
 		"style": [
 			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView", name="Dark theme", parameterType="style"),
-			AbstractRequest.find_parameter_by_id("candleStyle", PARAMETERS, "TradingView", name="Candles", parameterType="style")
+			AbstractRequest.find_parameter_by_id("chartType", PARAMETERS, "TradingView", name="Candles", parameterType="style")
 		],
 		"preferences": []
 	},

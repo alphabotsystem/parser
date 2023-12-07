@@ -558,7 +558,7 @@ class ChartRequest(AbstractRequest):
 		indicators = ""
 
 		if self.platform in "TradingView":
-			indicators = "\\\\u001f".join(parsed)
+			indicators = "\u001f".join(parsed)
 
 		elif self.platform == "TradingView Premium":
 			lengths = {i: [] for i in range(len(self.indicators))}

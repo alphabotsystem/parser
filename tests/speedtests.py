@@ -13,7 +13,7 @@ set_event_loop(loop)
 async def main():
 	arguments = ["bitmex", "2h"]
 	tickerId = "BTC"
-	requestHandler = ChartRequestHandler(tickerId, ["TradingView", "TradingView Premium", "TradingLite", "Bookmap", "Alternative.me", "CNN Business"])
+	requestHandler = ChartRequestHandler(tickerId, ["TradingView", "TradingView Premium", "TradingLite", "Alternative.me", "CNN Business"])
 
 	tasks = []
 	start = perf_counter()

@@ -10,7 +10,7 @@ QUERY_SORT = [
 	{"rank.quote": {"order": "asc"}},
 	{"rank.length": {"order": "asc"}}
 ]
-STRICT_MATCH = ["TradingLite", "Bookmap", "CoinGecko", "CCXT", "Twelvedata", "Ichibot"]
+STRICT_MATCH = ["TradingLite", "CoinGecko", "CCXT", "Twelvedata", "Ichibot"]
 
 EXCHANGE_SHORTCUTS = {
 	"crypto": {

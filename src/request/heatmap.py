@@ -272,7 +272,7 @@ DEFAULTS = {
 		],
 		"style": [
 			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Stock Heatmap", name="Dark theme", parameterType="style"),
-			AbstractRequest.find_parameter_by_id("dataset", PARAMETERS, "TradingView Stock Heatmap", name="S&P 500", parameterType="style")
+			AbstractRequest.find_parameter_by_id("dataset", PARAMETERS, "TradingView Stock Heatmap", name="S&P 500 INDEX", parameterType="style")
 		],
 		"preferences": []
 	},
@@ -325,7 +325,7 @@ class HeatmapRequestHandler(AbstractRequestHandler):
 				if theme is None:
 					request.styles.append(AbstractRequest.find_parameter_by_id("theme", PARAMETERS, platform, name="Dark theme", parameterType="style"))
 				if _type is None:
-					request.styles.append(AbstractRequest.find_parameter_by_id("dataset", PARAMETERS, platform, name="S&P 500", parameterType="style"))
+					request.styles.append(AbstractRequest.find_parameter_by_id("dataset", PARAMETERS, platform, name="S&P 500 INDEX", parameterType="style"))
 			elif platform == "TradingView Crypto Heatmap":
 				size = preferences.get("size")
 				group = preferences.get("group")

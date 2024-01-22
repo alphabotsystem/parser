@@ -234,7 +234,7 @@ DEFAULTS = {
 			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingLite", name="dark theme", parameterType="style")
 		],
 		"preferences": [
-			AbstractRequest.find_parameter_by_id("heatmapIntensity", PARAMETERS, "TradingLite", name="Normal heatmap intensity", parameterType="preferences")
+			AbstractRequest.find_parameter_by_id("heatmapIntensity", PARAMETERS, "TradingLite", name="normal heatmap intensity", parameterType="preferences")
 		]
 	},
 	"TradingView Premium": {

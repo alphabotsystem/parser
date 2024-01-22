@@ -51,7 +51,7 @@ PARAMETERS = {
 		Parameter(525949, "1-year", ["12", "12m", "12mo", "12month", "12months", "year", "yearly", "1year", "1-year", "1y", "y", "annual", "annually"], premium="12M", relay="12M"),
 	],
 	"indicators": [
-		Parameter("none", "No indicators", ["none", "noindicators"], tradingview="", premium=""), # Here due to default indicators
+		Parameter("none", "no indicators", ["none", "noindicators"], tradingview="", premium=""), # Here due to default indicators
 		Parameter("accd", "Accumulation/Distribution", ["accd", "ad", "acc", "accumulationdistribution", "accumulation/distribution"], tradingview="STD;Accumulation_Distribution", premium="Accumulation/Distribution"),
 		Parameter("accumulationswingindex", "Accumulation Swing Index", ["accumulationswingindex", "accsi", "asi"], premium="Accumulative+Swing+Index"),
 		Parameter("adl", "Advance/Decline Line", ["adl", "advance/declineline"], tradingview="STD;Advance%1Decline%1Line"),
@@ -175,32 +175,32 @@ PARAMETERS = {
 		Parameter("zz", "Zig Zag", ["zz", "zigzag"], tradingview="STD;Zig_Zag", premium="ZigZag")
 	],
 	"style": [
-		Parameter("hidevolume", "No volume", ["hv", "nv", "novol", "hidevolume"], tradingview="1", premium="1"),
-		Parameter("theme", "Light theme", ["light", "white"], tradingview="light", premium="light", relay="light", alternativeme="light", cnnbusiness="light", tradinglite="light"),
-		Parameter("theme", "Dark theme", ["dark", "black"], tradingview="dark", premium="dark", relay="dark", alternativeme="dark", cnnbusiness="dark", tradinglite="dark"),
-		Parameter("chartType", "Bars", ["bars", "bar"], tradingview="0"),
-		Parameter("chartType", "Candles", ["candles", "candle", "candlestick"], tradingview="1", premium="1"),
-		Parameter("chartType", "Line", ["line"], tradingview="2", premium="2"),
-		Parameter("chartType", "Area", ["area"], tradingview="3", premium="3"),
-		Parameter("chartType", "Renko", ["renko"], tradingview="4"),
-		Parameter("chartType", "Kagi", ["kagi"], tradingview="5"),
-		Parameter("chartType", "Point&Figure", ["point", "figure", "pf", "paf", "point&figure"], tradingview="6"),
-		Parameter("chartType", "Line break", ["break", "linebreak", "lb"], tradingview="7"),
-		Parameter("chartType", "Heikin ashi", ["heikin", "heiken", "heikinashi", "heikenashi", "ashi", "ha"], tradingview="8", premium="8"),
-		Parameter("chartType", "Hollow candles", ["hollow"], tradingview="9", premium="9"),
-		Parameter("chartType", "Baseline", ["baseline"], premium="10"),
-		Parameter("chartType", "HiLo", ["hilo"], premium="12"),
-		Parameter("log", "Log chart", ["log", "logarithmic"], tradingview=True, premium=True, alternativeme=True, cnnbusiness=True),
-		Parameter("extended", "Extended hours", ["extended", "post", "pre", "extendedhours"], premium=True),
-		Parameter("wide", "Wide chart", ["wide"], tradinglite=True, tradingview=True, premium=True, alternativeme=True, cnnbusiness=True),
+		Parameter("hidevolume", "no volume", ["hv", "nv", "novol", "hidevolume"], tradingview="1", premium="1"),
+		Parameter("theme", "light theme", ["light", "white"], tradingview="light", premium="light", relay="light", alternativeme="light", cnnbusiness="light", tradinglite="light"),
+		Parameter("theme", "dark theme", ["dark", "black"], tradingview="dark", premium="dark", relay="dark", alternativeme="dark", cnnbusiness="dark", tradinglite="dark"),
+		Parameter("chartType", "bars", ["bars", "bar"], tradingview="0"),
+		Parameter("chartType", "candles", ["candles", "candle", "candlestick"], tradingview="1", premium="1"),
+		Parameter("chartType", "line", ["line"], tradingview="2", premium="2"),
+		Parameter("chartType", "area", ["area"], tradingview="3", premium="3"),
+		Parameter("chartType", "renko", ["renko"], tradingview="4"),
+		Parameter("chartType", "kagi", ["kagi"], tradingview="5"),
+		Parameter("chartType", "point & figure", ["point", "figure", "pf", "paf", "point&figure"], tradingview="6"),
+		Parameter("chartType", "line break", ["break", "linebreak", "lb"], tradingview="7"),
+		Parameter("chartType", "heikin ashi", ["heikin", "heiken", "heikinashi", "heikenashi", "ashi", "ha"], tradingview="8", premium="8"),
+		Parameter("chartType", "hollow candles", ["hollow"], tradingview="9", premium="9"),
+		Parameter("chartType", "baseline", ["baseline"], premium="10"),
+		Parameter("chartType", "hiLo", ["hilo"], premium="12"),
+		Parameter("log", "log chart", ["log", "logarithmic"], tradingview=True, premium=True, alternativeme=True, cnnbusiness=True),
+		Parameter("extended", "extended hours", ["extended", "post", "pre", "extendedhours"], premium=True),
+		Parameter("wide", "wide chart", ["wide"], tradinglite=True, tradingview=True, premium=True, alternativeme=True, cnnbusiness=True),
 	],
 	"preferences": [
-		Parameter("heatmapIntensity", "Whales heatmap intensity", ["whale", "whales"], tradinglite=(50,100)),
-		Parameter("heatmapIntensity", "Low heatmap intensity", ["low"], tradinglite=(10,100)),
-		Parameter("heatmapIntensity", "Normal heatmap intensity", ["normal"], tradinglite=(0,85)),
-		Parameter("heatmapIntensity", "Medium heatmap intensity", ["medium", "med"], tradinglite=(0,62)),
-		Parameter("heatmapIntensity", "High heatmap intensity", ["high"], tradinglite=(0,39)),
-		Parameter("heatmapIntensity", "Crazy heatmap intensity", ["crazy"], tradinglite=(0,16)),
+		Parameter("heatmapIntensity", "whales heatmap intensity", ["whale", "whales"], tradinglite=(50,100)),
+		Parameter("heatmapIntensity", "low heatmap intensity", ["low"], tradinglite=(10,100)),
+		Parameter("heatmapIntensity", "normal heatmap intensity", ["normal"], tradinglite=(0,85)),
+		Parameter("heatmapIntensity", "medium heatmap intensity", ["medium", "med"], tradinglite=(0,62)),
+		Parameter("heatmapIntensity", "high heatmap intensity", ["high"], tradinglite=(0,39)),
+		Parameter("heatmapIntensity", "crazy heatmap intensity", ["crazy"], tradinglite=(0,16)),
 		Parameter("forcePlatform", "request chart on TradingLite", ["tl", "tradinglite"], tradinglite=True),
 		Parameter("forcePlatform", "request chart on TradingView", ["tv", "tradingview"], tradingview=True),
 		Parameter("forcePlatform", "request chart on TradingView Premium", ["tv", "tradingview", "prem", "premium", "tvp", "tradingviewpremium"], premium=True),
@@ -231,7 +231,7 @@ DEFAULTS = {
 		],
 		"indicators": [],
 		"style": [
-			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingLite", name="Dark theme", parameterType="style")
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingLite", name="dark theme", parameterType="style")
 		],
 		"preferences": [
 			AbstractRequest.find_parameter_by_id("heatmapIntensity", PARAMETERS, "TradingLite", name="Normal heatmap intensity", parameterType="preferences")
@@ -243,8 +243,8 @@ DEFAULTS = {
 		],
 		"indicators": [],
 		"style": [
-			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Premium", name="Dark theme", parameterType="style"),
-			AbstractRequest.find_parameter_by_id("chartType", PARAMETERS, "TradingView Premium", name="Candles", parameterType="style")
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Premium", name="dark theme", parameterType="style"),
+			AbstractRequest.find_parameter_by_id("chartType", PARAMETERS, "TradingView Premium", name="candles", parameterType="style")
 		],
 		"preferences": []
 	},
@@ -254,7 +254,7 @@ DEFAULTS = {
 		],
 		"indicators": [],
 		"style": [
-			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Relay", name="Dark theme", parameterType="style")
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView Relay", name="dark theme", parameterType="style")
 		],
 		"preferences": []
 	},
@@ -264,8 +264,8 @@ DEFAULTS = {
 		],
 		"indicators": [],
 		"style": [
-			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView", name="Dark theme", parameterType="style"),
-			AbstractRequest.find_parameter_by_id("chartType", PARAMETERS, "TradingView", name="Candles", parameterType="style")
+			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingView", name="dark theme", parameterType="style"),
+			AbstractRequest.find_parameter_by_id("chartType", PARAMETERS, "TradingView", name="candles", parameterType="style")
 		],
 		"preferences": []
 	}

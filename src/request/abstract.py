@@ -114,7 +114,7 @@ class AbstractRequest(object):
 			for parameter in params[t]:
 				if parameter.supports(platform) and _id == parameter.id and (name is None or parameter.name == name):
 					return parameter
-		return None
+		raise ValueError(f"Parameter with id `{_id}`, name `{name}` and type `{parameterType}` is not supported on {platform}.")
 
 	@staticmethod
 	def find_parameter_by_trigger(trigger, params, platform, parameterType=None):
@@ -135,10 +135,9 @@ class AbstractRequest(object):
 		self.errors.insert(0, error)
 
 	def prepare_styles(self):
-		parsed = [e.parsed[self.platform] for e in self.styles]
 		styles = {}
-		for e in parsed:
-			styles.update(e)
+		for e in self.styles:
+			styles[e.id] = e.parsed[self.platform]
 		return styles
 
 	def prepare_preferences(self):

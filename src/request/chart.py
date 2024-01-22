@@ -175,24 +175,24 @@ PARAMETERS = {
 		Parameter("zz", "Zig Zag", ["zz", "zigzag"], tradingview="STD;Zig_Zag", premium="ZigZag")
 	],
 	"style": [
-		Parameter("nv", "No volume", ["hv", "nv", "novol"], tradingview={"hidevolume": "1"}, premium={"hidevolume": "1"}),
-		Parameter("theme", "Light theme", ["light", "white"], tradingview={"theme": "light"}, premium={"theme": "light"}, relay={"theme": "light"}, alternativeme={"theme": "light"}, cnnbusiness={"theme": "light"}, tradinglite={"theme": "light"}),
-		Parameter("theme", "Dark theme", ["dark", "black"], tradingview={"theme": "dark"}, premium={"theme": "dark"}, relay={"theme": "dark"}, alternativeme={"theme": "dark"}, cnnbusiness={"theme": "dark"}, tradinglite={"theme": "dark"}),
-		Parameter("chartType", "Bars", ["bars", "bar"], tradingview={"style": "0"}),
-		Parameter("chartType", "Candles", ["candles", "candle", "candlestick"], tradingview={"style": "1"}, premium={"chartType": "1"}),
-		Parameter("chartType", "Line", ["line"], tradingview={"style": "2"}, premium={"chartType": "2"}),
-		Parameter("chartType", "Area", ["area"], tradingview={"style": "3"}, premium={"chartType": "3"}),
-		Parameter("chartType", "Renko", ["renko"], tradingview={"style": "4"}),
-		Parameter("chartType", "Kagi", ["kagi"], tradingview={"style": "5"}),
-		Parameter("chartType", "Point&Figure", ["point", "figure", "pf", "paf", "point&figure"], tradingview={"style": "6"}),
-		Parameter("chartType", "Line break", ["break", "linebreak", "lb"], tradingview={"style": "7"}),
-		Parameter("chartType", "Heikin ashi", ["heikin", "heiken", "heikinashi", "heikenashi", "ashi", "ha"], tradingview={"style": "8"}, premium={"chartType": "8"}),
-		Parameter("chartType", "Hollow candles", ["hollow"], tradingview={"style": "9"}, premium={"chartType": "9"}),
-		Parameter("chartType", "Baseline", ["baseline"], premium={"chartType": "10"}),
-		Parameter("chartType", "HiLo", ["hilo"], premium={"chartType": "12"}),
-		Parameter("log", "Log chart", ["log", "logarithmic"], tradingview={"log": True}, premium={"log": True}, alternativeme={"log": True}, cnnbusiness={"log": True}),
-		Parameter("extended", "Extended hours", ["extended", "post", "pre", "extendedhours"], premium={"extended": True}),
-		Parameter("wide", "Wide chart", ["wide"], tradinglite={"wide": True}, tradingview={"wide": True}, premium={"wide": True}, alternativeme={"wide": True}, cnnbusiness={"wide": True}),
+		Parameter("hidevolume", "No volume", ["hv", "nv", "novol", "hidevolume"], tradingview="1", premium="1"),
+		Parameter("theme", "Light theme", ["light", "white"], tradingview="light", premium="light", relay="light", alternativeme="light", cnnbusiness="light", tradinglite="light"),
+		Parameter("theme", "Dark theme", ["dark", "black"], tradingview="dark", premium="dark", relay="dark", alternativeme="dark", cnnbusiness="dark", tradinglite="dark"),
+		Parameter("chartType", "Bars", ["bars", "bar"], tradingview="0"),
+		Parameter("chartType", "Candles", ["candles", "candle", "candlestick"], tradingview="1", premium="1"),
+		Parameter("chartType", "Line", ["line"], tradingview="2", premium="2"),
+		Parameter("chartType", "Area", ["area"], tradingview="3", premium="3"),
+		Parameter("chartType", "Renko", ["renko"], tradingview="4"),
+		Parameter("chartType", "Kagi", ["kagi"], tradingview="5"),
+		Parameter("chartType", "Point&Figure", ["point", "figure", "pf", "paf", "point&figure"], tradingview="6"),
+		Parameter("chartType", "Line break", ["break", "linebreak", "lb"], tradingview="7"),
+		Parameter("chartType", "Heikin ashi", ["heikin", "heiken", "heikinashi", "heikenashi", "ashi", "ha"], tradingview="8", premium="8"),
+		Parameter("chartType", "Hollow candles", ["hollow"], tradingview="9", premium="9"),
+		Parameter("chartType", "Baseline", ["baseline"], premium="10"),
+		Parameter("chartType", "HiLo", ["hilo"], premium="12"),
+		Parameter("log", "Log chart", ["log", "logarithmic"], tradingview=True, premium=True, alternativeme=True, cnnbusiness=True),
+		Parameter("extended", "Extended hours", ["extended", "post", "pre", "extendedhours"], premium=True),
+		Parameter("wide", "Wide chart", ["wide"], tradinglite=True, tradingview=True, premium=True, alternativeme=True, cnnbusiness=True),
 	],
 	"preferences": [
 		Parameter("heatmapIntensity", "Whales heatmap intensity", ["whale", "whales"], tradinglite=(50,100)),
@@ -330,7 +330,7 @@ class ChartRequestHandler(AbstractRequestHandler):
 				pass
 
 			elif platform == "TradingView":
-				if styles["style"] == "6" and styles.get("log", False):
+				if styles["chartType"] == "6" and styles.get("log", False):
 					request.set_error("Point & Figure chart can't be viewed in log scale.", isFatal=True)
 
 

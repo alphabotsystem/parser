@@ -39,10 +39,11 @@ class ChartParameter(AbstractParameter):
 		self.dynamic = dynamic
 
 class HeatmapParameter(AbstractParameter):
-	def __init__(self, id, name, parsablePhrases, tradingViewStockHeatmap=None, tradingViewCryptoHeatmap=None):
+	def __init__(self, id, name, parsablePhrases, tradingViewStockHeatmap=None, tradingViewEtfHeatmap=None, tradingViewCryptoHeatmap=None):
 		super().__init__(id, name, parsablePhrases)
 		self.parsed = {
 			"TradingView Stock Heatmap": tradingViewStockHeatmap,
+			"TradingView ETF Heatmap": tradingViewEtfHeatmap,
 			"TradingView Crypto Heatmap": tradingViewCryptoHeatmap
 		}
 

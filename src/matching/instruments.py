@@ -312,6 +312,7 @@ async def find_listings(ticker, platform):
 	if ticker["tag"] == 1:
 		async with ClientSession() as session:
 			url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={ticker['id']}&hl=0&exchange=&lang=en&search_type=undefined&domain=production&sort_by_country=US"
+			print(platform, url)
 			async with session.get(url, timeout=2) as response:
 				response = await response.json()
 				for result in response:

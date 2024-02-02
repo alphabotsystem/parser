@@ -315,7 +315,7 @@ async def find_listings(ticker, platform):
 			print(platform, url)
 			async with session.get(url, timeout=2) as response:
 				response = await response.json()
-				for result in response:
+				for result in response["symbols"]:
 					if result["symbol"] == ticker["symbol"]:
 						if result.get("currency_code", "USD") in sources:
 							sources[result.get("currency_code", "USD")].add(result["exchange"].lower())

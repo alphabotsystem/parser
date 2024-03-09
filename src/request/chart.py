@@ -204,8 +204,8 @@ PARAMETERS = {
 		Parameter("forcePlatform", "request chart on TradingLite", ["tl", "tradinglite"], tradinglite=True),
 		Parameter("forcePlatform", "request chart on TradingView", ["tv", "tradingview"], tradingview=True),
 		Parameter("forcePlatform", "request chart on TradingView Premium", ["tv", "tradingview", "prem", "premium", "tvp", "tradingviewpremium"], premium=True),
-		Parameter("forcePlatform", "request chart on Alternative.me", ["am", "alternativeme"], alternativeme=True),
-		Parameter("forcePlatform", "request chart on CNN Business", ["cnn", "cnnbusiness"], cnnbusiness=True),
+		Parameter("forcePlatform", "request chart on Alternative.me", ["am", "alternativeme", "crypto"], alternativeme=True),
+		Parameter("forcePlatform", "request chart on CNN Business", ["cnn", "cnnbusiness", "stocks"], cnnbusiness=True),
 	]
 }
 DEFAULTS = {

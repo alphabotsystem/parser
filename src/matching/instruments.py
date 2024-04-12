@@ -4,6 +4,7 @@ from asyncio import gather
 from aiohttp import ClientSession
 from lark import Token
 from traceback import format_exc
+from cachetools import TTLCache
 from elasticsearch import AsyncElasticsearch
 from helpers.constants import ELASTIC_ASSET_INDEX, ELASTIC_EXCHANGE_INDEX
 from helpers.constants import QUERY_SORT, STRICT_MATCH, EXCHANGE_TO_TRADINGVIEW, FREE_TRADINGVIEW_SOURCES
@@ -15,6 +16,8 @@ elasticsearch = AsyncElasticsearch(
 	cloud_id=environ["ELASTICSEARCH_CLOUD_ID"],
 	api_key=environ["ELASTICSEARCH_API_KEY"],
 )
+
+tradingviewRequestCache = TTLCache(maxsize=1024, ttl=1800)
 
 
 async def match_ticker(tickerId, exchangeId, platform, assetClass):
@@ -210,67 +213,62 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 		if ":" in symbol and exchange == "":
 			exchange, symbol = symbol.split(":", 1)
 
-		async with ClientSession() as session:
-			url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={symbol}&hl=0&exchange={exchange}&lang=en&search_type=undefined&domain=production&sort_by_country=US"
-			print(platform, url)
-			async with session.get(url, timeout=2) as response:
-				responseMimeType = response.headers.get("Content-Type", "")
-				if "text/html" in responseMimeType:
-					print(await response.text())
-					raise Exception("TradingView API returned HTML response.")
-				response = (await response.json())["symbols"]
-				if len(response) == 0:
-					raise TokenNotFoundException("Requested ticker could not be found.")
-				freeSource = None
-				if platform == "TradingView" and exchange == "":
-					freeSource = next((e for e in response if response[0]["symbol"] == e["symbol"] and e["exchange"] in FREE_TRADINGVIEW_SOURCES), None)
+		url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={symbol}&hl=0&exchange={exchange}&lang=en&search_type=undefined&domain=production&sort_by_country=US"
+		print(platform, url)
+		response = await make_tradingview_request(url)
 
-				if freeSource is not None:
-					instrument = {
-						"_id": freeSource["symbol"],
-						"id": freeSource["symbol"],
-						"name": freeSource["description"],
-						"base": freeSource["symbol"].removesuffix(freeSource.get("currency_code", "")),
-						"quote": freeSource.get("currency_code", "USD"),
-						"tag": 1,
-						"symbol": instrument["symbol"],
-						"exchange": {"id": freeSource.get("prefix", freeSource["exchange"]).lower()},
-						"metadata": {
-							"type": "Unknown",
-							"rank": MAXSIZE,
-						}
-					}
-				elif "contracts" in response[0]:
-					instrument = {
-						"_id": response[0]["contracts"][0]["symbol"],
-						"id": response[0]["contracts"][0]["symbol"],
-						"name": response[0]["description"],
-						"base": response[0]["contracts"][0]["symbol"].removesuffix(response[0].get("currency_code", "")),
-						"quote": response[0].get("currency_code", "USD"),
-						"tag": 1,
-						"symbol": instrument["symbol"],
-						"exchange": {"id": response[0]["contracts"][0].get("prefix", response[0]["exchange"]).lower()},
-						"metadata": {
-							"type": "Unknown",
-							"rank": MAXSIZE,
-						}
-					}
-				else:
-					instrument = {
-						"_id": response[0]["symbol"],
-						"id": response[0]["symbol"],
-						"name": response[0]["description"],
-						"base": response[0]["symbol"].removesuffix(response[0].get("currency_code", "")),
-						"quote": response[0].get("currency_code", "USD"),
-						"tag": 1,
-						"symbol": instrument["symbol"],
-						"exchange": {"id": response[0].get("prefix", response[0]["exchange"]).lower()},
-						"metadata": {
-							"type": "Unknown",
-							"rank": MAXSIZE,
-						}
-					}
-				instrument["id"] = f"{instrument['exchange']['id'].upper()}:{instrument['id']}"
+		if len(response) == 0:
+			raise TokenNotFoundException("Requested ticker could not be found.")
+		freeSource = None
+		if platform == "TradingView" and exchange == "":
+			freeSource = next((e for e in response if response[0]["symbol"] == e["symbol"] and e["exchange"] in FREE_TRADINGVIEW_SOURCES), None)
+
+		if freeSource is not None:
+			instrument = {
+				"_id": freeSource["symbol"],
+				"id": freeSource["symbol"],
+				"name": freeSource["description"],
+				"base": freeSource["symbol"].removesuffix(freeSource.get("currency_code", "")),
+				"quote": freeSource.get("currency_code", "USD"),
+				"tag": 1,
+				"symbol": instrument["symbol"],
+				"exchange": {"id": freeSource.get("prefix", freeSource["exchange"]).lower()},
+				"metadata": {
+					"type": "Unknown",
+					"rank": MAXSIZE,
+				}
+			}
+		elif "contracts" in response[0]:
+			instrument = {
+				"_id": response[0]["contracts"][0]["symbol"],
+				"id": response[0]["contracts"][0]["symbol"],
+				"name": response[0]["description"],
+				"base": response[0]["contracts"][0]["symbol"].removesuffix(response[0].get("currency_code", "")),
+				"quote": response[0].get("currency_code", "USD"),
+				"tag": 1,
+				"symbol": instrument["symbol"],
+				"exchange": {"id": response[0]["contracts"][0].get("prefix", response[0]["exchange"]).lower()},
+				"metadata": {
+					"type": "Unknown",
+					"rank": MAXSIZE,
+				}
+			}
+		else:
+			instrument = {
+				"_id": response[0]["symbol"],
+				"id": response[0]["symbol"],
+				"name": response[0]["description"],
+				"base": response[0]["symbol"].removesuffix(response[0].get("currency_code", "")),
+				"quote": response[0].get("currency_code", "USD"),
+				"tag": 1,
+				"symbol": instrument["symbol"],
+				"exchange": {"id": response[0].get("prefix", response[0]["exchange"]).lower()},
+				"metadata": {
+					"type": "Unknown",
+					"rank": MAXSIZE,
+				}
+			}
+		instrument["id"] = f"{instrument['exchange']['id'].upper()}:{instrument['id']}"
 
 	return instrument
 
@@ -314,17 +312,15 @@ async def find_listings(ticker, platform):
 			sources[instrument["_source"]["quote"]] = {instrument["_source"]["market"]["source"]}
 
 	if ticker["tag"] == 1:
-		async with ClientSession() as session:
-			url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={ticker['id']}&hl=0&exchange=&lang=en&search_type=undefined&domain=production&sort_by_country=US"
-			print(platform, url)
-			async with session.get(url, timeout=2) as response:
-				response = await response.json()
-				for result in response["symbols"]:
-					if result["symbol"] == ticker["symbol"]:
-						if result.get("currency_code", "USD") in sources:
-							sources[result.get("currency_code", "USD")].add(result["exchange"].lower())
-						else:
-							sources[result.get("currency_code", "USD")] = {result["exchange"].lower()}
+		url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={ticker['id']}&hl=0&exchange=&lang=en&search_type=undefined&domain=production&sort_by_country=US"
+		print(platform, url)
+		response = await make_tradingview_request(url)
+		for result in response:
+			if result["symbol"] == ticker["symbol"]:
+				if result.get("currency_code", "USD") in sources:
+					sources[result.get("currency_code", "USD")].add(result["exchange"].lower())
+				else:
+					sources[result.get("currency_code", "USD")] = {result["exchange"].lower()}
 
 	response, total = [], 0
 	for quote in sources:
@@ -384,3 +380,20 @@ async def autocomplete_venues(tickerId, platforms):
 					venues.append(venue)
 
 	return venues
+
+async def make_tradingview_request(url):
+	if url in tradingviewRequestCache:
+		print("Cache hit")
+		return tradingviewRequestCache[url]
+
+	async with ClientSession() as session:
+		async with session.get(url, timeout=2) as response:
+			responseMimeType = response.headers.get("Content-Type", "")
+			if "text/html" in responseMimeType:
+				print(await response.text())
+				raise Exception("TradingView API returned HTML response.")
+
+			response = await response.json()
+			tradingviewRequestCache[url] = response["symbols"]
+
+			return response["symbols"]

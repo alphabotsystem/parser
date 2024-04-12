@@ -6,3 +6,4 @@ orjson>=3.8.1
 lark-parser>=0.12.0
 elasticsearch[async]>=8.4.3
 aiohttp>=3.8.3
+cachetools>=5.3.3

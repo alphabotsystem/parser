@@ -17,7 +17,7 @@ elasticsearch = AsyncElasticsearch(
 	api_key=environ["ELASTICSEARCH_API_KEY"],
 )
 
-tradingviewRequestCache = TTLCache(maxsize=1024, ttl=1800)
+tradingviewRequestCache = TTLCache(maxsize=1024, ttl=86400)
 
 
 async def match_ticker(tickerId, exchangeId, platform, assetClass):
@@ -213,9 +213,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 		if ":" in symbol and exchange == "":
 			exchange, symbol = symbol.split(":", 1)
 
-		url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={symbol}&hl=0&exchange={exchange}&lang=en&search_type=undefined&domain=production&sort_by_country=US"
-		print(platform, url)
-		response = await make_tradingview_request(url)
+		response = await make_tradingview_request(symbol, exchange)
 
 		if len(response) == 0:
 			raise TokenNotFoundException("Requested ticker could not be found.")
@@ -312,9 +310,7 @@ async def find_listings(ticker, platform):
 			sources[instrument["_source"]["quote"]] = {instrument["_source"]["market"]["source"]}
 
 	if ticker["tag"] == 1:
-		url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={ticker['id']}&hl=0&exchange=&lang=en&search_type=undefined&domain=production&sort_by_country=US"
-		print(platform, url)
-		response = await make_tradingview_request(url)
+		response = await make_tradingview_request(ticker['id'])
 		for result in response:
 			if result["symbol"] == ticker["symbol"]:
 				if result.get("currency_code", "USD") in sources:
@@ -381,7 +377,10 @@ async def autocomplete_venues(tickerId, platforms):
 
 	return venues
 
-async def make_tradingview_request(url):
+async def make_tradingview_request(symbol, exchange=""):
+	url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={symbol}&hl=0&exchange={exchange}&lang=en&search_type=undefined&domain=production&sort_by_country=US"
+	print(platform, url)
+
 	if url in tradingviewRequestCache:
 		print("Cache hit")
 		return tradingviewRequestCache[url]
@@ -394,6 +393,8 @@ async def make_tradingview_request(url):
 				raise Exception("TradingView API returned HTML response.")
 
 			response = await response.json()
-			tradingviewRequestCache[url] = response["symbols"]
+
+			if all(not char.isdigit() for char in symbol):
+				tradingviewRequestCache[url] = response["symbols"]
 
 			return response["symbols"]

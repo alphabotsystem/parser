@@ -17,7 +17,7 @@ elasticsearch = AsyncElasticsearch(
 	api_key=environ["ELASTICSEARCH_API_KEY"],
 )
 
-tradingviewRequestCache = TTLCache(maxsize=1024, ttl=86400)
+tradingviewRequestCache = TTLCache(maxsize=65536, ttl=86400)
 
 
 async def match_ticker(tickerId, exchangeId, platform, assetClass):

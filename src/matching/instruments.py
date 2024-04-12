@@ -214,6 +214,10 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 			url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={symbol}&hl=0&exchange={exchange}&lang=en&search_type=undefined&domain=production&sort_by_country=US"
 			print(platform, url)
 			async with session.get(url, timeout=2) as response:
+				responseMimeType = response.headers.get("Content-Type", "")
+				if "text/html" in responseMimeType:
+					print(await response.text())
+					raise Exception("TradingView API returned HTML response.")
 				response = (await response.json())["symbols"]
 				if len(response) == 0:
 					raise TokenNotFoundException("Requested ticker could not be found.")

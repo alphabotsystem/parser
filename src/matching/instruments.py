@@ -379,7 +379,7 @@ async def autocomplete_venues(tickerId, platforms):
 
 async def make_tradingview_request(symbol, exchange=""):
 	url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={symbol}&hl=0&exchange={exchange}&lang=en&search_type=undefined&domain=production&sort_by_country=US"
-	print(platform, url)
+	print(url)
 
 	if url in tradingviewRequestCache:
 		print("Cache hit")

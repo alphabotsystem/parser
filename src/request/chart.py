@@ -192,7 +192,7 @@ PARAMETERS = {
 		Parameter("chartType", "hiLo", ["hilo"], premium="12"),
 		Parameter("log", "log chart", ["log", "logarithmic"], tradingview=True, premium=True, alternativeme=True, cnnbusiness=True),
 		Parameter("extended", "extended hours", ["extended", "post", "pre", "extendedhours"], premium=True),
-		Parameter("wide", "wide chart", ["wide"], tradinglite=True, tradingview=True, premium=True, alternativeme=True, cnnbusiness=True),
+		Parameter("wide", "wide chart", ["wide"], tradinglite=True, tradingview=True, premium=True, relay=True, alternativeme=True, cnnbusiness=True),
 	],
 	"preferences": [
 		Parameter("heatmapIntensity", "whales heatmap intensity", ["whale", "whales"], tradinglite=(50,100)),

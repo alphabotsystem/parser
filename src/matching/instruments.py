@@ -378,6 +378,9 @@ async def autocomplete_venues(tickerId, platforms):
 	return venues
 
 async def make_tradingview_request(symbol, exchange=""):
+	headers = {
+		"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+	}
 	url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={symbol}&hl=0&exchange={exchange}&lang=en&search_type=undefined&domain=production&sort_by_country=US"
 	print(url)
 
@@ -386,7 +389,7 @@ async def make_tradingview_request(symbol, exchange=""):
 		return tradingviewRequestCache[url]
 
 	async with ClientSession() as session:
-		async with session.get(url, timeout=2) as response:
+		async with session.get(url, headers=headers, timeout=2) as response:
 			responseMimeType = response.headers.get("Content-Type", "")
 			if "text/html" in responseMimeType:
 				print(await response.text())

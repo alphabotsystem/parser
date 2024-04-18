@@ -401,6 +401,8 @@ async def make_tradingview_request(symbol, exchange=""):
 		async with session.get(url, headers=headers, timeout=2) as response:
 			responseMimeType = response.headers.get("Content-Type", "")
 			if "text/html" in responseMimeType:
+				# print header and body
+				print(response.headers)
 				print(await response.text())
 				raise Exception("TradingView API returned HTML response.")
 

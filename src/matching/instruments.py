@@ -379,6 +379,15 @@ async def autocomplete_venues(tickerId, platforms):
 
 async def make_tradingview_request(symbol, exchange=""):
 	headers = {
+		"Accept": "*/*",
+		"Accept-Encoding": "gzip, deflate, br",
+		"Accept-Language": "em-GB,en-US;q=0.9,en;q=0.8",
+		"Connection": "keep-alive",
+		"Origin": "https://www.tradingview.com",
+		"Referer": "https://www.tradingview.com/",
+		"Sec-Fetch-Dest": "empty",
+		"Sec-Fetch-Mode": "cors",
+		"Sec-Fetch-Site": "same-site",
 		"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 	}
 	url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={symbol}&hl=0&exchange={exchange}&lang=en&search_type=undefined&domain=production&sort_by_country=US"

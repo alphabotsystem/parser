@@ -215,8 +215,8 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 				symbol, tag = symbol.split(":")
 			elif tickerId.count(":") == 2:
 				exchange, symbol, tag = symbol.split(":")
-			if not tag.isnumeric():
-				symbol = f"{symbol}:{tag}"
+			if exchange == "" and not tag.isnumeric():
+				exchange, symbol = symbol, tag
 
 		response = await make_tradingview_request(symbol, exchange)
 

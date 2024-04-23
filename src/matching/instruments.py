@@ -430,12 +430,12 @@ async def make_tradingview_request(instrument, exchange=""):
 			data = response["symbols"]
 
 			# TEMPORARY
-			for s in data:
-				for t in s.get("typespecs", []):
-					if t not in typeMapper:
-						print(print(s))
-			temp = [d for d in data if "typespecs" in d and all(typeMapper.get(t) not in instrument["type"] for t in d["typespecs"])]
-			print(f"Omitting {len(temp)}:\n{temp}")
+			# for s in data:
+			# 	for t in s.get("typespecs", []):
+			# 		if t not in typeMapper:
+			# 			print(print(s))
+			# temp = [d for d in data if "typespecs" in d and all(typeMapper.get(t) not in instrument["type"] for t in d["typespecs"])]
+			# print(f"Omitting {len(temp)}:\n{temp}")
 			# TEMPORARY
 
 			# data = [d for d in data if "typespecs" not in d or any(typeMapper.get(t["type"]) in instrument["type"] for t in d["typespecs"])]

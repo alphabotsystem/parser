@@ -440,7 +440,7 @@ async def make_tradingview_request(instrument, exchange=""):
 
 			# data = [d for d in data if "typespecs" not in d or any(typeMapper.get(t["type"]) in instrument["type"] for t in d["typespecs"])]
 
-			if all(not char.isdigit() for char in instrument['symbol']):
+			if all(not char.isdigit() for char in instrument['id']):
 				tradingviewRequestCache[url] = data
 
 			return data

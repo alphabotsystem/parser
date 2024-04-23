@@ -202,6 +202,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 
 	if platform in ["TradingView", "TradingView Premium", "TradingView Relay"]:
 		symbol = instrument["id"]
+		tag = instrument["tag"]
 		exchange = EXCHANGE_TO_TRADINGVIEW.get(instrument["exchange"].get("id"), instrument["exchange"].get("id", "").replace("2", "").replace("3", "").replace("4", "").replace("5", "").upper())
 		if exchange == "FOREX": exchange = ""
 		if instrument["exchange"].get("id") in ["binanceusdm", "binancecoinm"] and not symbol.endswith("PERP"):
@@ -218,7 +219,10 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 			if exchange == "" and not tag.isnumeric():
 				exchange, symbol = symbol, tag
 
-		response = await make_tradingview_request(symbol, exchange)
+		instrument["id"] = symbol
+		instrument["exchange"]["id"] = exchange
+		instrument["tag"] = int(tag) if tag.isnumeric() else 1
+		response = await make_tradingview_request(instrument, exchange)
 
 		if len(response) == 0:
 			raise TokenNotFoundException("Requested ticker could not be found.")
@@ -382,7 +386,17 @@ async def autocomplete_venues(tickerId, platforms):
 
 	return venues
 
-async def make_tradingview_request(symbol, exchange=""):
+async def make_tradingview_request(instrument, exchange=""):
+	typeMapper = {
+		"crypto": "Crypto",
+		"defi": "Crypto",
+		"oracle": "Crypto",
+		"common": "Common Stock",
+		"etf": "ETF",
+		"etn": "Exchange-Traded Note",
+		"cfd": None,
+	}
+
 	headers = {
 		"Accept": "*/*",
 		"Accept-Encoding": "gzip, deflate, br",
@@ -395,7 +409,7 @@ async def make_tradingview_request(symbol, exchange=""):
 		"Sec-Fetch-Site": "same-site",
 		"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 	}
-	url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={symbol}&hl=0&exchange={exchange}&lang=en&search_type=undefined&domain=production&sort_by_country=US"
+	url = f"https://symbol-search.tradingview.com/symbol_search/v3/?text={instrument['id']}&hl=0&exchange={exchange}&lang=en&search_type=undefined&domain=production&sort_by_country=US"
 	print(url)
 
 	if url in tradingviewRequestCache:
@@ -413,7 +427,20 @@ async def make_tradingview_request(symbol, exchange=""):
 
 			response = await response.json()
 
-			if all(not char.isdigit() for char in symbol):
-				tradingviewRequestCache[url] = response["symbols"]
+			data = response["symbols"]
 
-			return response["symbols"]
+			# TEMPORARY
+			for s in data:
+				for t in s.get("typespecs", []):
+					if t["type"] not in typeMapper:
+						print(print(s))
+			temp = [d for d in data if "typespecs" in d and all(typeMapper.get(t["type"]) not in instrument["type"] for t in d["typespecs"])]
+			print(f"Omitting {len(temp)}:\n{temp}")
+			# TEMPORARY
+
+			# data = [d for d in data if "typespecs" not in d or any(typeMapper.get(t["type"]) in instrument["type"] for t in d["typespecs"])]
+
+			if all(not char.isdigit() for char in instrument['symbol']):
+				tradingviewRequestCache[url] = data
+
+			return data

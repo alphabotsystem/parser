@@ -221,7 +221,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 
 		instrument["id"] = symbol
 		instrument["exchange"]["id"] = exchange
-		instrument["tag"] = int(tag) if tag.isnumeric() else 1
+		instrument["tag"] = int(tag) if isinstance(tag, str) and tag.isnumeric() else 1
 		response = await make_tradingview_request(instrument, exchange)
 
 		if len(response) == 0:

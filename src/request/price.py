@@ -10,12 +10,12 @@ from .abstract import AbstractRequestHandler, AbstractRequest
 
 PARAMETERS = {
 	"preferences": [
-		Parameter("prefix", "funding", ["fun", "fund", "funding"], ccxt="FUNDING:"),
-		Parameter("prefix", "open interest", ["oi", "openinterest", "ov", "openvalue"], ccxt="OI:"),
-		Parameter("prefix", "longs/shorts ratio", ["ls", "l/s", "longs/shorts", "long/short"], ccxt="LS:"),
-		Parameter("prefix", "shorts/longs ratio", ["sl", "s/l", "shorts/longs", "short/long"], ccxt="SL:"),
-		Parameter("prefix", "dominance", ["dom", "dominance"], coingecko="DOM:"),
-		Parameter("prefix", "halving", ["halving", "halfing", "halv", "half"], blockchair="HALVING:"),
+		Parameter("suffix", "funding", ["fun", "fund", "funding"], ccxt=".FUNDING"),
+		Parameter("suffix", "open interest", ["oi", "openinterest", "ov", "openvalue"], ccxt=".OI"),
+		Parameter("suffix", "longs/shorts ratio", ["ls", "l/s", "longs/shorts", "long/short"], ccxt=".LS"),
+		Parameter("suffix", "shorts/longs ratio", ["sl", "s/l", "shorts/longs", "short/long"], ccxt=".SL"),
+		Parameter("suffix", "dominance", ["dom", "dominance"], coingecko=".D"),
+		Parameter("suffix", "halving", ["halving", "halfing", "halv", "half"], blockchair="HALVING:"),
 		Parameter("forcePlatform", "request quote on CoinGecko", ["cg", "coingecko"], coingecko=True),
 		Parameter("forcePlatform", "request quote on a crypto exchange", ["cx", "ccxt", "crypto", "exchange"], ccxt=True),
 		Parameter("forcePlatform", "request quote on a stock exchange", ["equities", "equity", "forex", "fx", "metal", "metals", "stock", "stocks", "index"], twelvedata=True),
@@ -137,13 +137,13 @@ class PriceRequest(AbstractRequest):
 
 	async def process_ticker(self, assetClass):
 		preferences = self.prepare_preferences()
-		prefix = preferences.get("prefix")
+		suffix = preferences.get("suffix")
 
-		if prefix in ["FUNDING:", "OI:"]:
+		if suffix in [".FUNDING", ".OI"]:
 			if not self.hasExchange:
 				try: _, self.exchange = await find_exchange("bitmex", self.platform)
 				except: pass
-		elif prefix in ["LS:", "SL:"]:
+		elif suffix in [".LS", ".SL"]:
 			if not self.hasExchange:
 				try: _, self.exchange = await find_exchange("bitfinex", self.platform)
 				except: pass
@@ -162,10 +162,10 @@ class PriceRequest(AbstractRequest):
 		else:
 			self.ticker = updatedTicker
 			self.tickerId = updatedTicker.get("id")
-			if prefix is not None:
-				self.tickerId = prefix + self.tickerId
-				self.ticker["id"] = prefix + self.ticker["id"]
-				self.ticker["symbol"] = prefix + self.ticker["symbol"]
+			if suffix is not None:
+				self.tickerId = self.tickerId + prefix
+				self.ticker["id"] = self.ticker["id"] + prefix
+				self.ticker["symbol"] = self.ticker["symbol"] + prefix
 			self.exchange = updatedTicker.get("exchange")
 
 	def add_parameter(self, argument, type):

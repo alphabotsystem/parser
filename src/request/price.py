@@ -120,7 +120,7 @@ class PriceRequest(AbstractRequest):
 
 		finalOutput = None
 
-		responseMessage, success = await self.add_preferences(argument)
+		responseMessage, success = self.add_preferences(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
@@ -189,13 +189,13 @@ class PriceRequest(AbstractRequest):
 				if isSupported: break
 		return isSupported, parsedParameter, requiresPro
 
-	async def add_timeframe(self, argument): raise NotImplementedError
+	def add_timeframe(self, argument): raise NotImplementedError
 
 	# async def add_exchange(self, argument) -- inherited
 
-	async def add_style(self, argument): raise NotImplementedError
+	def add_style(self, argument): raise NotImplementedError
 
-	# async def add_preferences(self, argument) -- inherited
+	# def add_preferences(self, argument) -- inherited
 
 	def set_default_for(self, t):
 		if t == "preferences":

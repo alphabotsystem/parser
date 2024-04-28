@@ -392,19 +392,19 @@ class ChartRequest(AbstractRequest):
 
 		finalOutput = None
 
-		responseMessage, success = await self.add_timeframe(argument)
+		responseMessage, success = self.add_timeframe(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
-		responseMessage, success = await self.add_indicator(argument)
+		responseMessage, success = self.add_indicator(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
-		responseMessage, success = await self.add_style(argument)
+		responseMessage, success = self.add_style(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
-		responseMessage, success = await self.add_preferences(argument)
+		responseMessage, success = self.add_preferences(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
@@ -412,7 +412,7 @@ class ChartRequest(AbstractRequest):
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
-		responseMessage, success = await self.add_numerical_parameters(argument)
+		responseMessage, success = self.add_numerical_parameters(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
@@ -453,11 +453,11 @@ class ChartRequest(AbstractRequest):
 					requiresPro = "Advanced Charting"
 		return isSupported, parsedParameter, requiresPro
 
-	# async def add_timeframe(self, argument) -- inherited
+	# def add_timeframe(self, argument) -- inherited
 
 	# async def add_exchange(self, argument) -- inherited
 
-	async def add_indicator(self, argument):
+	def add_indicator(self, argument):
 		if argument in ["oscillator", "bands", "band", "ta"]: return None, False
 		length = search("(\d+)$", argument)
 		if length is not None and int(length.group()) > 0: argument = argument[:-len(length.group())]
@@ -477,11 +477,11 @@ class ChartRequest(AbstractRequest):
 			return None, True
 		return None, None
 
-	# async def add_style(self, argument) -- inherited
+	# def add_style(self, argument) -- inherited
 
-	# async def add_preferences(self, argument) -- inherited
+	# def add_preferences(self, argument) -- inherited
 
-	async def add_numerical_parameters(self, argument):
+	def add_numerical_parameters(self, argument):
 		try:
 			numericalParameter = float(argument)
 			if numericalParameter <= 0:

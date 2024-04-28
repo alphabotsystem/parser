@@ -431,15 +431,15 @@ class HeatmapRequest(AbstractRequest):
 
 		finalOutput = None
 
-		responseMessage, success = await self.add_timeframe(argument)
+		responseMessage, success = self.add_timeframe(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
-		responseMessage, success = await self.add_style(argument)
+		responseMessage, success = self.add_style(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
-		responseMessage, success = await self.add_preferences(argument)
+		responseMessage, success = self.add_preferences(argument)
 		if responseMessage is not None: finalOutput = responseMessage
 		elif success: return
 
@@ -461,13 +461,13 @@ class HeatmapRequest(AbstractRequest):
 				if isSupported: break
 		return isSupported, parsedParameter, requiresPro
 
-	# async def add_timeframe(self, argument) -- inherited
+	# def add_timeframe(self, argument) -- inherited
 
 	async def add_exchange(self, argument): raise NotImplementedError
 
-	# async def add_style(self, argument) -- inherited
+	# def add_style(self, argument) -- inherited
 
-	# async def add_preferences(self, argument) -- inherited
+	# def add_preferences(self, argument) -- inherited
 
 	def set_default_for(self, t):
 		if t == "timeframes" and len(self.timeframes) == 0:

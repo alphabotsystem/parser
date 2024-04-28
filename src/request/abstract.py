@@ -63,7 +63,7 @@ class AbstractRequest(object):
 		self.errorIsFatal = False
 		self.couldFail = False
 
-	async def add_timeframe(self, argument):
+	def add_timeframe(self, argument):
 		timeframeSupported, parsedTimeframe, requiresPro = self.add_parameter(argument, "timeframes")
 		if parsedTimeframe is not None and not self.has_parameter(parsedTimeframe.id, self.timeframes):
 			if not timeframeSupported:
@@ -88,7 +88,7 @@ class AbstractRequest(object):
 			return None, True
 		return None, None
 
-	async def add_style(self, argument):
+	def add_style(self, argument):
 		styleSupported, parsedStyle, requiresPro = self.add_parameter(argument, "style")
 		if parsedStyle is not None and not self.has_parameter(parsedStyle.id, self.styles):
 			if not styleSupported:
@@ -98,7 +98,7 @@ class AbstractRequest(object):
 			return None, True
 		return None, None
 
-	async def add_preferences(self, argument):
+	def add_preferences(self, argument):
 		preferenceSupported, parsedPreference, requiresPro = self.add_parameter(argument, "preferences")
 		if parsedPreference is not None and not self.has_parameter(parsedPreference.id, self.preferences):
 			if not preferenceSupported:

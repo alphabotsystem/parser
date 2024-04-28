@@ -174,7 +174,7 @@ class PriceRequest(AbstractRequest):
 		preferences = self.prepare_preferences()
 		if self.tickerId.count(".") == 1 and preferences.get("suffix") is None:
 			self.tickerId, suffix = self.tickerId.split(".")
-			responseMessage, success = self.add_preferences(suffix)
+			responseMessage, success = self.add_preferences(suffix.lower())
 			if responseMessage is not None or not success:
 				self.tickerId += "." + suffix
 

@@ -137,7 +137,10 @@ class PriceRequest(AbstractRequest):
 
 	async def process_ticker(self, assetClass):
 		preferences = self.prepare_preferences()
-		suffix = preferences.get("suffix")
+		if self.tickerId.count(".") == 1 and preferences.get("suffix") is None:
+			self.tickerId, suffix = self.tickerId.split(".")
+		else:
+			suffix = preferences.get("suffix")
 
 		if suffix in [".FUNDING", ".OI"]:
 			if not self.hasExchange:
@@ -163,9 +166,9 @@ class PriceRequest(AbstractRequest):
 			self.ticker = updatedTicker
 			self.tickerId = updatedTicker.get("id")
 			if suffix is not None:
-				self.tickerId = self.tickerId + prefix
-				self.ticker["id"] = self.ticker["id"] + prefix
-				self.ticker["symbol"] = self.ticker["symbol"] + prefix
+				self.tickerId = self.tickerId + suffix
+				self.ticker["id"] = self.ticker["id"] + suffix
+				self.ticker["symbol"] = self.ticker["symbol"] + suffix
 			self.exchange = updatedTicker.get("exchange")
 
 	def add_parameter(self, argument, type):

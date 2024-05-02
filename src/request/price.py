@@ -71,7 +71,7 @@ class PriceRequestHandler(AbstractRequestHandler):
 					request.set_error(None, isFatal=True)
 
 			elif platform == "Blockchair":
-				if not request.tickerId.startswith("HALVING:"):
+				if not request.tickerId.endswith(".HALVING"):
 					request.set_error(None, isFatal=True)
 
 			elif platform == "CoinGecko":

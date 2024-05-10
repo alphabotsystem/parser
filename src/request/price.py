@@ -17,6 +17,7 @@ PARAMETERS = {
 		Parameter("suffix", "dominance", ["d", "dom", "dominance"], coingecko=".D"),
 		Parameter("suffix", "halving", ["halving", "halfing", "halv", "half"], blockchair=".HALVING"),
 		Parameter("forcePlatform", "request quote on CoinGecko", ["cg", "coingecko"], coingecko=True),
+		Parameter("forcePlatform", "request quote on chain", ["on-chain", "onchain", "chain"], chain=True),
 		Parameter("forcePlatform", "request quote on a crypto exchange", ["cx", "ccxt", "crypto", "exchange"], ccxt=True),
 		Parameter("forcePlatform", "request quote on a stock exchange", ["equities", "equity", "forex", "fx", "metal", "metals", "stock", "stocks", "index"], twelvedata=True),
 		Parameter("forcePlatform", "request quote on Alternative.me", ["am", "alternativeme"], alternativeme=True),
@@ -35,6 +36,9 @@ DEFAULTS = {
 		"preferences": []
 	},
 	"CoinGecko": {
+		"preferences": []
+	},
+	"On-Chain": {
 		"preferences": []
 	},
 	"CCXT": {
@@ -77,6 +81,9 @@ class PriceRequestHandler(AbstractRequestHandler):
 			elif platform == "CoinGecko":
 				if request.couldFail:
 					request.set_error("Requested ticker could not be found.", isFatal=True)
+
+			elif platform == "On-Chain":
+				pass
 
 			elif platform == "CCXT":
 				if request.couldFail:

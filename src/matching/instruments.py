@@ -24,7 +24,7 @@ async def match_ticker(tickerId, exchangeId, platform, assetClass):
 	try:
 		ticker = Ticker(tickerId)
 	except:
-		print(tickerId)
+		print(f"Ticker requested: {tickerId}")
 		print(format_exc())
 		return None, "Requested ticker could not be found."
 
@@ -33,14 +33,14 @@ async def match_ticker(tickerId, exchangeId, platform, assetClass):
 	except TokenNotFoundException as e:
 		return None, e.message
 	except:
-		print(tickerId)
+		print(f"Ticker requested: {tickerId}")
 		print(format_exc())
 		return None, "Requested ticker could not be found."
 
 	reconstructedId = Reconstructor.reconstruct(ticker)
 	isSimple = isinstance(ticker.children[0], Token) and (ticker.children[0].type == "NAME" or ticker.children[0].type == "QUOTED")
 	match = ticker.children[0].value if isSimple else {}
-	if not isSimple and platform not in ["TradingView", "TradingView Premium", "TradingView Relay", "CoinGecko", "CCXT", "Twelvedata"]:
+	if not isSimple and platform not in ["TradingView", "TradingView Premium", "TradingView Relay", "CoinGecko", "On-Chain", "CCXT", "Twelvedata"]:
 		return None, f"Complex tickers aren't available on {platform}"
 
 	response = {
@@ -69,6 +69,30 @@ async def ticker_tree_search(node, exchangeId, platform, assetClass):
 			newValue = await find_instrument(child.value, exchangeId, platform, assetClass, child.type == "QUOTED")
 			node.children[i] = child.update(value=newValue)
 	return node
+
+def placeholder_instrument(tickerId, exchange):
+	return {
+		"_id": tickerId,
+		"id": tickerId,
+		"name": tickerId,
+		"base": None,
+		"quote": None,
+		"tag": 1,
+		"symbol": None,
+		"exchange": exchange,
+		"metadata": {
+			"type": "Unknown",
+			"rank": MAXSIZE,
+		}
+	}
+
+async def resolve_exchange(exchangeId):
+	if exchangeId is not None:
+		response = await elasticsearch.get(index=ELASTIC_EXCHANGE_INDEX, id=exchangeId)
+		exchange = response["_source"]
+	else:
+		exchange = {}
+	return exchange
 
 async def prepare_instrument(instrument, exchangeId):
 	if instrument is None: return None
@@ -172,31 +196,20 @@ async def perform_search(tickerId, exchangeId, platform, assetClass=None, limit=
 	return response
 
 async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
+	if platform in ["CNN Business", "Alternative.me"]:
+		return placeholder_instrument(tickerId.upper(), {})
+	elif platform in ["On-Chain"]:
+		exchange = await resolve_exchange(exchangeId)
+		return placeholder_instrument(tickerId, exchange)
+
 	response = await perform_search(tickerId, exchangeId, platform, assetClass=assetClass, strict=strict)
 
 	if response["hits"]["total"]["value"] == 0:
 		if platform in STRICT_MATCH:
 			raise TokenNotFoundException("Requested ticker could not be found.")
 		else:
-			if exchangeId is not None:
-				response = await elasticsearch.get(index=ELASTIC_EXCHANGE_INDEX, id=exchangeId)
-				exchange = response["_source"]
-			else:
-				exchange = {}
-			instrument = {
-				"_id": tickerId,
-				"id": tickerId,
-				"name": tickerId,
-				"base": None,
-				"quote": None,
-				"tag": 1,
-				"symbol": None,
-				"exchange": exchange,
-				"metadata": {
-					"type": "Unknown",
-					"rank": MAXSIZE,
-				}
-			}
+			exchange = await resolve_exchange(exchangeId)
+			instrument = placeholder_instrument(tickerId.upper(), exchange)
 	else:
 		instrument = await prepare_instrument(response["hits"]["hits"][0]["_source"], exchangeId)
 
@@ -219,7 +232,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 			if exchange == "" and not tag.isnumeric():
 				exchange, symbol = symbol, tag
 
-		instrument["id"] = symbol
+		instrument["id"] = symbol.upper()
 		instrument["exchange"]["id"] = exchange
 		instrument["tag"] = int(tag) if isinstance(tag, str) and tag.isnumeric() else 1
 		response = await make_tradingview_request(instrument, exchange)

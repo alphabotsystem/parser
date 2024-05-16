@@ -332,7 +332,7 @@ async def find_listings(ticker, platform):
 			sources[instrument["_source"]["quote"]] = {instrument["_source"]["market"]["source"]}
 
 	if ticker["tag"] == 1:
-		response = await make_tradingview_request(ticker['id'])
+		response = await make_tradingview_request(ticker)
 		for result in response:
 			if result["symbol"] == ticker["symbol"]:
 				if result.get("currency_code", "USD") in sources:

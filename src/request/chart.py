@@ -540,7 +540,7 @@ class ChartRequest(AbstractRequest):
 	def prepare_indicators(self):
 		if self.platform in "TradingView":
 			parsed = [e.parsed[self.platform] for e in self.indicators if e.id != "clear"]
-			indicators = "\u001f".join(parsed)
+			return "\u001f".join(parsed)
 
 		elif self.platform == "TradingView Premium":
 			lengths = {i: [] for i in range(len(self.indicators))}
@@ -562,9 +562,9 @@ class ChartRequest(AbstractRequest):
 				_indicators.insert(0, f"{self.indicators[i].parsed[self.platform]}@{';'.join([f'{n}{l}' for n, l in lengths[i]])}")
 
 			parsed = [_indicators[i] for i in range(len(_indicators)) if self.indicators[i].id != "clear"]
-			indicators = "&studies=" + ",".join(parsed)
+			return "&studies=" + ",".join(parsed)
 
-		return indicators
+		return ""
 
 
 	def to_dict(self):

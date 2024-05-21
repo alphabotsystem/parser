@@ -51,7 +51,7 @@ PARAMETERS = {
 		Parameter(525949, "1-year", ["12", "12m", "12mo", "12month", "12months", "year", "yearly", "1year", "1-year", "1y", "y", "annual", "annually"], premium="12M", relay="12M"),
 	],
 	"indicators": [
-		Parameter("none", "no indicators", ["none", "noindicators"], tradingview="", premium=""), # Here due to default indicators
+		Parameter("clear", "clear indicators", ["clear", "clearindicators"], tradingview="", premium=""), # Here due to default indicators
 		Parameter("accd", "Accumulation/Distribution", ["accd", "ad", "acc", "accumulationdistribution", "accumulation/distribution"], tradingview="STD;Accumulation_Distribution", premium="Accumulation/Distribution"),
 		Parameter("accumulationswingindex", "Accumulation Swing Index", ["accumulationswingindex", "accsi", "asi"], premium="Accumulative+Swing+Index"),
 		Parameter("adl", "Advance/Decline Line", ["adl", "advance/declineline"], tradingview="STD;Advance%1Decline%1Line"),
@@ -507,7 +507,7 @@ class ChartRequest(AbstractRequest):
 						self.timeframes.append(parameter)
 		elif t == "indicators" and len(self.indicators) == 0:
 			userDefaults = [e for e in self.defaults.get("indicators") if e is not None]
-			if len(userDefaults) > 0:
+			if all(e.id != "clear" for e in self.indicators) and len(userDefaults) > 0:
 				for parameter in userDefaults:
 					self.indicators.append(parameter)
 					self.numericalParameters.append(-1)
@@ -538,13 +538,8 @@ class ChartRequest(AbstractRequest):
 						self.preferences.append(parameter)
 
 	def prepare_indicators(self):
-		parsed = [e.parsed[self.platform] for e in self.indicators]
-		if "" in parsed or len(self.indicators) == 0:
-			return ""
-
-		indicators = ""
-
 		if self.platform in "TradingView":
+			parsed = [e.parsed[self.platform] for e in self.indicators if e.id != "clear"]
 			indicators = "\u001f".join(parsed)
 
 		elif self.platform == "TradingView Premium":
@@ -564,9 +559,10 @@ class ChartRequest(AbstractRequest):
 					for j in range(len(lengths[i]), len(self.indicators[i].dynamic)):
 						lengths[i].append(list(self.indicators[i].dynamic[j]))
 
-				_indicators.insert(0, f"{parsed[i]}@{';'.join([f'{n}{l}' for n, l in lengths[i]])}")
+				_indicators.insert(0, f"{self.indicators[i].parsed[self.platform]}@{';'.join([f'{n}{l}' for n, l in lengths[i]])}")
 
-			indicators = "&studies=" + ",".join(_indicators)
+			parsed = [_indicators[i] for i in range(len(_indicators)) if self.indicators[i].id != "clear"]
+			indicators = "&studies=" + ",".join(parsed)
 
 		return indicators
 

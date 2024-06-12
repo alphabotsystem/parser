@@ -114,7 +114,7 @@ PARAMETERS = {
 		Parameter("ma", "Moving Average", ["ma", "movingaverage"], tradingview="STD;SMA", premium="Moving+Average", dynamic=[("length:f:", 9)]),
 		Parameter("macross", "MA Cross", ["macross"], tradingview="STD;MA%1Cross", premium="MA+Cross"),
 		Parameter("maribbon", "MA Ribbon", ["maribbon"], tradingview="STD;MA%Ribbon"),
-		Parameter("emacross", "EMA Cross", ["emacross"], premium="EMA+Cross"),
+		Parameter("emacross", "EMA Cross", ["cross", "emacross"], premium="EMA+Cross"),
 		Parameter("movingaveragechannel", "Moving Average Channel", ["movingaveragechannel"], premium="Moving+Average+Channel"),
 		Parameter("movingaveragedouble", "Moving Average Double", ["movingaveragedouble"], premium="Moving+Average+Double"),
 		Parameter("movingaverageadaptive", "Moving Average Adaptive", ["movingaverageadaptive"], premium="Moving+Average+Adaptive"),

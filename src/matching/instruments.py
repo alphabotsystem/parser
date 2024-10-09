@@ -253,10 +253,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 				"tag": 1,
 				"symbol": instrument["symbol"],
 				"exchange": {"id": freeSource.get("prefix", freeSource["exchange"]).lower()},
-				"metadata": {
-					"type": "Unknown",
-					"rank": MAXSIZE,
-				}
+				"metadata": instrument["metadata"] if freeSource["symbol"] == instrument["id"] else { "type": "Unknown", "rank": MAXSIZE }
 			}
 		elif "contracts" in response[0]:
 			instrument = {
@@ -268,10 +265,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 				"tag": 1,
 				"symbol": instrument["symbol"],
 				"exchange": {"id": response[0]["contracts"][0].get("prefix", response[0]["exchange"]).lower()},
-				"metadata": {
-					"type": "Unknown",
-					"rank": MAXSIZE,
-				}
+				"metadata": instrument["metadata"] if response[0]["contracts"][0]["symbol"] == instrument["id"] else { "type": "Unknown", "rank": MAXSIZE }
 			}
 		else:
 			instrument = {
@@ -283,10 +277,7 @@ async def find_instrument(tickerId, exchangeId, platform, assetClass, strict):
 				"tag": 1,
 				"symbol": instrument["symbol"],
 				"exchange": {"id": response[0].get("prefix", response[0]["exchange"]).lower()},
-				"metadata": {
-					"type": "Unknown",
-					"rank": MAXSIZE,
-				}
+				"metadata": instrument["metadata"] if response[0]["symbol"] == instrument["id"] else { "type": "Unknown", "rank": MAXSIZE }
 			}
 		instrument["id"] = f"{instrument['exchange']['id'].upper()}:{instrument['id']}"
 

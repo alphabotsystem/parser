@@ -175,7 +175,7 @@ PARAMETERS = {
 		Parameter("zz", "Zig Zag", ["zz", "zigzag"], tradingview="ZigZag", premium="ZigZag")
 	],
 	"style": [
-		Parameter("hidevolume", "no volume", ["hv", "nv", "novol", "hidevolume"], tradingview="1", premium="1"),
+		Parameter("hidevolume", "no volume", ["hv", "nv", "novol", "hidevolume"], tradingview=True, premium=True),
 		Parameter("theme", "light theme", ["light", "white"], tradingview="light", premium="light", relay="light", alternativeme="light", cnnbusiness="light", tradinglite="light"),
 		Parameter("theme", "dark theme", ["dark", "black"], tradingview="dark", premium="dark", relay="dark", alternativeme="dark", cnnbusiness="dark", tradinglite="dark"),
 		# Parameter("chartType", "bars", ["bars", "bar"], tradingview=0),

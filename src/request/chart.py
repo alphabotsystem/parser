@@ -286,13 +286,11 @@ class ChartRequestHandler(AbstractRequestHandler):
 
 	async def find_caveats(self):
 		for platform, request in self.requests.items():
-			print(platform, request.errorIsFatal)
 			if request.errorIsFatal: continue
 
 			styles = request.prepare_styles()
 			preferences = request.prepare_preferences()
 
-			print(request.ticker.get("id"))
 			if platform == "Alternative.me":
 				if request.ticker.get("id") != "FGI": request.set_error(None, isFatal=True)
 

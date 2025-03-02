@@ -53,6 +53,8 @@ class AbstractRequestHandler(object):
 			else: i += 1
 		if len(self.platforms) > 0: self.currentPlatform = self.platforms[0]
 
+		print(self.platforms)
+
 		responseMessage = None if currentMinimumErrors == 0 else (preferredRequestOrder[0].errors[0] if len(preferredRequestOrder) > 0 else "None of the available platforms could process your request.")
 		return responseMessage
 

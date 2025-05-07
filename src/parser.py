@@ -169,8 +169,8 @@ async def format_price(req: Request):
 	else:
 		exchange = getattr(ccxt, request["exchangeId"])({
 			"proxies": {
-				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				"http": f"http://{environ['PROXY_IP']}",
+				"https": f"http://{environ['PROXY_IP']}"
 			}
 		})
 	await loop.run_in_executor(None, exchange.load_markets)
@@ -186,8 +186,8 @@ async def format_amount(req: Request):
 	else:
 		exchange = getattr(ccxt, request["exchangeId"])({
 			"proxies": {
-				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				"http": f"http://{environ['PROXY_IP']}",
+				"https": f"http://{environ['PROXY_IP']}"
 			}
 		})
 	await loop.run_in_executor(None, exchange.load_markets)

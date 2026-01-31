@@ -16,25 +16,25 @@ PARAMETERS = {
 		Parameter(10/60, "10-second", ["10s", "10sec", "10secs", "10second", "10-second", "10seconds"], premium="10S", relay="10S"),
 		Parameter(15/60, "15-second", ["15s", "15sec", "15secs", "15second", "15-second", "15seconds"], premium="15S", relay="15S"),
 		Parameter(30/60, "30-second", ["30s", "30sec", "30secs", "30second", "30-second", "30seconds"], premium="30S", relay="30S"),
-		Parameter(1, "1-minute", ["1", "1m", "1min", "1mins", "1minute", "1-minute", "1minutes", "min", "m"], tradinglite="1", tradingview="1", premium="1", relay="1"),
+		Parameter(1, "1-minute", ["1", "1m", "1min", "1mins", "1minute", "1-minute", "1minutes", "min", "m"], tradingview="1", premium="1", relay="1"),
 		Parameter(2, "2-minute", ["2", "2m", "2min", "2mins", "2minute", "2-minute", "2minutes"], premium="2", relay="2"),
-		Parameter(3, "3-minute", ["3", "3m", "3min", "3mins", "3minute", "3-minute", "3minutes"], tradinglite="3", tradingview="3", premium="3", relay="3"),
+		Parameter(3, "3-minute", ["3", "3m", "3min", "3mins", "3minute", "3-minute", "3minutes"], tradingview="3", premium="3", relay="3"),
 		Parameter(4, "4-minute", ["4", "4m", "4min", "4mins", "4minute", "4-minute", "4minutes"], premium="4", relay="4"),
-		Parameter(5, "5-minute", ["5", "5m", "5min", "5mins", "5minute", "5-minute", "5minutes"], tradinglite="5", tradingview="5", premium="5", relay="5"),
+		Parameter(5, "5-minute", ["5", "5m", "5min", "5mins", "5minute", "5-minute", "5minutes"], tradingview="5", premium="5", relay="5"),
 		Parameter(6, "6-minute", ["6", "6m", "6min", "6mins", "6minute", "6-minute", "6minutes"], premium="6", relay="6"),
 		Parameter(10, "10-minute", ["10", "10m", "10min", "10mins", "10minute", "10-minute", "10minutes"], premium="10", relay="10"),
-		Parameter(15, "15-minute", ["15", "15m", "15min", "15mins", "15minute", "15-minute", "15minutes"], tradinglite="15", tradingview="15", premium="15", relay="15"),
+		Parameter(15, "15-minute", ["15", "15m", "15min", "15mins", "15minute", "15-minute", "15minutes"], tradingview="15", premium="15", relay="15"),
 		Parameter(20, "20-minute", ["20", "20m", "20min", "20mins", "20minute", "20-minute", "20minutes"], premium="20", relay="20"),
-		Parameter(30, "30-minute", ["30", "30m", "30min", "30mins", "30minute", "30-minute", "30minutes"], tradinglite="30", tradingview="30", premium="30", relay="30"),
+		Parameter(30, "30-minute", ["30", "30m", "30min", "30mins", "30minute", "30-minute", "30minutes"], tradingview="30", premium="30", relay="30"),
 		Parameter(45, "45-minute", ["45", "45m", "45min", "45mins", "45minute", "45-minute", "45minutes"], tradingview="45", premium="45", relay="45"),
-		Parameter(60, "1-hour", ["60", "60m", "60min", "60mins", "60minute", "60-minute", "60minutes", "1", "1h", "1hr", "1hour", "1-hour", "1hours", "hourly", "hour", "hr", "h"], tradinglite="60", tradingview="1H", premium="1H", relay="60"),
-		Parameter(120, "2-hour", ["120", "120m", "120min", "120mins", "120minute", "120-minute", "120minutes", "2", "2h", "2hr", "2hrs", "2hour", "2-hour", "2hours"], tradinglite="120", tradingview="2H", premium="2H", relay="120"),
+		Parameter(60, "1-hour", ["60", "60m", "60min", "60mins", "60minute", "60-minute", "60minutes", "1", "1h", "1hr", "1hour", "1-hour", "1hours", "hourly", "hour", "hr", "h"], tradingview="1H", premium="1H", relay="60"),
+		Parameter(120, "2-hour", ["120", "120m", "120min", "120mins", "120minute", "120-minute", "120minutes", "2", "2h", "2hr", "2hrs", "2hour", "2-hour", "2hours"], tradingview="2H", premium="2H", relay="120"),
 		Parameter(180, "3-hour", ["180", "180m", "180min", "180mins", "180minute", "180-minute", "180minutes", "3", "3h", "3hr", "3hrs", "3hour", "3-hour", "3hours"], tradingview="3H", premium="3H", relay="180"),
-		Parameter(240, "4-hour", ["240", "240m", "240min", "240mins", "240minute", "240-minute", "240minutes", "4", "4h", "4hr", "4hrs", "4hour", "4-hour", "4hours"], tradinglite="240", tradingview="4H", premium="4H", relay="240"),
-		Parameter(360, "6-hour", ["360", "360m", "360min", "360mins", "360minute", "360-minute", "360minutes", "6", "6h", "6hr", "6hrs", "6hour", "6-hour", "6hours"], tradinglite="360", premium="6H", relay="360"),
-		Parameter(480, "8-hour", ["480", "480m", "480min", "480mins", "480minute", "480-minute", "480minutes", "8", "8h", "8hr", "8hrs", "8hour", "8-hour", "8hours"], tradinglite="480", premium="8H", relay="480"),
-		Parameter(720, "12-hour", ["720", "720m", "720min", "720mins", "720minute", "720-minute", "720minutes", "12", "12h", "12hr", "12hrs", "12hour", "12-hour", "12hours"], tradinglite="720", premium="12H", relay="720"),
-		Parameter(1440, "1-day", ["24", "24h", "24hr", "24hrs", "24hour", "24-hour", "24hours", "d", "day", "1", "1d", "1day", "1-day", "daily", "1440", "1440m", "1440min", "1440mins", "1440minute", "1440-minute", "1440minutes"], tradinglite="1440", tradingview="1D", premium="1D", relay="D", alternativeme="1D", cnnbusiness="1D"),
+		Parameter(240, "4-hour", ["240", "240m", "240min", "240mins", "240minute", "240-minute", "240minutes", "4", "4h", "4hr", "4hrs", "4hour", "4-hour", "4hours"], tradingview="4H", premium="4H", relay="240"),
+		Parameter(360, "6-hour", ["360", "360m", "360min", "360mins", "360minute", "360-minute", "360minutes", "6", "6h", "6hr", "6hrs", "6hour", "6-hour", "6hours"], premium="6H", relay="360"),
+		Parameter(480, "8-hour", ["480", "480m", "480min", "480mins", "480minute", "480-minute", "480minutes", "8", "8h", "8hr", "8hrs", "8hour", "8-hour", "8hours"], premium="8H", relay="480"),
+		Parameter(720, "12-hour", ["720", "720m", "720min", "720mins", "720minute", "720-minute", "720minutes", "12", "12h", "12hr", "12hrs", "12hour", "12-hour", "12hours"], premium="12H", relay="720"),
+		Parameter(1440, "1-day", ["24", "24h", "24hr", "24hrs", "24hour", "24-hour", "24hours", "d", "day", "1", "1d", "1day", "1-day", "daily", "1440", "1440m", "1440min", "1440mins", "1440minute", "1440-minute", "1440minutes"], tradingview="1D", premium="1D", relay="D", alternativeme="1D", cnnbusiness="1D"),
 		Parameter(2880, "2-day", ["48", "48h", "48hr", "48hrs", "48hour", "48-hour", "48hours", "2", "2d", "2day", "2-day", "2880", "2880m", "2880min", "2880mins", "2880minute", "2880-minute", "2880minutes"], premium="2D", relay="2D", alternativeme="2D", cnnbusiness="2D"),
 		Parameter(3420, "3-day", ["72", "72h", "72hr", "72hrs", "72hour", "72-hour", "72hours", "3", "3d", "3day", "3-day", "3420", "3420m", "3420min", "3420mins", "3420minute", "3420-minute", "3420minutes"], premium="3D", relay="3D", alternativeme="3D", cnnbusiness="3D"),
 		Parameter(5760, "4-day", ["96", "96h", "96hr", "96hrs", "96hour", "96-hour", "96hours", "4", "4d", "4day", "4-day", "5760", "5760m", "5760min", "5760mins", "5760minute", "5760-minute", "5760minutes"], premium="4D", relay="4D", alternativeme="4D", cnnbusiness="4D"),
@@ -176,32 +176,20 @@ PARAMETERS = {
 	],
 	"style": [
 		Parameter("hidevolume", "no volume", ["hv", "nv", "novol", "hidevolume"], tradingview=True, premium=True),
-		Parameter("theme", "light theme", ["light", "white"], tradingview="light", premium="light", relay="light", alternativeme="light", cnnbusiness="light", tradinglite="light"),
-		Parameter("theme", "dark theme", ["dark", "black"], tradingview="dark", premium="dark", relay="dark", alternativeme="dark", cnnbusiness="dark", tradinglite="dark"),
-		# Parameter("chartType", "bars", ["bars", "bar"], tradingview=0),
+		Parameter("theme", "light theme", ["light", "white"], tradingview="light", premium="light", relay="light", alternativeme="light", cnnbusiness="light"),
+		Parameter("theme", "dark theme", ["dark", "black"], tradingview="dark", premium="dark", relay="dark", alternativeme="dark", cnnbusiness="dark"),
 		Parameter("chartType", "candles", ["candles", "candle", "candlestick"], tradingview=1, premium=1),
 		Parameter("chartType", "line", ["line"], tradingview=2, premium=2),
 		Parameter("chartType", "area", ["area"], tradingview=3, premium=3),
-		# Parameter("chartType", "renko", ["renko"], tradingview=4),
-		# Parameter("chartType", "kagi", ["kagi"], tradingview=5),
-		# Parameter("chartType", "point & figure", ["point", "figure", "pf", "paf", "point&figure"], tradingview=6),
-		# Parameter("chartType", "line break", ["break", "linebreak", "lb"], tradingview=7),
 		Parameter("chartType", "heikin ashi", ["heikin", "heiken", "heikinashi", "heikenashi", "ashi", "ha"], tradingview=8, premium=8),
 		Parameter("chartType", "hollow candles", ["hollow"], tradingview=9, premium=9),
 		Parameter("chartType", "baseline", ["baseline"], premium=10),
 		Parameter("chartType", "hiLo", ["hilo"], premium=12),
 		Parameter("log", "log chart", ["log", "logarithmic"], tradingview=True, premium=True, alternativeme=True, cnnbusiness=True),
 		Parameter("extended", "extended hours", ["extended", "post", "pre", "extendedhours"], premium=True),
-		Parameter("wide", "wide chart", ["wide"], tradinglite=True, tradingview=True, premium=True, relay=True, alternativeme=True, cnnbusiness=True),
+		Parameter("wide", "wide chart", ["wide"], tradingview=True, premium=True, relay=True, alternativeme=True, cnnbusiness=True),
 	],
 	"preferences": [
-		Parameter("heatmapIntensity", "whales heatmap intensity", ["whale", "whales"], tradinglite=(50,100)),
-		Parameter("heatmapIntensity", "low heatmap intensity", ["low"], tradinglite=(10,100)),
-		Parameter("heatmapIntensity", "normal heatmap intensity", ["normal"], tradinglite=(0,85)),
-		Parameter("heatmapIntensity", "medium heatmap intensity", ["medium", "med"], tradinglite=(0,62)),
-		Parameter("heatmapIntensity", "high heatmap intensity", ["high"], tradinglite=(0,39)),
-		Parameter("heatmapIntensity", "crazy heatmap intensity", ["crazy"], tradinglite=(0,16)),
-		Parameter("forcePlatform", "request chart on TradingLite", ["tl", "tradinglite"], tradinglite=True),
 		Parameter("forcePlatform", "request chart on TradingView", ["tv", "tradingview"], tradingview=True),
 		Parameter("forcePlatform", "request chart on TradingView Premium", ["tv", "tradingview", "prem", "premium", "tvp", "tradingviewpremium"], premium=True),
 		Parameter("forcePlatform", "request chart on Alternative.me", ["am", "alternativeme", "crypto"], alternativeme=True),
@@ -224,18 +212,6 @@ DEFAULTS = {
 		"indicators": [],
 		"style": [],
 		"preferences": []
-	},
-	"TradingLite": {
-		"timeframes": [
-			AbstractRequest.find_parameter_by_id(60, PARAMETERS, "TradingLite", parameterType="timeframes")
-		],
-		"indicators": [],
-		"style": [
-			AbstractRequest.find_parameter_by_id("theme", PARAMETERS, "TradingLite", name="dark theme", parameterType="style")
-		],
-		"preferences": [
-			AbstractRequest.find_parameter_by_id("heatmapIntensity", PARAMETERS, "TradingLite", name="normal heatmap intensity", parameterType="preferences")
-		]
 	},
 	"TradingView Premium": {
 		"timeframes": [
@@ -296,14 +272,6 @@ class ChartRequestHandler(AbstractRequestHandler):
 
 			elif platform == "CNN Business":
 				if request.ticker.get("id") != "FGI": request.set_error(None, isFatal=True)
-
-			elif platform == "TradingLite":
-				if not bool(request.exchange):
-					request.set_error("TradingLite currently only supports cryptocurrency markets on supported exchanges.", isFatal=True)
-				elif request.ticker.get("symbol") is None:
-					request.set_error(f"Requested chart for `{request.ticker.get('id')}` is not available.", isFatal=True)
-				elif request.exchange.get("id") in ["binanceusdm", "binancecoinm", "okex5", "kucoin"]:
-					request.set_error(f"{request.exchange.get('name')} exchange is not available. ||Yet? Let TradingLite know you want it!||", isFatal=True)
 
 			elif platform == "TradingView Premium":
 				indicators = request.indicators

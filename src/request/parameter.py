@@ -66,10 +66,3 @@ class DetailParameter(AbstractParameter):
 			"CoinGecko": coingecko,
 			"Twelvedata": twelvedata
 		}
-
-class TradeParameter(AbstractParameter):
-	def __init__(self, id, name, parsablePhrases, ichibot=None):
-		super().__init__(id, name, parsablePhrases)
-		self.parsed = {
-			"Ichibot": ichibot
-		}

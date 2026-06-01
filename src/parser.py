@@ -17,6 +17,8 @@ from request import HeatmapRequestHandler
 from request import PriceRequestHandler
 from request import DetailRequestHandler
 
+from tradingview.client import TradingViewSymbolSearchClient
+
 
 PROXY_BLACKLIST = ["htx"]
 
@@ -30,6 +32,22 @@ set_event_loop(loop)
 # -------------------------
 # Endpoints
 # -------------------------
+
+@app.post("/parser/parse")
+async def parse_ticker(req: Request):
+	request = await req.json()
+	query = request.get("query") or ""
+	venue = request.get("venue") or ""
+
+	client = TradingViewSymbolSearchClient()
+
+	try:
+		symbols = await client.search_symbols(query, exchange=venue, use_cache=True)
+		return {"response": symbols}
+	except Exception as e:
+		logging.report_exception()
+		return {"message": "Error occurred while searching symbols", "response": [], "error": str(e)}
+
 
 @app.post("/parser/chart")
 async def process_chart_request(req: Request):
